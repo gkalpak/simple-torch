@@ -1,0 +1,4 @@
+/.firebase/
+/dist/
+/node_modules/
+*.log

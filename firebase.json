@@ -1,0 +1,6 @@
+{
+  "hosting": {
+    "cleanUrls": true,
+    "public": "dist"
+  }
+}

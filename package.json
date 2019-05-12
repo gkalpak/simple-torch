@@ -1,0 +1,46 @@
+{
+  "private": true,
+  "name": "@gkalpak/simple-torch",
+  "version": "0.0.0",
+  "description": "A simple torch PWA using the `MediaDevices` API.",
+  "keywords": [
+    "MediaCapabilities",
+    "MediaDevices",
+    "Progressive Web App",
+    "PWA",
+    "Torch",
+    "Utility"
+  ],
+  "scripts": {
+    "prebuild": "npm run clean-dist",
+    "build": "npm run ~~build",
+    "clean-dist": "node --eval \"require('shelljs/global'); set('-e'); rm('-rf', 'dist/');\"",
+    "deploy": "firebase deploy --only=hosting",
+    "predev": "npm run build",
+    "dev": "run-p --race ~~dev-watch ~~serve-watch",
+    "lint": "eslint ./",
+    "preserve": "npm run build",
+    "serve": "npm run ~~serve -- --port=4002 --no-reload",
+    "test": "npm run lint && node --print \"'No tests yet.\\n'\" && exit 1",
+    "~~build": "node --eval \"require('shelljs/global'); set('-e'); mkdir('-p', 'dist/'); cp('-r', 'src/*', 'dist/');\"",
+    "~~dev-watch": "watch \"run-p ~~build lint\" src/",
+    "~~serve": "light-server --bind=localhost --serve=dist/",
+    "~~serve-watch": "npm run ~~serve -- --port=4001 --watchexp=dist/**"
+  },
+  "license": "Unlicense",
+  "author": "gkalpak <kalpakas.g@gmail.com>",
+  "homepage": "https://github.com/gkalpak/simple-torch#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gkalpak/simple-torch.git"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "eslint": "^5.16.0",
+    "firebase-tools": "^6.9.2",
+    "light-server": "^2.6.2",
+    "npm-run-all": "^4.1.5",
+    "shelljs": "^0.8.3",
+    "watch": "^1.0.2"
+  }
+}

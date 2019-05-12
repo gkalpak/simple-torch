@@ -1,0 +1,3 @@
+* text=auto
+*.js eol=lf
+package.json eol=lf
