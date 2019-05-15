@@ -23,6 +23,7 @@
     "serve": "npm run ~~serve -- --port=4002 --no-reload",
     "test": "npm run lint && node --print \"'No tests yet.\\n'\" && exit 1",
     "~~build": "node --eval \"require('shelljs/global'); set('-e'); mkdir('-p', 'dist/'); cp('-r', 'src/*', 'dist/');\"",
+    "post~~build": "node --eval \"require('shelljs/global'); set('-e'); sed('-i', /X\\.Y\\.Z-VERSION/g, process.env.npm_package_version, 'dist/shared/constants.js');\"",
     "~~dev-watch": "watch \"run-p ~~build lint\" src/",
     "~~serve": "light-server --bind=localhost --serve=dist/",
     "~~serve-watch": "npm run ~~serve -- --port=4001 --watchexp=dist/**"
