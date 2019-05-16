@@ -26,6 +26,11 @@
       </small>
     </footer>
 
-    <script type="module" src="index.js"></script>
+    <script>
+      window.ENV = {
+        version: 'X.Y.Z-VERSION',
+      };
+    </script>
+    <script type="module" src="app/main.js"></script>
   </body>
 </html>

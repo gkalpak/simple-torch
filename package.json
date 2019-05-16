@@ -12,26 +12,27 @@
     "Utility"
   ],
   "scripts": {
-    "prebuild": "npm run clean-dist",
-    "build": "npm run ~~build",
-    "clean-dist": "node --eval \"require('shelljs/global'); set('-e'); rm('-rf', 'dist/');\"",
+    "prebuild": "npm run clean-up",
+    "build": "run-p ~~compile ~~generate-app",
+    "clean-up": "node --eval \"require('shelljs/global'); set('-e'); rm('-rf', 'out/');\"",
     "predeploy": "npm run build",
     "deploy": "firebase deploy --only=hosting",
-    "predev": "npm run build",
-    "dev": "run-p --race ~~dev-watch ~~serve-watch",
-    "lint": "eslint ./",
+    "predev": "npm run build || true",
+    "dev": "run-p --race ~~compile-watch ~~generate-app-watch ~~serve-watch",
+    "lint": "tslint --project tsconfig.json",
     "release": "gkcu-run \"npm version \\${*:patch}\"",
     "postrelease": "npm run deploy",
     "preserve": "npm run build",
     "serve": "npm run ~~serve -- --port=4002 --no-reload",
     "test": "npm run lint && node --print \"'No tests yet.\\n'\" && exit 1",
-    "preversion": "npm run lint",
+    "preversion": "run-p ~~compile lint",
     "postversion": "git push && git push --tags",
-    "~~build": "node --eval \"require('shelljs/global'); set('-e'); mkdir('-p', 'dist/'); cp('-r', 'src/*', 'dist/');\"",
-    "post~~build": "node --eval \"require('shelljs/global'); set('-e'); sed('-i', /X\\.Y\\.Z-VERSION/g, process.env.npm_package_version, 'dist/shared/constants.js');\"",
-    "~~dev-watch": "watch \"run-p ~~build lint\" src/",
-    "~~serve": "light-server --bind=localhost --serve=dist/",
-    "~~serve-watch": "npm run ~~serve -- --port=4001 --watchexp=dist/**"
+    "~~compile": "tsc --project ./",
+    "~~compile-watch": "npm run ~~compile -- --watch",
+    "~~generate-app": "node --eval \"require('shelljs/global'); set('-e'); mkdir('-p', 'out/'); cp('src/index.{css,html}', 'out/'); sed('-i', /X\\.Y\\.Z-VERSION/g, process.env.npm_package_version, 'out/index.html');\"",
+    "~~generate-app-watch": "watch \"npm run ~~generate-app\" src/ --filter=watch-filters/generate-app.filter.js",
+    "~~serve": "light-server --bind=localhost --serve=out/",
+    "~~serve-watch": "npm run ~~serve -- --port=4001 --watchexp=out/**"
   },
   "license": "Unlicense",
   "author": "gkalpak <kalpakas.g@gmail.com>",
@@ -43,11 +44,12 @@
   "dependencies": {},
   "devDependencies": {
     "@gkalpak/cli-utils": "^0.1.7",
-    "eslint": "^5.16.0",
     "firebase-tools": "^6.9.2",
     "light-server": "^2.6.2",
     "npm-run-all": "^4.1.5",
     "shelljs": "^0.8.3",
+    "tslint": "^5.16.0",
+    "typescript": "^3.4.5",
     "watch": "^1.0.2"
   }
 }

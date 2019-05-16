@@ -1,4 +1,4 @@
 /.firebase/
-/dist/
 /node_modules/
+/out/
 *.log

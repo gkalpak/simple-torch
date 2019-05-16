@@ -24,7 +24,8 @@ Currently there are no automated tests :scream: :scream: :scream:
 
 Things I want to (but won't necessarily) do:
 
-- Implement functionality.
+- Remove `allowJs` and `.js` sources.
+- Refine functionality.
 - Add unit tests.
 - Add e2e tests.
 - Add favicon.

@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "declaration": false,
+    "lib": [
+      "es2018",
+      "dom"
+    ],
+    "module": "esnext",
+    "moduleResolution": "node",
+    "newLine": "lf",
+    "noUnusedLocals": true,
+    "outDir": "out/app/",
+    "sourceMap": true,
+    "strict": true,
+    "target": "es2018"
+  },
+  "include": [
+    "src/app/"
+  ]
+}
