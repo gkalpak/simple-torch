@@ -2,10 +2,11 @@ import {WIN} from '../shared/constants.js';
 import {pascalToKebabCase} from '../shared/utils.js';
 
 
+export type IInitializedCe<T extends BaseCe> = T & {shadowRoot: NonNullable<T['shadowRoot']>};
+
 export abstract class BaseCe extends HTMLElement {
   public static get tagName(): string { return pascalToKebabCase(this.name); }
-  protected static readonly content: string = '&lt;base-ce&gt;Not implemented yet.&lt;/base-ce&gt;';
-  private initialized: boolean = false;
+  protected static readonly template: string = '&lt;base-ce&gt;Not implemented yet.&lt;/base-ce&gt;';
 
   public static register(): Promise<void> {
     const registry = WIN.customElements;
@@ -17,10 +18,12 @@ export abstract class BaseCe extends HTMLElement {
     this.initialize();
   }
 
-  protected async initialize() {
-    if (!this.initialized) {
-      this.initialized = true;
-      this.innerHTML = (this.constructor as typeof BaseCe).content;
+  protected async initialize(): Promise<IInitializedCe<this>> {
+    if (!this.shadowRoot) {
+      const shadowRoot = this.attachShadow({mode: 'open'});
+      shadowRoot.innerHTML = (this.constructor as typeof BaseCe).template;
     }
+
+    return this as IInitializedCe<this>;
   }
 }

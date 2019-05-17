@@ -3,5 +3,5 @@ import {BaseCe} from './base.ce.js';
 
 
 export class VersionCe extends BaseCe {
-  protected static readonly content = `v${ENV.version}`;
+  protected static readonly template = `v${ENV.version}`;
 }
