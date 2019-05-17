@@ -24,7 +24,8 @@ Currently there are no automated tests :scream: :scream: :scream:
 
 Things I want to (but won't necessarily) do:
 
-- Refine functionality.
+- Refine functionality:
+  - Try to stop tracks/stream.
 - Add unit tests.
 - Add e2e tests.
 - Add favicon.

@@ -32,8 +32,7 @@ export class TorchCe extends BaseCe {
     let track: MediaStreamTrack | undefined;
 
     const onError = (err: any) => {
-      console.error(err);
-      alert(`ERROR: ${err && err.message || err}`);
+      this.onError(err);
 
       btn.disabled = true;
       track = undefined;

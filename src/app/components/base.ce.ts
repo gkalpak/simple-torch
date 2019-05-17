@@ -15,6 +15,7 @@ export abstract class BaseCe extends HTMLElement {
       display: block;
     }
   `;
+  protected readonly clazz: typeof BaseCe = (this.constructor as typeof BaseCe);
 
   public static register(): Promise<void> {
     const registry = WIN.customElements;
@@ -23,23 +24,30 @@ export abstract class BaseCe extends HTMLElement {
   }
 
   public connectedCallback(): void {
-    this.initialize();
+    this.initialize().catch(err => {
+      err.message = `Error initializing custom element '<${this.clazz.tagName}>': ${err.message}`;
+      this.onError(err);
+    });
   }
 
   protected async initialize(): Promise<IInitializedCe<this>> {
     if (!this.shadowRoot) {
-      const clazz = (this.constructor as typeof BaseCe);
       const shadowRoot = this.attachShadow({mode: 'open'});
 
       shadowRoot.innerHTML = `
         <style>
-          ${clazz.baseStyle}
-          ${clazz.style}
+          ${this.clazz.baseStyle}
+          ${this.clazz.style}
         </style>
-        ${clazz.template}
+        ${this.clazz.template}
       `;
     }
 
     return this as IInitializedCe<this>;
+  }
+
+  protected onError(err: Error): void {
+    console.error(err);
+    alert(`ERROR: ${err.message}`);
   }
 }
