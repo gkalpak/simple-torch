@@ -6,7 +6,7 @@ import {BaseCe, IInitializedCe} from './base.ce.js';
 export class TorchCe extends BaseCe {
   protected static readonly template = `
     <h1>Torch</h1>
-    <button class="torch-switch"></button>
+    <button class="torch-switch" disabled></button>
   `;
   protected static readonly style = `
     .torch-switch {
@@ -20,27 +20,43 @@ export class TorchCe extends BaseCe {
 
   protected async initialize(): Promise<IInitializedCe<this>> {
     const self = await super.initialize();
-
-    const stream = await WIN.navigator.mediaDevices.getUserMedia({video: {facingMode: 'environment'}});
-    const track = stream.getVideoTracks().pop()!;
-    const hasTorch = await waitAndCheck(100, 25, () => !!track.getCapabilities().torch);
-
     const btn = self.shadowRoot.querySelector<HTMLButtonElement>('.torch-switch')!;
+    let track: MediaStreamTrack | undefined;
+
+    const onError = (err: any) => {
+      console.error(err);
+      alert(`ERROR: ${err && err.message || err}`);
+
+      updateBtn(false);
+      btn.disabled = true;
+      track = undefined;
+    };
     const updateBtn = (on: boolean) => {
       btn.textContent = on ? 'ON' : 'OFF';
       btn.classList.toggle('off', !on);
       btn.classList.toggle('on', on);
 
-      track.applyConstraints({advanced: [{torch: on}]});
+      if (track) {
+        track.applyConstraints({advanced: [{torch: on}]}).catch(onError);
+      }
     };
 
-    if (!hasTorch) {
-      updateBtn(false);
-      btn.disabled = true;
-    } else {
+    try {
+      const stream = await WIN.navigator.mediaDevices.
+        getUserMedia({video: {facingMode: 'environment'}}).
+        catch(() => undefined);
+      track = stream && stream.getVideoTracks().pop();
+      const hasTorch = !!track && await waitAndCheck(100, 25, () => !!track!.getCapabilities().torch);
+
+      if (!hasTorch) {
+        throw new Error('Unable to access camera or torch.');
+      }
+
+      btn.addEventListener('click', () => updateBtn(btn.textContent!.toLowerCase() === 'off'));
+      btn.disabled = false;
       updateBtn(true);
-      btn.addEventListener('click', () =>
-        updateBtn(btn.textContent!.toLowerCase() === 'off'));
+    } catch (err) {
+      onError(err);
     }
 
     return self;
