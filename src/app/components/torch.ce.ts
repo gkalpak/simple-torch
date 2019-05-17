@@ -3,15 +3,23 @@ import {waitAndCheck} from '../shared/utils.js';
 import {BaseCe, IInitializedCe} from './base.ce.js';
 
 
+const enum State {
+  Loading = 'loading',
+  Disabled = 'not available' ,
+  Off = 'off',
+  On = 'on',
+}
+
 export class TorchCe extends BaseCe {
   protected static readonly template = `
     <h1>Torch</h1>
-    <button class="torch-switch" disabled></button>
+    <button class="torch-switch" disabled>${State.Loading}...</button>
   `;
   protected static readonly style = `
     .torch-switch {
       background-color: gray;
       color: white;
+      text-transform: capitalize;
     }
     .torch-switch.off { background-color: darkred; }
     .torch-switch.on { background-color: green; }
@@ -27,12 +35,14 @@ export class TorchCe extends BaseCe {
       console.error(err);
       alert(`ERROR: ${err && err.message || err}`);
 
-      updateBtn(false);
       btn.disabled = true;
       track = undefined;
+      updateState(State.Disabled);
     };
-    const updateBtn = (on: boolean) => {
-      btn.textContent = on ? 'ON' : 'OFF';
+    const updateState = (state: State) => {
+      const on = state === State.On;
+
+      btn.textContent = state;
       btn.classList.toggle('off', !on);
       btn.classList.toggle('on', on);
 
@@ -52,9 +62,10 @@ export class TorchCe extends BaseCe {
         throw new Error('Unable to access camera or torch.');
       }
 
-      btn.addEventListener('click', () => updateBtn(btn.textContent!.toLowerCase() === 'off'));
+      btn.addEventListener('click', () =>
+        updateState((btn.textContent!.toLowerCase() === 'off') ? State.On : State.Off));
       btn.disabled = false;
-      updateBtn(true);
+      updateState(State.On);
     } catch (err) {
       onError(err);
     }
