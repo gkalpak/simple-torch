@@ -8,6 +8,15 @@ export class TorchCe extends BaseCe {
     <h1>Torch</h1>
     <button class="torch-switch"></button>
   `;
+  protected static readonly style = `
+    .torch-switch {
+      background-color: gray;
+      color: white;
+    }
+    .torch-switch.off { background-color: darkred; }
+    .torch-switch.on { background-color: green; }
+    .torch-switch[disabled] { opacity: 0.5; }
+  `;
 
   protected async initialize(): Promise<IInitializedCe<this>> {
     const self = await super.initialize();
@@ -19,10 +28,8 @@ export class TorchCe extends BaseCe {
     const btn = self.shadowRoot.querySelector<HTMLButtonElement>('.torch-switch')!;
     const updateBtn = (on: boolean) => {
       btn.textContent = on ? 'ON' : 'OFF';
-      Object.assign(btn.style, {
-        backgroundColor: on ? 'green' : 'darkred',
-        color: 'white',
-      });
+      btn.classList.toggle('off', !on);
+      btn.classList.toggle('on', on);
 
       track.applyConstraints({advanced: [{torch: on}]});
     };
@@ -30,7 +37,6 @@ export class TorchCe extends BaseCe {
     if (!hasTorch) {
       updateBtn(false);
       btn.disabled = true;
-      btn.style.opacity = '0.5';
     } else {
       updateBtn(true);
       btn.addEventListener('click', () =>
