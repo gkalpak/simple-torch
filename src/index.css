@@ -9,3 +9,7 @@ body {
   margin: 0;
   padding: 0;
 }
+
+body > header-ce {
+  z-index: 10;  /* To render `box-shadow` above main content. */
+}
