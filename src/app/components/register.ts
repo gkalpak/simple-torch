@@ -1,15 +1,7 @@
-import {BaseCe} from './base.ce.js';
-import {ExternalSvgCe} from './external-svg.ce.js';
-import {TorchCe} from './torch.ce.js';
-import {VersionCe} from './version.ce.js';
+import {registerComponents as registerLayoutComponents} from './layout/register.js';
+import {registerComponents as registerSharedComponents} from './shared/register.js';
 
-
-const components: Array<typeof BaseCe> = [
-  ExternalSvgCe,
-  TorchCe,
-  VersionCe,
-];
 
 export const registerComponents = (): Promise<void> => Promise.
-  all(components.map(ce => ce.register())).
+  all([registerLayoutComponents(), registerSharedComponents()]).
   then(() => undefined);

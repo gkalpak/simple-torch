@@ -1,6 +1,6 @@
-import {WIN} from '../shared/constants.js';
-import {waitAndCheck} from '../shared/utils.js';
-import {BaseCe, IInitializedCe} from './base.ce.js';
+import {WIN} from '../../shared/constants.js';
+import {waitAndCheck} from '../../shared/utils.js';
+import {BaseCe, IInitializedCe} from '../base.ce.js';
 
 
 const enum State {

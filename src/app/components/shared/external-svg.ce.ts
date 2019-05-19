@@ -1,5 +1,5 @@
-import {WIN} from '../shared/constants.js';
-import {BaseCe, IInitializedCe} from './base.ce.js';
+import {WIN} from '../../shared/constants.js';
+import {BaseCe, IInitializedCe} from '../base.ce.js';
 
 
 export class ExternalSvgCe extends BaseCe {
