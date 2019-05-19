@@ -25,6 +25,9 @@ Currently there are no automated tests :scream: :scream: :scream:
 Things I want to (but won't necessarily) do:
 
 - Refine functionality:
+  - Show loading spinner in `ExternalSvgCe`.
+  - Show loading spinner in `TorchCe`.
+  - Use torch SVG in `TorchCe`.
   - Try to stop tracks/stream.
 - Add unit tests.
 - Add e2e tests.

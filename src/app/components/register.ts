@@ -1,9 +1,11 @@
 import {BaseCe} from './base.ce.js';
+import {ExternalSvgCe} from './external-svg.ce.js';
 import {TorchCe} from './torch.ce.js';
 import {VersionCe} from './version.ce.js';
 
 
 const components: Array<typeof BaseCe> = [
+  ExternalSvgCe,
   TorchCe,
   VersionCe,
 ];
