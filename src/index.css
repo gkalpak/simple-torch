@@ -9,26 +9,3 @@ body {
   margin: 0;
   padding: 0;
 }
-
-body > footer {
-  background-color: linen;
-  display: flex;
-  justify-content: center;
-  padding: 2px 4px;
-}
-
-body > header {
-  background-color: khaki;
-  display: flex;
-  justify-content: space-between;
-  padding: 5px 10px;
-}
-
-body > main {
-  align-items: center;
-  background-color: floralwhite;
-  display: flex;
-  flex-grow: 1;
-  justify-content: center;
-  padding: 5px 10px;
-}
