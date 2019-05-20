@@ -10,7 +10,7 @@
   - **-\-simple-torch-rotation**: The angle of rotation (on the Z-axis). _(Default: `45deg`)_
   - **-\-simple-torch-stroke-color**: The stroke color. _(Default: `var(-\-simple-torch-bg-color)`)_
 -->
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="100%" height="100%" viewBox="0 0 100 100">
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 100 100">
   <defs>
     <!-- Torch body. -->
     <g id="torch-body" stroke="var(--st-stroke-color)" stroke-linejoin="round" stroke-width="2">
@@ -30,9 +30,9 @@
 
     <!-- Foreground. -->
     <g id="foreground">
-      <use xlink:href="#torch-body" />
-      <use xlink:href="#torch-switch" />
-      <use xlink:href="#light" />
+      <use href="#torch-body" />
+      <use href="#torch-switch" />
+      <use href="#light" />
     </g>
     <!-- Background. -->
     <g id="background" fill="var(--st-bg-color)" stroke="var(--st-outline-color)">
@@ -75,6 +75,6 @@
     svg.off #torch-switch-thingy { transform: translate(0, 15px); }
   </style>
 
-  <use xlink:href="#background" />
-  <use xlink:href="#foreground" />
+  <use href="#background" />
+  <use href="#foreground" />
 </svg>
