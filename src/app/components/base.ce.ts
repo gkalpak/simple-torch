@@ -11,6 +11,7 @@ export abstract class BaseCe extends HTMLElement {
   private static readonly baseStyle: string = `
     :host {
       all: initial;
+      color: inherit;
       contain: content;
       display: block;
     }
