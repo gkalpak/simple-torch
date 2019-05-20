@@ -1,0 +1,66 @@
+<!--
+  Supported classes:
+  - **.no-bg**: Do not display a background.
+  - **.off**: Display as turned off.
+
+  Supported CSS variables:
+  - **-\-simple-torch-bg-color**: The background circle fill color. _(Default: `rgb(33, 33, 33)`)_
+  - **-\-simple-torch-outline-color**: The outline color around the background circle. _(Default: `dimgray`)_
+  - **-\-simple-torch-rotation**: The angle of rotation (on the Z-axis). _(Default: `45deg`)_
+  - **-\-simple-torch-stroke-color**: The stroke color. _(Default: `var(-\-simple-torch-bg-color)`)_
+-->
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="100%" height="100%" viewBox="0 0 100 100">
+  <defs>
+    <!-- Torch body. -->
+    <g id="torch-body" stroke="var(--st-stroke-color)" stroke-linejoin="round" stroke-width="2">
+      <path fill="darkorange" d="M15 10 h70 v10 h-70 z" />
+      <path fill="orange" d="M15 20 h70 a50 50 0 0 1 -15 25 h-40 a50 50 0 0 1 -15 -25 z" />
+      <path fill="darkorange" d="M30 45 h40 v55 a100 125 0 0 1 -40 0 z" />
+    </g>
+    <!-- Torch switch. -->
+    <g id="torch-switch" stroke="var(--st-stroke-color)" stroke-linejoin="round" stroke-width="2">
+      <path fill="darkorchid" d="M45 60 a5 5 0 1 1 10 0 v15 a5 5 0 1 1 -10 0 z" />
+      <circle id="torch-switch-thingy" fill="orchid" cx="50" cy="60" r="7.5" />
+    </g>
+    <!-- Light. -->
+    <g id="light" stroke="var(--st-stroke-color)" stroke-linejoin="round" stroke-width="2">
+      <path fill="yellow" d="M15 10 a100 125 0 0 1 70 0 z" />
+    </g>
+
+    <!-- Foreground. -->
+    <g id="foreground">
+      <use xlink:href="#torch-body" />
+      <use xlink:href="#torch-switch" />
+      <use xlink:href="#light" />
+    </g>
+    <!-- Background. -->
+    <g id="background" fill="var(--st-bg-color)" stroke="var(--st-outline-color)">
+      <circle cx="50" cy="50" r="49" />
+    </g>
+  </defs>
+
+  <style>
+    svg {
+      --st-bg-color: var(--simple-torch-bg-color, rgb(33, 33, 33));
+      --st-outline-color: var(--simple-torch-outline-color, dimgray);
+      --st-rotation: var(--simple-torch-rotation, 45deg);
+      --st-stroke-color: var(--simple-torch-stroke-color, var(--st-bg-color));
+    }
+
+    svg.no-bg #background { display: none; }
+
+    #foreground {
+      transform: rotateZ(var(--st-rotation)) scale(0.8);
+      transform-origin: center;
+    }
+
+    #light { transition: opacity 0.3s; }
+    svg.off #light { opacity: 0; }
+
+    #torch-switch-thingy { transition: transform 0.1s; }
+    svg.off #torch-switch-thingy { transform: translate(0, 15px); }
+  </style>
+
+  <use xlink:href="#background" />
+  <use xlink:href="#foreground" />
+</svg>

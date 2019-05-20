@@ -25,6 +25,7 @@ Currently there are no automated tests :scream: :scream: :scream:
 Things I want to (but won't necessarily) do:
 
 - Refine functionality:
+  - Create dark mode for `simple-torch.svg`.
   - Show loading spinner in `ExternalSvgCe`.
   - Show loading spinner in `TorchCe`.
   - Use torch SVG in `TorchCe`.
