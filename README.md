@@ -30,9 +30,9 @@ Things I want to (but won't necessarily) do:
   - Show loading spinner in `TorchCe`.
   - Use torch SVG in `TorchCe`.
   - Try to stop tracks/stream.
+  - Make it a PWA.
 - Add unit tests.
 - Add e2e tests.
-- Add favicon.
 - Add CI support.
 
 

@@ -19,6 +19,7 @@
     "deploy": "firebase deploy --only=hosting",
     "predev": "npm run build || true",
     "dev": "run-p --race ~~compile-watch ~~generate-app-watch ~~serve-watch",
+    "generate-favicon": "convert-svg-to-png --filename=src/favicon.png --width=128 --height=128 < src/assets/images/simple-torch.svg",
     "lint": "tslint --project tsconfig.json",
     "release": "gkcu-run \"npm version \\${*:patch}\"",
     "postrelease": "npm run deploy",
@@ -44,6 +45,7 @@
   "dependencies": {},
   "devDependencies": {
     "@gkalpak/cli-utils": "^0.1.7",
+    "convert-svg-to-png": "^0.5.0",
     "firebase-tools": "^6.9.2",
     "light-server": "^2.6.2",
     "npm-run-all": "^4.1.5",
