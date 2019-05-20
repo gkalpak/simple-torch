@@ -4,6 +4,7 @@ import {BaseCe} from '../base.ce.js';
 export class HeaderCe extends BaseCe {
   protected static readonly template = `
     <header>
+      <logo-ce></logo-ce>
       <b>Simple Torch</b>
       <flex-spacer-ce></flex-spacer-ce>
       <version-ce></version-ce>
@@ -18,6 +19,14 @@ export class HeaderCe extends BaseCe {
       color: lightgray;
       display: flex;
       padding: 5px 10px;
+    }
+
+    header logo-ce {
+      height: 25px;
+      margin-right: 10px;
+      width: 25px;
+
+      --simple-torch-outline-color: transparent;
     }
   `;
 }
