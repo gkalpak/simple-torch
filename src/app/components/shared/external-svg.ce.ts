@@ -18,7 +18,11 @@ export class ExternalSvgCe extends BaseCe {
 
   protected async initialize(): Promise<IInitializedCe<this>> {
     const self = await super.initialize();
-    const src = self.getAttribute('src') || '';
+    const src = self.getAttribute('src');
+
+    if (!src) {
+      throw new Error('Missing or empty \'src\' attribute.');
+    }
 
     if (!ExternalSvgCe.cache.has(src)) {
       ExternalSvgCe.cache.set(src, WIN.fetch(src).then(res => res.text()));
