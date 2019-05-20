@@ -4,7 +4,7 @@ import {BaseCe, IInitializedCe} from '../base.ce.js';
 
 export class ExternalSvgCe extends BaseCe {
   public static readonly observedAttributes = ['class'];
-  protected static readonly template = 'Loading...';
+  protected static readonly template = '';
   private static readonly cache = new Map<string, Promise<string>>();
   private svgElem: SVGSVGElement | null = null;
 
@@ -28,7 +28,14 @@ export class ExternalSvgCe extends BaseCe {
       ExternalSvgCe.cache.set(src, WIN.fetch(src).then(res => res.text()));
     }
 
-    self.shadowRoot.innerHTML = await ExternalSvgCe.cache.get(src)!;
+    const loadingPromise = ExternalSvgCe.cache.get(src)!;
+
+    if (!this.hasAttribute('no-loader')) {
+      const timer = setTimeout(() => self.shadowRoot.innerHTML = 'Loading...', 500);
+      loadingPromise.then(() => clearTimeout(timer));
+    }
+
+    self.shadowRoot.innerHTML = await loadingPromise;
     self.svgElem = self.shadowRoot.querySelector('svg');
     self.updateClass(self.className);
 
