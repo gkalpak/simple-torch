@@ -31,7 +31,7 @@ export class ExternalSvgCe extends BaseCe {
     const loadingPromise = ExternalSvgCe.cache.get(src)!;
 
     if (!this.hasAttribute('no-loader')) {
-      const timer = setTimeout(() => self.shadowRoot.innerHTML = 'Loading...', 500);
+      const timer = setTimeout(() => self.shadowRoot.innerHTML = '<loader-ce></loader-ce>', 500);
       loadingPromise.then(() => clearTimeout(timer));
     }
 

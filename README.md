@@ -56,8 +56,6 @@ The following npm scripts are available and can help with releasing/deploying a 
 Things I want to (but won't necessarily) do:
 
 - Refine functionality:
-  - `ExternalSvgCe`:
-    - Show loading spinner.
   - `TorchCe`:
     - Show loading spinner.
     - Show torch.
