@@ -15,9 +15,40 @@ Once the app is loaded in a mobile browser supporting [PWAs][mdn-pwa], you can i
 easier access. The app uses a [ServiceWorker][mdn-sw], so it can work offline (on supporting browsers).
 
 
-## Test
+## Contributing
 
-Currently there are no automated tests :scream: :scream: :scream:
+
+### Local development
+
+The following npm scripts are available and can help during local development:
+
+- `build`: Build the app.
+- `clean-up`: Remove the output directory.
+  _(You shouldn't need to run this manually. It is run by other scripts as necessary.)_
+- `dev`: Build and serve the app and automatically reload whenever a file changes. Useful during development.
+- `generate-favicon`: Generates `favicon.png` based on `simple-torch.svg`. This needs to be manually run, when the logo
+  (in SVG format) changes.
+- `serve`: Build and serve the app.
+  _(Unlike `dev` this does not watch the files for changes.)_
+
+
+### Testing
+
+The following npm scripts are available and can help during testing:
+
+- `lint`: Lint the source code.
+- `test`: Lint the source code and run the automated tests.
+
+_**NOTE**: Currently there are no actual automated tests :scream: :scream: :scream:_
+
+
+### Releasing/Deploying
+
+The following npm scripts are available and can help with releasing/deploying a new version of the app:
+
+- `deploy`: Build the app and deploy it to Firebase.
+  _(You shouldn't need to run this manually. It is run as part of the `release` script.)_
+- `release`: Cut a new version of the app and deploy it to production.
 
 
 ## TODO
