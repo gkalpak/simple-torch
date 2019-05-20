@@ -56,11 +56,13 @@ The following npm scripts are available and can help with releasing/deploying a 
 Things I want to (but won't necessarily) do:
 
 - Refine functionality:
-  - Create dark mode for `simple-torch.svg`.
-  - Show loading spinner in `ExternalSvgCe`.
-  - Show loading spinner in `TorchCe`.
-  - Use torch SVG in `TorchCe`.
-  - Try to stop tracks/stream.
+  - `ExternalSvgCe`:
+    - Show loading spinner.
+  - `TorchCe`:
+    - Show loading spinner.
+    - Show torch.
+    - Show status message (e.g. on error).
+    - Try to stop tracks/stream (and see if it makes a difference in mobile notifications).
   - Make it a PWA.
 - Add unit tests.
 - Add e2e tests.

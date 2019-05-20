@@ -1,5 +1,6 @@
 <!--
   Supported classes:
+  - **dark**: Use a dark theme.
   - **.no-bg**: Do not display a background.
   - **.off**: Display as turned off.
 
@@ -13,18 +14,18 @@
   <defs>
     <!-- Torch body. -->
     <g id="torch-body" stroke="var(--st-stroke-color)" stroke-linejoin="round" stroke-width="2">
-      <path fill="darkorange" d="M15 10 h70 v10 h-70 z" />
-      <path fill="orange" d="M15 20 h70 a50 50 0 0 1 -15 25 h-40 a50 50 0 0 1 -15 -25 z" />
-      <path fill="darkorange" d="M30 45 h40 v55 a100 125 0 0 1 -40 0 z" />
+      <path fill="var(--st-body-color-1)" d="M15 10 h70 v10 h-70 z" />
+      <path fill="var(--st-body-color-2)" d="M15 20 h70 a50 50 0 0 1 -15 25 h-40 a50 50 0 0 1 -15 -25 z" />
+      <path fill="var(--st-body-color-1)" d="M30 45 h40 v55 a100 125 0 0 1 -40 0 z" />
     </g>
     <!-- Torch switch. -->
     <g id="torch-switch" stroke="var(--st-stroke-color)" stroke-linejoin="round" stroke-width="2">
-      <path fill="darkorchid" d="M45 60 a5 5 0 1 1 10 0 v15 a5 5 0 1 1 -10 0 z" />
-      <circle id="torch-switch-thingy" fill="orchid" cx="50" cy="60" r="7.5" />
+      <path fill="var(--st-switch-color-1)" d="M45 60 a5 5 0 1 1 10 0 v15 a5 5 0 1 1 -10 0 z" />
+      <circle id="torch-switch-thingy" fill="var(--st-switch-color-2)" cx="50" cy="60" r="7.5" />
     </g>
     <!-- Light. -->
     <g id="light" stroke="var(--st-stroke-color)" stroke-linejoin="round" stroke-width="2">
-      <path fill="yellow" d="M15 10 a100 125 0 0 1 70 0 z" />
+      <path fill="var(--st-light-color)" d="M15 10 a100 125 0 0 1 70 0 z" />
     </g>
 
     <!-- Foreground. -->
@@ -42,9 +43,22 @@
   <style>
     svg {
       --st-bg-color: var(--simple-torch-bg-color, rgb(33, 33, 33));
+      --st-body-color-1: darkorange;
+      --st-body-color-2: orange;
+      --st-light-color: yellow;
       --st-outline-color: var(--simple-torch-outline-color, dimgray);
       --st-rotation: var(--simple-torch-rotation, 45deg);
       --st-stroke-color: var(--simple-torch-stroke-color, var(--st-bg-color));
+      --st-switch-color-1: darkorchid;
+      --st-switch-color-2: orchid;
+    }
+
+    svg.dark {
+      --st-body-color-1: dimgray;
+      --st-body-color-2: gray;
+      --st-light-color: goldenrod;
+      --st-switch-color-1: darkslategray;
+      --st-switch-color-2: slategray;
     }
 
     svg.no-bg #background { display: none; }
