@@ -2,4 +2,4 @@
  * @param {string} fileName
  * @param {fs.Stats} fileStat
  */
-module.exports = fileName => !/^src([\\/])app(?:\1|$)/.test(fileName);
+module.exports = fileName => !/^src([\\/])(?:app|test)(?:\1|$)/.test(fileName);

@@ -25,7 +25,8 @@ The following npm scripts are available and can help during local development:
 - `build`: Build the app.
 - `clean-up`: Remove the output directory.
   _(You shouldn't need to run this manually. It is run by other scripts as necessary.)_
-- `dev`: Build and serve the app and automatically reload whenever a file changes. Useful during development.
+- `dev`: Build, test and serve the app. Also, automatically reload and re-run tests whenever a file changes.
+  _(Useful during development.)_
 - `generate-favicon`: Generates `favicon.png` based on `simple-torch.svg`. This needs to be manually run, when the logo
   (in SVG format) changes.
 - `serve`: Build and serve the app.
@@ -39,7 +40,9 @@ The following npm scripts are available and can help during testing:
 - `lint`: Lint the source code.
 - `test`: Lint the source code and run the automated tests.
 
-_**NOTE**: Currently there are no actual automated tests :scream: :scream: :scream:_
+_**NOTE**:_
+_Adding automated tests is still a work in progress._
+_Currently there are no unit tests and no end-to-end (e2e) tests :scream: :scream: :scream:_
 
 
 ### Releasing/Deploying

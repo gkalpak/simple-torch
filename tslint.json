@@ -12,8 +12,12 @@
     "no-consecutive-blank-lines": [true, 2],
     "no-console": [false],
 		"no-duplicate-variable": [true, "check-parameters"],
+    "no-focused-test": true,
+    "no-skipped-test": true,
     "quotemark": [true, "single"],
     "variable-name": [true, "allow-leading-underscore", "allow-trailing-underscore", "ban-keywords", "check-format"]
   },
-  "rulesDirectory": []
+  "rulesDirectory": [
+    "node_modules/tslint-jasmine-noSkipOrFocus/"
+  ]
 }

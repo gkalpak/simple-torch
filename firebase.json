@@ -1,6 +1,9 @@
 {
   "hosting": {
     "cleanUrls": true,
+    "ignore": [
+      "test/**"
+    ],
     "public": "out"
   }
 }

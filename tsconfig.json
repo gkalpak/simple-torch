@@ -9,12 +9,13 @@
     "moduleResolution": "node",
     "newLine": "lf",
     "noUnusedLocals": true,
-    "outDir": "out/app/",
+    "outDir": "out",
     "sourceMap": true,
     "strict": true,
     "target": "es2018"
   },
   "include": [
-    "src/app/"
+    "src/app/",
+    "src/test/"
   ]
 }
