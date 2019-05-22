@@ -6,7 +6,8 @@ export class ContentCe extends BaseCe {
   protected static readonly style = `
     :host {
       align-items: center;
-      background-color: darkslategray;
+      background-color: rgb(66, 55, 66);
+      color: darkgray;
       display: flex;
       flex-grow: 1;
       justify-content: center;
