@@ -11,6 +11,25 @@ module.exports = config => config.set({
     {pattern: 'test/unit/**/*.js', type: 'module'},
   ],
   frameworks: ['jasmine'],
-  reporters: ['progress'],
+  plugins: [
+    'karma-*',
+    {'reporter:jasmine-seed': ['type', JasmineSeedReporter]},
+  ],
+  reporters: [
+    'progress',
+    'jasmine-seed',
+  ],
   restartOnFileChange: true,
 });
+
+// Helpers
+function JasmineSeedReporter(baseReporterDecorator) {
+  baseReporterDecorator(this);
+
+  this.onBrowserComplete = (browser, result) => {
+    const seed = result.order && result.order.random && result.order.seed;
+    if (seed) this.write(`${browser}: Randomized with seed ${seed}.\n`);
+  };
+
+  this.onRunComplete = () => undefined;
+}
