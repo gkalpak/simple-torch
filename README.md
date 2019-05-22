@@ -42,7 +42,7 @@ The following npm scripts are available and can help during testing:
 
 _**NOTE**:_
 _Adding automated tests is still a work in progress._
-_Currently there are no unit tests and no end-to-end (e2e) tests :scream: :scream: :scream:_
+_Currently there are few unit tests and no end-to-end (e2e) tests :scream: :scream: :scream:_
 
 
 ### Releasing/Deploying
@@ -65,8 +65,8 @@ Things I want to (but won't necessarily) do:
     - Show status message (e.g. on error).
     - Try to stop tracks/stream (and see if it makes a difference in mobile notifications).
   - Make it a PWA.
-- Add unit tests.
-- Add e2e tests.
+- Add more unit tests (and update documentation for the `test` script).
+- Add e2e tests (and update documentation for the `test` script).
 - Add CI support.
 
 

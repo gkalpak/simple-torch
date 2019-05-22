@@ -7,6 +7,7 @@ module.exports = config => config.set({
     {pattern: 'out/**/*.js.map', included: false, watched: false},
     {pattern: 'out/assets/**', included: false},
     {pattern: 'out/app/**/*.js', included: false},
+    {pattern: 'out/test/unit/patch-env.js'},
     {pattern: 'out/test/unit/**/*.js', type: 'module'},
   ],
   frameworks: ['jasmine'],
