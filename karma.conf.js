@@ -2,13 +2,12 @@
 // More info: https://karma-runner.github.io/1.0/config/configuration-file.html
 
 module.exports = config => config.set({
-  basePath: 'out/',
   browsers: ['ChromeHeadless'],
   files: [
-    {pattern: '**/*.js.map', included: false, watched: false},
-    {pattern: 'assets/**', included: false},
-    {pattern: 'app/**/*.js', included: false},
-    {pattern: 'test/unit/**/*.js', type: 'module'},
+    {pattern: 'out/**/*.js.map', included: false, watched: false},
+    {pattern: 'out/assets/**', included: false},
+    {pattern: 'out/app/**/*.js', included: false},
+    {pattern: 'out/test/unit/**/*.js', type: 'module'},
   ],
   frameworks: ['jasmine'],
   middleware: ['exitOn404'],
@@ -17,6 +16,7 @@ module.exports = config => config.set({
     {'middleware:exitOn404': ['factory', exitOn404MiddlewareFactory]},
     {'reporter:jasmine-seed': ['type', JasmineSeedReporter]},
   ],
+  preprocessors: {'out/**/*.js': ['sourcemap']},
   reporters: [
     'progress',
     'jasmine-seed',
