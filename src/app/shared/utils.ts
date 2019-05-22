@@ -8,9 +8,10 @@ export const sleep =
 
 export const waitAndCheck =
   async (interval: number, attempts: number, conditionFn: () => boolean): Promise<boolean> => {
-    if (conditionFn()) return true;
-    if (attempts <= 0) return false;
+    while (!conditionFn()) {
+      if (--attempts < 0) return false;
+      await sleep(interval);
+    }
 
-    await sleep(interval);
-    return waitAndCheck(interval, attempts - 1, conditionFn);
+    return true;
   };
