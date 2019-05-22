@@ -49,6 +49,6 @@ export abstract class BaseCe extends HTMLElement {
 
   protected onError(err: Error): void {
     console.error(err);
-    alert(`ERROR: ${err.message}`);
+    WIN.alert(`ERROR: ${err.message}`);
   }
 }
