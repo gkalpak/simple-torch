@@ -59,10 +59,13 @@ The following npm scripts are available and can help with releasing/deploying a 
 Things I want to (but won't necessarily) do:
 
 - Refine functionality:
+  - `simple-torch.svg`:
+    - Add "glow" when ON.
   - `TorchCe`:
-    - Show loading spinner.
-    - Show torch.
-    - Show status message (e.g. on error).
+    - Show loading spinner(?)
+    - Update status message on error (and consider skipping alert).
+    - Improve styling (torch size, status messages).
+    - Improve torch interaction (e.g. slide switch instead of click).
     - Try to stop tracks/stream (and see if it makes a difference in mobile notifications).
   - Make it a PWA.
 - Add more unit tests (and update documentation for the `test` script).

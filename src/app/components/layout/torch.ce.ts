@@ -4,7 +4,7 @@ import {BaseCe, IInitializedCe} from '../base.ce.js';
 
 
 const enum State {
-  Loading = 'loading',
+  Loading = 'loading...',
   Disabled = 'not available' ,
   Off = 'off',
   On = 'on',
@@ -12,38 +12,58 @@ const enum State {
 
 export class TorchCe extends BaseCe {
   protected static readonly template = `
-    <h1>Torch</h1>
-    <button class="torch-switch" disabled>${State.Loading}...</button>
+    <external-svg-ce class="dark no-bg off torch" src="/assets/images/simple-torch.svg"></external-svg-ce>
+    <div class="status">
+      <b>Status:</b>
+      <span class="status-message"></span>
+    </div>
   `;
   protected static readonly style = `
-    .torch-switch {
-      background-color: gray;
-      color: white;
-      text-transform: capitalize;
+    :host{
+      --simple-torch-rotation: 0;
+      --simple-torch-stroke-color: rgb(55, 44, 55);
     }
-    .torch-switch.off { background-color: darkred; }
-    .torch-switch.on { background-color: green; }
-    .torch-switch[disabled] { opacity: 0.5; }
+
+    .status { text-align: center; }
+
+    .status-message { text-transform: uppercase; }
+
+    .torch {
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .torch.loading { cursor: progress; }
+    .torch.disabled { cursor: not-allowed; }
   `;
 
   protected async initialize(): Promise<IInitializedCe<this>> {
     const self = await super.initialize();
-    const btn = self.shadowRoot.querySelector<HTMLButtonElement>('.torch-switch')!;
+    const torchElem = self.shadowRoot.querySelector('.torch')!;
+    const statusMsgElem = self.shadowRoot.querySelector('.status-message')!;
+    let state: State = State.Loading;
     let track: MediaStreamTrack | undefined;
 
+    const onClick = () => updateState((state === State.Off) ? State.On : State.Off);
     const onError = (err: any) => {
       this.onError(err);
 
-      btn.disabled = true;
       track = undefined;
       updateState(State.Disabled);
     };
-    const updateState = (state: State) => {
-      const on = state === State.On;
+    const updateState = (newState: State) => {
+      if ((newState !== State.Off) && (newState !== State.On)) {
+        torchElem.removeEventListener('click', onClick);
+      } else if ((state !== State.Off) && (state !== State.On)) {
+        torchElem.addEventListener('click', onClick);
+      }
 
-      btn.textContent = state;
-      btn.classList.toggle('off', !on);
-      btn.classList.toggle('on', on);
+      const on = newState === State.On;
+
+      torchElem.classList.toggle('loading', newState === State.Loading);
+      torchElem.classList.toggle('disabled', newState === State.Disabled);
+      torchElem.classList.toggle('off', !on);
+      statusMsgElem.textContent = newState;
+      state = newState;
 
       if (track) {
         track.applyConstraints({advanced: [{torch: on}]}).catch(onError);
@@ -51,6 +71,8 @@ export class TorchCe extends BaseCe {
     };
 
     try {
+      updateState(State.Loading);
+
       const stream = await WIN.navigator.mediaDevices.
         getUserMedia({video: {facingMode: 'environment'}}).
         catch(() => undefined);
@@ -61,9 +83,6 @@ export class TorchCe extends BaseCe {
         throw new Error('Unable to access camera or torch.');
       }
 
-      btn.addEventListener('click', () =>
-        updateState((btn.textContent!.toLowerCase() === 'off') ? State.On : State.Off));
-      btn.disabled = false;
       updateState(State.On);
     } catch (err) {
       onError(err);
