@@ -12,7 +12,7 @@ const enum State {
 
 export class TorchCe extends BaseCe {
   protected static readonly template = `
-    <external-svg-ce class="dark no-bg off torch" src="/assets/images/simple-torch.svg"></external-svg-ce>
+    <external-svg-ce class="dark no-bg off torch with-effects" src="/assets/images/simple-torch.svg"></external-svg-ce>
     <div class="status">
       <b>Status:</b>
       <span class="status-message"></span>

@@ -59,8 +59,6 @@ The following npm scripts are available and can help with releasing/deploying a 
 Things I want to (but won't necessarily) do:
 
 - Refine functionality:
-  - `simple-torch.svg`:
-    - Add "glow" when ON.
   - `TorchCe`:
     - Show loading spinner(?)
     - Update status message on error (and consider skipping alert).
