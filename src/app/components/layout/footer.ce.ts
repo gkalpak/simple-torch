@@ -12,16 +12,16 @@ export class FooterCe extends BaseCe {
     </footer>
   `;
   protected static readonly style = `
-    :host { box-shadow: 0 0 5px; }
+    :host { box-shadow: 0 0 15px -5px; }
 
     footer {
       align-items: center;
       background-color: rgb(33, 33, 33);
-      color: lightgray;
+      color: gray;
       display: flex;
       font-size: 0.75em;
       justify-content: center;
-      letter-spacing: 1px;
+      letter-spacing: 0.5px;
       padding: 2px 4px;
       word-spacing: 2px;
     }

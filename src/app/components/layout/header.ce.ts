@@ -11,12 +11,12 @@ export class HeaderCe extends BaseCe {
     </header>
   `;
   protected static readonly style = `
-    :host { box-shadow: 0 0 10px; }
+    :host { box-shadow: 0 0 10px -5px; }
 
     header {
       align-items: center;
       background-color: rgb(33, 33, 33);
-      color: lightgray;
+      color: darkgray;
       display: flex;
       padding: 5px 10px;
     }

@@ -14,6 +14,7 @@ export abstract class BaseCe extends HTMLElement {
       color: inherit;
       contain: content;
       display: block;
+      font-family: inherit;
     }
   `;
   protected readonly clazz: typeof BaseCe = (this.constructor as typeof BaseCe);

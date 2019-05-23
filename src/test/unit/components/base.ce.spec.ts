@@ -161,6 +161,7 @@ describe('BaseCe', () => {
             color: inherit;
             contain: content;
             display: block;
+            font-family: inherit;
           }
         </style>
         &lt;base-ce&gt;Not implemented yet.&lt;/base-ce&gt;
@@ -172,6 +173,7 @@ describe('BaseCe', () => {
             color: inherit;
             contain: content;
             display: block;
+            font-family: inherit;
           }
           div { color: orange; }
         </style>

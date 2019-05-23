@@ -5,6 +5,7 @@
 body {
   display: flex;
   flex-direction: column;
+  font-family: cursive;
   height: 100vh;
   margin: 0;
   padding: 0;
