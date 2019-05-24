@@ -4,16 +4,23 @@ import {BaseCe, IInitializedCe} from '../base.ce.js';
 
 
 const enum State {
-  Unitialized = '-',
-  Initializing = 'initializing...',
-  Disabled = 'not available' ,
-  Off = 'off',
-  On = 'on',
+  Unitialized,
+  Initializing,
+  Disabled,
+  Off,
+  On,
 }
 
 const ZERO_WIDTH_SPACE = '\u200b';
 
 export class TorchCe extends BaseCe {
+  private static readonly statusMessages = {
+    [State.Unitialized]: '-',
+    [State.Initializing]: 'INITIALIZING...',
+    [State.Disabled]: 'NOT AVAILABLE',
+    [State.Off]: 'OFF',
+    [State.On]: 'ON',
+  };
   protected static readonly template = `
     <external-svg-ce class="dark no-bg off torch with-effects" src="/assets/images/simple-torch.svg"></external-svg-ce>
     <div class="status">
@@ -34,8 +41,6 @@ export class TorchCe extends BaseCe {
       padding-bottom: 20px;
       text-align: center;
     }
-
-    .status-message { text-transform: uppercase; }
 
     .status-message-extra {
       color: orange;
@@ -79,7 +84,7 @@ export class TorchCe extends BaseCe {
       torchElem.classList.toggle('disabled', newState === State.Disabled);
       torchElem.classList.toggle('off', !on);
 
-      statusMsgElem.textContent = newState;
+      statusMsgElem.textContent = TorchCe.statusMessages[newState];
       statusMsgExtraElem.textContent = extraMsg || ZERO_WIDTH_SPACE;
 
       state = newState;
