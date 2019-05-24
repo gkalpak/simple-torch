@@ -3,6 +3,11 @@ import {waitAndCheck} from '../../shared/utils.js';
 import {BaseCe, IInitializedCe} from '../base.ce.js';
 
 
+interface ITrackInfo {
+  track: MediaStreamTrack | undefined;
+  hasTorch: boolean;
+}
+
 const enum State {
   Unitialized,
   Initializing,
@@ -12,6 +17,7 @@ const enum State {
 }
 
 const ZERO_WIDTH_SPACE = '\u200b';
+const EMPTY_TRACK_INFO: ITrackInfo = {track: undefined, hasTorch: false};
 
 export class TorchCe extends BaseCe {
   private static readonly statusMessages = {
@@ -84,6 +90,8 @@ export class TorchCe extends BaseCe {
     .torch.initializing { cursor: progress; }
   `;
 
+  private trackInfoPromise: Promise<ITrackInfo> = Promise.resolve(EMPTY_TRACK_INFO);
+
   protected async initialize(): Promise<IInitializedCe<this>> {
     const self = await super.initialize();
     const torchElem = self.shadowRoot.querySelector('.torch')!;
@@ -91,16 +99,17 @@ export class TorchCe extends BaseCe {
     const statusMsgExtraElem = self.shadowRoot.querySelector('.status-message-extra')!;
     const clickSound = Object.assign(new Audio('/assets/audio/click.ogg'), {volume: 0.15});
     let state: State = State.Unitialized;
-    let track: MediaStreamTrack | undefined;
 
     const onClick = () => {
       updateState((state === State.Off) ? State.On : State.Off);
       clickSound.play();
     };
-    const onError = (err: any) => {
+    const onError = async (err: any) => {
       this.onError(err);
 
-      track = undefined;
+      const {track} = await this.getTrackInfo();
+      if (track) track.stop();
+
       updateState(State.Disabled, err.message);
     };
     const updateState = (newState: State, extraMsg?: string) => {
@@ -122,19 +131,15 @@ export class TorchCe extends BaseCe {
 
       state = newState;
 
-      if (track) {
-        track.applyConstraints({advanced: [{torch: on}]}).catch(onError);
-      }
+      this.getTrackInfo().
+        then(({track}) => track && track.applyConstraints({advanced: [{torch: on}]})).
+        catch(onError);
     };
 
     try {
       updateState(State.Initializing);
 
-      const stream = await WIN.navigator.mediaDevices.
-        getUserMedia({video: {facingMode: 'environment'}}).
-        catch(() => undefined);
-      track = stream && stream.getVideoTracks().pop();
-      const hasTorch = !!track && await waitAndCheck(100, 25, () => !!track!.getCapabilities().torch);
+      const {track, hasTorch} = await this.getTrackInfo(true);
 
       if (!hasTorch) {
         const permissionState = (await navigator.permissions.query({name: 'camera'})).state;
@@ -152,5 +157,29 @@ export class TorchCe extends BaseCe {
     }
 
     return self;
+  }
+
+  private async getTrackInfo(renewIfNecessary = false): Promise<ITrackInfo> {
+    let trackInfo = await this.trackInfoPromise;
+    const noActiveTrack = !trackInfo.track || (trackInfo.track.readyState === 'ended');
+
+    if (noActiveTrack) {
+      if (renewIfNecessary) {
+        this.trackInfoPromise = WIN.navigator.mediaDevices.
+          getUserMedia({video: {facingMode: 'environment'}}).
+          catch(() => undefined).
+          then(stream => stream && stream.getVideoTracks().pop()).
+          then(async track => ({
+            hasTorch: !!track && await waitAndCheck(100, 25, () => !!track.getCapabilities().torch),
+            track,
+          }));
+
+        trackInfo = await this.trackInfoPromise;
+      } else {
+        trackInfo = EMPTY_TRACK_INFO;
+      }
+    }
+
+    return trackInfo;
   }
 }
