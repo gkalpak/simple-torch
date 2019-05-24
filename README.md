@@ -60,8 +60,6 @@ Things I want to (but won't necessarily) do:
 
 - Refine functionality:
   - `TorchCe`:
-    - Try to stop tracks/stream (and see if it makes a difference in mobile notifications).
-      Alternatively, investigate reloading on switch-off (either immediately or when the document loses focus).
     - Add option: No sound.
   - Make it a PWA.
 - Add more unit tests (and update documentation for the `test` script).

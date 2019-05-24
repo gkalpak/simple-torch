@@ -112,6 +112,18 @@ export class TorchCe extends BaseCe {
 
       updateState(State.Disabled, err.message);
     };
+    const onVisibilityChange = async () => {
+      const {track} = await this.getTrackInfo(!WIN.document.hidden);
+      if (!track) return;
+
+      if (WIN.document.hidden) {
+        if (state === State.Off) {
+          track.stop();
+        }
+      } else if (state === State.On) {
+        track.applyConstraints({advanced: [{torch: true}]});
+      }
+    };
     const updateState = (newState: State, extraMsg?: string) => {
       if ((newState !== State.Off) && (newState !== State.On)) {
         torchElem.removeEventListener('click', onClick);
@@ -151,6 +163,7 @@ export class TorchCe extends BaseCe {
         throw new Error(errorMessage);
       }
 
+      WIN.document.addEventListener('visibilitychange', onVisibilityChange);
       updateState(State.On);
     } catch (err) {
       onError(err);
