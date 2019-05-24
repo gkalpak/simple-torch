@@ -119,7 +119,13 @@ export class TorchCe extends BaseCe {
       const hasTorch = !!track && await waitAndCheck(100, 25, () => !!track!.getCapabilities().torch);
 
       if (!hasTorch) {
-        throw new Error('Unable to access camera or torch.');
+        const permissionState = (await navigator.permissions.query({name: 'camera'})).state;
+        const errorMessage = (permissionState === 'denied') ?
+          'Access to camera denied. Please, give permission in browser settings.' : (permissionState === 'prompt') ?
+          'Access to camera not granted. Please, give permission when prompted.' :
+          `Unable to detect ${!track ? 'camera' : 'torch'} on your device.`;
+
+        throw new Error(errorMessage);
       }
 
       updateState(State.On);
