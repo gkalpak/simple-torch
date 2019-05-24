@@ -39,7 +39,10 @@ export class TorchCe extends BaseCe {
     </div>
   `;
   protected static readonly style = `
-    :host{
+    :host {
+      display: flex;
+      flex-direction: column;
+
       --simple-torch-rotation: 0;
       --simple-torch-stroke-color: rgb(55, 44, 55);
     }
@@ -57,9 +60,14 @@ export class TorchCe extends BaseCe {
 
     .torch {
       cursor: pointer;
+      flex-grow: 1;
+      max-height: 75vh;
       -webkit-tap-highlight-color: transparent;
     }
-    .torch.disabled { cursor: not-allowed; }
+    .torch.disabled {
+      cursor: not-allowed;
+      opacity: 0.5;
+    }
     .torch.initializing { cursor: progress; }
   `;
 
