@@ -89,10 +89,14 @@ export class TorchCe extends BaseCe {
     const torchElem = self.shadowRoot.querySelector('.torch')!;
     const statusMsgElem = self.shadowRoot.querySelector('.status-message')!;
     const statusMsgExtraElem = self.shadowRoot.querySelector('.status-message-extra')!;
+    const clickSound = Object.assign(new Audio('/assets/audio/click.ogg'), {volume: 0.15});
     let state: State = State.Unitialized;
     let track: MediaStreamTrack | undefined;
 
-    const onClick = () => updateState((state === State.Off) ? State.On : State.Off);
+    const onClick = () => {
+      updateState((state === State.Off) ? State.On : State.Off);
+      clickSound.play();
+    };
     const onError = (err: any) => {
       this.onError(err);
 
