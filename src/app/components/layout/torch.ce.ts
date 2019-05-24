@@ -21,6 +21,13 @@ export class TorchCe extends BaseCe {
     [State.Off]: 'OFF',
     [State.On]: 'ON',
   };
+  private static readonly statusEmojis = {
+    [State.Unitialized]: ZERO_WIDTH_SPACE,
+    [State.Initializing]: '⏳',  // Hourglass not done
+    [State.Disabled]: '🚫',  // No entry sign
+    [State.Off]: ZERO_WIDTH_SPACE,
+    [State.On]: ZERO_WIDTH_SPACE,
+  };
   protected static readonly template = `
     <external-svg-ce class="dark no-bg off torch with-effects" src="/assets/images/simple-torch.svg"></external-svg-ce>
     <div class="status">
@@ -84,7 +91,7 @@ export class TorchCe extends BaseCe {
       torchElem.classList.toggle('disabled', newState === State.Disabled);
       torchElem.classList.toggle('off', !on);
 
-      statusMsgElem.textContent = TorchCe.statusMessages[newState];
+      statusMsgElem.textContent = `${TorchCe.statusMessages[newState]} ${TorchCe.statusEmojis[newState]}`;
       statusMsgExtraElem.textContent = extraMsg || ZERO_WIDTH_SPACE;
 
       state = newState;
