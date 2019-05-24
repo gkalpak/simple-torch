@@ -4,7 +4,8 @@ import {BaseCe, IInitializedCe} from '../base.ce.js';
 
 
 const enum State {
-  Loading = 'loading...',
+  Unitialized = '-',
+  Initializing = 'initializing...',
   Disabled = 'not available' ,
   Off = 'off',
   On = 'on',
@@ -46,8 +47,8 @@ export class TorchCe extends BaseCe {
       cursor: pointer;
       -webkit-tap-highlight-color: transparent;
     }
-    .torch.loading { cursor: progress; }
     .torch.disabled { cursor: not-allowed; }
+    .torch.initializing { cursor: progress; }
   `;
 
   protected async initialize(): Promise<IInitializedCe<this>> {
@@ -55,7 +56,7 @@ export class TorchCe extends BaseCe {
     const torchElem = self.shadowRoot.querySelector('.torch')!;
     const statusMsgElem = self.shadowRoot.querySelector('.status-message')!;
     const statusMsgExtraElem = self.shadowRoot.querySelector('.status-message-extra')!;
-    let state: State = State.Loading;
+    let state: State = State.Unitialized;
     let track: MediaStreamTrack | undefined;
 
     const onClick = () => updateState((state === State.Off) ? State.On : State.Off);
@@ -74,7 +75,7 @@ export class TorchCe extends BaseCe {
 
       const on = newState === State.On;
 
-      torchElem.classList.toggle('loading', newState === State.Loading);
+      torchElem.classList.toggle('initializing', newState === State.Initializing);
       torchElem.classList.toggle('disabled', newState === State.Disabled);
       torchElem.classList.toggle('off', !on);
 
@@ -89,7 +90,7 @@ export class TorchCe extends BaseCe {
     };
 
     try {
-      updateState(State.Loading);
+      updateState(State.Initializing);
 
       const stream = await WIN.navigator.mediaDevices.
         getUserMedia({video: {facingMode: 'environment'}}).
