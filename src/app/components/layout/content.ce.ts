@@ -8,7 +8,7 @@ export class ContentCe extends BaseCe {
       background-color: rgb(66, 55, 66);
       color: darkgray;
       flex-grow: 1;
-      padding: 5px 10px;
+      padding: 10px;
     }
 
     torch-ce {

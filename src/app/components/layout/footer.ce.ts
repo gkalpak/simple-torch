@@ -12,7 +12,10 @@ export class FooterCe extends BaseCe {
     </footer>
   `;
   protected static readonly style = `
-    :host { box-shadow: 0 0 15px -5px; }
+    :host {
+      box-shadow: 0 -6px 10px 0 rgba(0, 0, 0, 0.1),
+                  0 -1px 18px 0 rgba(0, 0, 0, 0.08);
+    }
 
     footer {
       align-items: center;
@@ -22,7 +25,7 @@ export class FooterCe extends BaseCe {
       font-size: 0.75em;
       justify-content: center;
       letter-spacing: 0.5px;
-      padding: 2px 4px;
+      padding: 10px 5px;
       word-spacing: 2px;
     }
 
