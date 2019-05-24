@@ -60,7 +60,6 @@ Things I want to (but won't necessarily) do:
 
 - Refine functionality:
   - `TorchCe`:
-    - Show loading spinner(?)
     - Make sound on switch on/off.
     - Improve torch interaction (e.g. slide switch instead of click).
     - Try to stop tracks/stream (and see if it makes a difference in mobile notifications).

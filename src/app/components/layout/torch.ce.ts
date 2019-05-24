@@ -30,6 +30,7 @@ export class TorchCe extends BaseCe {
   };
   protected static readonly template = `
     <external-svg-ce class="dark no-bg off torch with-effects" src="/assets/images/simple-torch.svg"></external-svg-ce>
+    <loader-ce class="loader"></loader-ce>
     <div class="status">
       <div>
         <b>Status:</b>
@@ -45,6 +46,18 @@ export class TorchCe extends BaseCe {
 
       --simple-torch-rotation: 0;
       --simple-torch-stroke-color: rgb(55, 44, 55);
+    }
+
+    .loader {
+      color: orange;
+      height: 10%;
+      left: 0;
+      position: absolute;
+      right: 0;
+      top: 20px;
+    }
+    .torch:not(.unitialized):not(.initializing) ~ .loader {
+      display: none;
     }
 
     .status {
@@ -95,6 +108,7 @@ export class TorchCe extends BaseCe {
 
       const on = newState === State.On;
 
+      torchElem.classList.toggle('uninitialized', newState === State.Unitialized);
       torchElem.classList.toggle('initializing', newState === State.Initializing);
       torchElem.classList.toggle('disabled', newState === State.Disabled);
       torchElem.classList.toggle('off', !on);
