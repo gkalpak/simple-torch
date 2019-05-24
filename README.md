@@ -61,8 +61,7 @@ Things I want to (but won't necessarily) do:
 - Refine functionality:
   - `TorchCe`:
     - Show loading spinner(?)
-    - Update status message on error (and consider skipping alert).
-    - Improve styling (torch size, status messages).
+    - Improve styling (torch size).
     - Improve torch interaction (e.g. slide switch instead of click).
     - Try to stop tracks/stream (and see if it makes a difference in mobile notifications).
   - Make it a PWA.

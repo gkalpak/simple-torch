@@ -10,12 +10,17 @@ const enum State {
   On = 'on',
 }
 
+const ZERO_WIDTH_SPACE = '\u200b';
+
 export class TorchCe extends BaseCe {
   protected static readonly template = `
     <external-svg-ce class="dark no-bg off torch with-effects" src="/assets/images/simple-torch.svg"></external-svg-ce>
     <div class="status">
-      <b>Status:</b>
-      <span class="status-message"></span>
+      <div>
+        <b>Status:</b>
+        <span class="status-message"></span>
+      </div>
+      <div class="status-message-extra"></div>
     </div>
   `;
   protected static readonly style = `
@@ -24,9 +29,18 @@ export class TorchCe extends BaseCe {
       --simple-torch-stroke-color: rgb(55, 44, 55);
     }
 
-    .status { text-align: center; }
+    .status {
+      padding-bottom: 20px;
+      text-align: center;
+    }
 
     .status-message { text-transform: uppercase; }
+
+    .status-message-extra {
+      color: orange;
+      font-size: small;
+      margin-top: 5px;
+    }
 
     .torch {
       cursor: pointer;
@@ -40,6 +54,7 @@ export class TorchCe extends BaseCe {
     const self = await super.initialize();
     const torchElem = self.shadowRoot.querySelector('.torch')!;
     const statusMsgElem = self.shadowRoot.querySelector('.status-message')!;
+    const statusMsgExtraElem = self.shadowRoot.querySelector('.status-message-extra')!;
     let state: State = State.Loading;
     let track: MediaStreamTrack | undefined;
 
@@ -48,9 +63,9 @@ export class TorchCe extends BaseCe {
       this.onError(err);
 
       track = undefined;
-      updateState(State.Disabled);
+      updateState(State.Disabled, err.message);
     };
-    const updateState = (newState: State) => {
+    const updateState = (newState: State, extraMsg?: string) => {
       if ((newState !== State.Off) && (newState !== State.On)) {
         torchElem.removeEventListener('click', onClick);
       } else if ((state !== State.Off) && (state !== State.On)) {
@@ -62,7 +77,10 @@ export class TorchCe extends BaseCe {
       torchElem.classList.toggle('loading', newState === State.Loading);
       torchElem.classList.toggle('disabled', newState === State.Disabled);
       torchElem.classList.toggle('off', !on);
+
       statusMsgElem.textContent = newState;
+      statusMsgExtraElem.textContent = extraMsg || ZERO_WIDTH_SPACE;
+
       state = newState;
 
       if (track) {
