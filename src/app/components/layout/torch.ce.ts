@@ -1,4 +1,4 @@
-import {WIN} from '../../shared/constants.js';
+import {EMOJI, WIN} from '../../shared/constants.js';
 import {waitAndCheck} from '../../shared/utils.js';
 import {BaseCe, IInitializedCe} from '../base.ce.js';
 
@@ -29,8 +29,8 @@ export class TorchCe extends BaseCe {
   };
   private static readonly statusEmojis = {
     [State.Unitialized]: ZERO_WIDTH_SPACE,
-    [State.Initializing]: '⏳',  // Hourglass not done
-    [State.Disabled]: '🚫',  // No entry sign
+    [State.Initializing]: EMOJI.hourglassNotDone,
+    [State.Disabled]: EMOJI.noEntrySign,
     [State.Off]: ZERO_WIDTH_SPACE,
     [State.On]: ZERO_WIDTH_SPACE,
   };

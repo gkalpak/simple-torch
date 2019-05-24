@@ -1,7 +1,14 @@
-import {ENV, WIN} from '../../../app/shared/constants.js';
+import {EMOJI, ENV, WIN} from '../../../app/shared/constants.js';
 
 
 describe('shared/constants', () => {
+  describe('EMOJI', () => {
+    it('should contain emojis', () => {
+      expect(Object.keys(EMOJI).length).toBeGreaterThan(0);
+      expect(EMOJI.noEntrySign).toBe('🚫');
+    });
+  });
+
   describe('ENV', () => {
     it('should be `window.ENV`', () => {
       expect(ENV).toEqual({version: '1.33.7-foo'});
