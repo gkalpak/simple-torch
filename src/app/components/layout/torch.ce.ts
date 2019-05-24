@@ -90,44 +90,22 @@ export class TorchCe extends BaseCe {
     .torch.initializing { cursor: progress; }
   `;
 
+  private readonly clickSound = Object.assign(new Audio('/assets/audio/click.ogg'), {volume: 0.15});
+  private state: State = State.Unitialized;
   private trackInfoPromise: Promise<ITrackInfo> = Promise.resolve(EMPTY_TRACK_INFO);
+  private updateState: (newState: State, extraMsg?: string) => void = () => undefined;
 
   protected async initialize(): Promise<IInitializedCe<this>> {
     const self = await super.initialize();
     const torchElem = self.shadowRoot.querySelector('.torch')!;
     const statusMsgElem = self.shadowRoot.querySelector('.status-message')!;
     const statusMsgExtraElem = self.shadowRoot.querySelector('.status-message-extra')!;
-    const clickSound = Object.assign(new Audio('/assets/audio/click.ogg'), {volume: 0.15});
-    let state: State = State.Unitialized;
 
-    const onClick = () => {
-      updateState((state === State.Off) ? State.On : State.Off);
-      clickSound.play();
-    };
-    const onError = async (err: any) => {
-      this.onError(err);
-
-      const {track} = await this.getTrackInfo();
-      if (track) track.stop();
-
-      updateState(State.Disabled, err.message);
-    };
-    const onVisibilityChange = async () => {
-      const {track} = await this.getTrackInfo(!WIN.document.hidden);
-      if (!track) return;
-
-      if (WIN.document.hidden) {
-        if (state === State.Off) {
-          track.stop();
-        }
-      } else if (state === State.On) {
-        track.applyConstraints({advanced: [{torch: true}]});
-      }
-    };
-    const updateState = (newState: State, extraMsg?: string) => {
+    const onClick = () => this.onClick();
+    const updateState = this.updateState = (newState: State, extraMsg?: string) => {
       if ((newState !== State.Off) && (newState !== State.On)) {
         torchElem.removeEventListener('click', onClick);
-      } else if ((state !== State.Off) && (state !== State.On)) {
+      } else if ((this.state !== State.Off) && (this.state !== State.On)) {
         torchElem.addEventListener('click', onClick);
       }
 
@@ -141,11 +119,11 @@ export class TorchCe extends BaseCe {
       statusMsgElem.textContent = `${TorchCe.statusMessages[newState]} ${TorchCe.statusEmojis[newState]}`;
       statusMsgExtraElem.textContent = extraMsg || ZERO_WIDTH_SPACE;
 
-      state = newState;
+      this.state = newState;
 
       this.getTrackInfo().
         then(({track}) => track && track.applyConstraints({advanced: [{torch: on}]})).
-        catch(onError);
+        catch(err => this.onError(err));
     };
 
     try {
@@ -163,13 +141,22 @@ export class TorchCe extends BaseCe {
         throw new Error(errorMessage);
       }
 
-      WIN.document.addEventListener('visibilitychange', onVisibilityChange);
+      WIN.document.addEventListener('visibilitychange', () => this.onVisibilityChange());
       updateState(State.On);
     } catch (err) {
-      onError(err);
+      this.onError(err);
     }
 
     return self;
+  }
+
+  protected async onError(err: Error): Promise<void> {
+    super.onError(err);
+
+    const {track} = await this.getTrackInfo();
+    if (track) track.stop();
+
+    this.updateState(State.Disabled, err.message);
   }
 
   private async getTrackInfo(renewIfNecessary = false): Promise<ITrackInfo> {
@@ -194,5 +181,23 @@ export class TorchCe extends BaseCe {
     }
 
     return trackInfo;
+  }
+
+  private onClick(): void {
+    this.updateState((this.state === State.Off) ? State.On : State.Off);
+    this.clickSound.play();
+  }
+
+  private async onVisibilityChange(): Promise<void> {
+    const {track} = await this.getTrackInfo(!WIN.document.hidden);
+    if (!track) return;
+
+    if (WIN.document.hidden) {
+      if (this.state === State.Off) {
+        track.stop();
+      }
+    } else if (this.state === State.On) {
+      track.applyConstraints({advanced: [{torch: true}]});
+    }
   }
 }
