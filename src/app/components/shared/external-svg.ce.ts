@@ -5,7 +5,7 @@ import {BaseCe, IInitializedCe} from '../base.ce.js';
 export class ExternalSvgCe extends BaseCe {
   public static readonly observedAttributes = ['class'];
   protected static readonly template = '';
-  private static readonly cache = new Map<string, Promise<string>>();
+  protected static readonly cache = new Map<string, Promise<string>>();
   private svgElem: SVGSVGElement | null = null;
 
   public attributeChangedCallback(attr: string, oldValue: string, newValue: string): void {

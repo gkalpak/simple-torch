@@ -25,6 +25,7 @@ module.exports = config => config.set({
     {'reporter:jasmine-seed': ['type', JasmineSeedReporter]},
   ],
   preprocessors: {'out/**/*.js': ['sourcemap']},
+  proxies: {'/assets/': '/base/out/assets/'},
   reporters: [
     'progress',
     'jasmine-seed',

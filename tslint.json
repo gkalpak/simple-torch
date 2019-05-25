@@ -14,6 +14,7 @@
 		"no-duplicate-variable": [true, "check-parameters"],
     "no-focused-test": true,
     "no-skipped-test": true,
+    "object-literal-key-quotes": false,
     "quotemark": [true, "single"],
     "variable-name": [true, "allow-leading-underscore", "allow-trailing-underscore", "ban-keywords", "check-format"]
   },

@@ -10,23 +10,28 @@ export const getNormalizedTextContent = (elem: IInitializedCe<BaseCe>): string =
 
 export const macrotick = (): Promise<void> => new Promise(resolve => setTimeout(resolve, 0));
 
+export const macrotickWithMockedClock = async () => {
+  const macrotickPromise = macrotick();
+  jasmine.clock().tick(0);
+  await macrotickPromise;
+};
+
 export const microtick = (): Promise<void> => new Promise(resolve => resolve());
 
 export const normalizeWhitespace = (input: string): string => input.replace(/\s+/g, ' ').trim();
 
-// tslint:disable-next-line: variable-name
-export const setupCeContainer = (): <T extends BaseCe>(CeClass: new() => T) => Promise<IInitializedCe<T>> => {
+export const setupCeContainer = () => {
   const container = document.createElement('div');
 
   beforeAll(() => WIN.document.body.appendChild(container));
   beforeEach(() => container.innerHTML = '');
   afterAll(() => container.remove());
 
-  // tslint:disable-next-line: variable-name
-  return async <T extends BaseCe>(CeClass: new() => T) => {
-    const elem = new CeClass();
-    container.appendChild(elem);
+  return async <T extends BaseCe>(ceClassOrInstance: (new() => T) | T, attrs: {[name: string]: string} = {}) => {
+    const elem = (ceClassOrInstance instanceof BaseCe) ? ceClassOrInstance : new ceClassOrInstance();
+    Object.keys(attrs).forEach(name => elem.setAttribute(name, attrs[name]));
 
+    container.appendChild(elem);
     await macrotick();  // Wait for initialization to complete.
 
     return elem as IInitializedCe<T>;

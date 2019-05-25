@@ -1,5 +1,6 @@
 import {pascalToKebabCase, sleep, waitAndCheck} from '../../../app/shared/utils.js';
-import {macrotick, microtick} from '../test-utils.js';
+import {macrotickWithMockedClock, microtick} from '../test-utils.js';
+
 
 describe('shared/utils', () => {
   describe('pascalToKebabCase()', () => {
@@ -66,12 +67,6 @@ describe('shared/utils', () => {
     let doneSpy: jasmine.Spy;
 
     // Helpers
-    const macrotickWithMockedClock = async () => {
-      const macrotickPromise = macrotick();
-      jasmine.clock().tick(0);
-      await macrotickPromise;
-    };
-
     beforeEach(() => {
       checkSpy = jasmine.createSpy('check');
       doneSpy = jasmine.createSpy('done');
