@@ -1,0 +1,46 @@
+<!--
+  Supported classes:
+  - **.muted**: Display as muted.
+
+  Supported CSS variables:
+  - **-\-speaker-color**: The color of the speaker. _(Default: `currentColor`)_
+  - **-\-speaker-cancel-line-color**: The color of the cancellation stroke. _(Default: `red`)_
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 100 100">
+  <defs>
+    <!-- Speaker body. -->
+    <g id="speaker-body" fill="var(--spkr-color)" stroke="none">
+      <path d="M10 30 h20 v40 h-20 z" />
+      <path d="M35 30 l30 -25 v90 l-30 -25 z" />
+    </g>
+    <!-- Sound waves. -->
+    <g id="sound-waves" fill="var(--spkr-color)" stroke="none">
+      <path d="M70 20 a20 30 0 0 1 0 60 v-5 a15 25 0 0 0 0 -50 z" />
+      <path d="M70 35 a10 15 0 0 1 0 30 v-5 a5 10 0 0 0 0 -20 z" />
+    </g>
+    <!-- Cancellation stroke. -->
+    <g id="cancellation-stroke" stroke="var(--spkr-cancel-line-color)" stroke-width="15">
+      <line x1="0" y1="0" x2="100" y2="100" />
+    </g>
+
+    <!-- Speaker. -->
+    <g id="speaker">
+      <use href="#speaker-body" />
+      <use href="#sound-waves" />
+      <use href="#cancellation-stroke" />
+    </g>
+  </defs>
+
+  <style>
+    svg {
+      --spkr-color: var(--speaker-color, currentColor);
+      --spkr-cancel-line-color: var(--speaker-cancel-line-color, red);
+    }
+
+    svg:not(.muted) #cancellation-stroke { display: none; }
+
+    svg.muted #sound-waves { display: none; }
+  </style>
+
+  <use href="#speaker" />
+</svg>

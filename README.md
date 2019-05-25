@@ -59,8 +59,6 @@ The following npm scripts are available and can help with releasing/deploying a 
 Things I want to (but won't necessarily) do:
 
 - Refine functionality:
-  - `TorchCe`:
-    - Add option: No sound.
   - Make it a PWA.
 - Add more unit tests (and update documentation for the `test` script).
 - Add e2e tests (and update documentation for the `test` script).

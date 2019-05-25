@@ -1,13 +1,15 @@
-import {BaseCe} from '../base.ce.js';
+import {ISettings, Settings} from '../../shared/settings.service.js';
+import {BaseCe, IInitializedCe} from '../base.ce.js';
 
 
 export class HeaderCe extends BaseCe {
   protected static readonly template = `
     <header>
-      <logo-ce></logo-ce>
+      <logo-ce class="logo"></logo-ce>
       <b>Simple Torch</b>
+      <version-ce class="version"></version-ce>
       <flex-spacer-ce></flex-spacer-ce>
-      <version-ce></version-ce>
+      <external-svg-ce class="speaker" src="/assets/images/speaker.svg"></external-svg-ce>
     </header>
   `;
   protected static readonly style = `
@@ -24,12 +26,43 @@ export class HeaderCe extends BaseCe {
       padding: 15px 10px;
     }
 
-    header logo-ce {
+    .logo {
       height: 25px;
       margin-right: 10px;
       width: 25px;
 
       --simple-torch-outline-color: transparent;
     }
+
+    .speaker {
+      cursor: pointer;
+      height: 25px;
+      width: 25px;
+
+      --speaker-color: slateblue;
+      --speaker-cancel-line-color: darkred;
+    }
+
+    .version {
+      font-size: small;
+      margin-left: 10px;
+    }
   `;
+
+  private settings: ISettings = Settings.getInstance();
+
+  protected async initialize(): Promise<IInitializedCe<this>> {
+    const self = await super.initialize();
+    const speaker = self.shadowRoot.querySelector('.speaker')!;
+    const updateSpeaker = () => speaker.classList.toggle('muted', this.settings.muted);
+
+    speaker.addEventListener('click', () => {
+      this.settings.muted = !this.settings.muted;
+      updateSpeaker();
+    });
+
+    updateSpeaker();
+
+    return self;
+  }
 }

@@ -1,4 +1,5 @@
 import {EMOJI, WIN} from '../../shared/constants.js';
+import {ISettings, Settings} from '../../shared/settings.service.js';
 import {waitAndCheck} from '../../shared/utils.js';
 import {BaseCe, IInitializedCe} from '../base.ce.js';
 
@@ -90,7 +91,8 @@ export class TorchCe extends BaseCe {
     .torch.initializing { cursor: progress; }
   `;
 
-  private readonly clickSound = Object.assign(new Audio('/assets/audio/click.ogg'), {volume: 0.15});
+  private readonly settings: ISettings = Settings.getInstance();
+  private readonly clickSound: HTMLAudioElement = Object.assign(new Audio('/assets/audio/click.ogg'), {volume: 0.15});
   private state: State = State.Unitialized;
   private trackInfoPromise: Promise<ITrackInfo> = Promise.resolve(EMPTY_TRACK_INFO);
   private updateState: (newState: State, extraMsg?: string) => void = () => undefined;
@@ -185,7 +187,7 @@ export class TorchCe extends BaseCe {
 
   private onClick(): void {
     this.updateState((this.state === State.Off) ? State.On : State.Off);
-    this.clickSound.play();
+    if (!this.settings.muted) this.clickSound.play();
   }
 
   private async onVisibilityChange(): Promise<void> {
