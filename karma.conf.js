@@ -3,6 +3,12 @@
 
 module.exports = config => config.set({
   browsers: ['ChromeHeadless'],
+  client: {
+    jasmine: {
+      random: true,
+      seed: '',
+    },
+  },
   files: [
     {pattern: 'out/**/*.js.map', included: false, watched: false},
     {pattern: 'out/assets/**', included: false},
