@@ -4,10 +4,10 @@ import {microtick, normalizeWhitespace} from '../test-utils.js';
 
 
 describe('BaseCe', () => {
-  beforeAll(() => {
-    TestBaseCe.register();
-    FancyDivCe.register();
-  });
+  beforeAll(() => Promise.all([
+    TestBaseCe.register(),
+    FancyDivCe.register(),
+  ]));
 
   it('should extend `HTMLElement`', () => {
     const elem = new TestBaseCe();
