@@ -42,7 +42,7 @@ The following npm scripts are available and can help during testing:
 
 _**NOTE**:_
 _Adding automated tests is still a work in progress._
-_Currently there are few unit tests and no end-to-end (e2e) tests :scream: :scream: :scream:_
+_Currently there are a few unit tests and no end-to-end (e2e) tests :scream: :scream: :scream:_
 
 
 ### Releasing/Deploying
@@ -60,8 +60,12 @@ Things I want to (but won't necessarily) do:
 
 - Refine functionality:
   - Make it a PWA.
+    - Test PWA (e.g. Lighthouse).
 - Add more unit tests (and update documentation for the `test` script).
 - Add e2e tests (and update documentation for the `test` script).
+  Relevant resources:
+  - https://www.protractortest.org/#/api?view=ProtractorBy.prototype.addLocator
+  - https://gist.github.com/ChadKillingsworth/d4cb3d30b9d7fbc3fd0af93c2a133a53
 - Add CI support.
 
 

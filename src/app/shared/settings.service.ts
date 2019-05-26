@@ -17,7 +17,7 @@ export class Settings implements ISettings {
   protected constructor() {
   }
 
-  public static getInstance(): Settings {
+  public static getInstance(): ISettings {
     return this.instance || (this.instance = new Settings());
   }
 
