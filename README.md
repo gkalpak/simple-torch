@@ -36,6 +36,7 @@ The following npm scripts are available and can help during local development:
 
 Building the app in production mode has the following differences:
 1. The `ENV.production` global JavaScript variable is set to `true`.
+2. The ServiceWorker script (`sw.js`) is also built.
 
 ### Testing
 

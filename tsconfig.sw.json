@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "lib": [
+      "es2018",
+      "webworker"
+    ]
+  },
+  "exclude": [
+  ],
+  "include": [
+    "src/app/sw.ts"
+  ]
+}

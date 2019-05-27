@@ -9,11 +9,14 @@
     "moduleResolution": "node",
     "newLine": "lf",
     "noUnusedLocals": true,
-    "outDir": "out",
+    "outDir": "out/",
     "sourceMap": true,
     "strict": true,
     "target": "es2018"
   },
+  "exclude": [
+    "src/app/sw.ts"
+  ],
   "include": [
     "src/app/",
     "src/test/"
