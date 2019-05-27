@@ -5,7 +5,6 @@ export class ContentCe extends BaseCe {
   protected static readonly template = '<torch-ce></torch-ce>';
   protected static readonly style = `
     :host {
-      background-color: rgb(66, 55, 66);
       color: darkgray;
       flex-grow: 1;
       padding: 10px;
