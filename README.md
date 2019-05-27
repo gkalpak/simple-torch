@@ -22,16 +22,20 @@ easier access. The app uses a [ServiceWorker][mdn-sw], so it can work offline (o
 
 The following npm scripts are available and can help during local development:
 
-- `build`: Build the app.
+- `build`: Build the app (in dev mode; see below).
+- `build-prod`: Build the app (in production mode; see below).
 - `clean-up`: Remove the output directory.
   _(You shouldn't need to run this manually. It is run by other scripts as necessary.)_
-- `dev`: Build, test and serve the app. Also, automatically reload and re-run tests whenever a file changes.
+- `dev`: Build (in dev mode), test and serve the app. Also, automatically reload and re-run tests whenever a file
+  changes.
   _(Useful during development.)_
 - `generate-favicon`: Generates `favicon.png` based on `simple-torch.svg`. This needs to be manually run, when the logo
   (in SVG format) changes.
-- `serve`: Build and serve the app.
+- `serve`: Build (in production mode) and serve the app.
   _(Unlike `dev` this does not watch the files for changes.)_
 
+Building the app in production mode has the following differences:
+1. The `ENV.production` global JavaScript variable is set to `true`.
 
 ### Testing
 
@@ -49,7 +53,7 @@ _Currently there are a few unit tests and no end-to-end (e2e) tests :scream: :sc
 
 The following npm scripts are available and can help with releasing/deploying a new version of the app:
 
-- `deploy`: Build the app and deploy it to Firebase.
+- `deploy`: Build the app (in production mode) and deploy it to Firebase.
   _(You shouldn't need to run this manually. It is run as part of the `release` script.)_
 - `release`: Cut a new version of the app and deploy it to production.
 

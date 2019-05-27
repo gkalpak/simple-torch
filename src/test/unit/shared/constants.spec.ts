@@ -11,7 +11,7 @@ describe('shared/constants', () => {
 
   describe('ENV', () => {
     it('should be `window.ENV`', () => {
-      expect(ENV).toEqual({version: '1.33.7-foo'});
+      expect(ENV).toEqual({production: false, version: '1.33.7-foo'});
       expect(ENV).toBe(WIN.ENV!);
     });
   });

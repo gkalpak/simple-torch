@@ -15,7 +15,8 @@ const OUT_INDEX_PATH = `${OUT_DIR}/index.html`;
 _main(process.argv.slice(2));
 
 // Helpers
-async function _main() {
+async function _main(args) {
+  const production = args.includes('--production');
   const version = process.env.npm_package_version;
 
   // Copy files.
@@ -23,5 +24,6 @@ async function _main() {
   sh.cp('-r', 'src/!(app|test)', OUT_DIR);
 
   // Replace ENV placeholders.
+  sh.sed('-i', /<PLACEHOLDER:PRODUCTION>/g, `${production}`, OUT_INDEX_PATH);
   sh.sed('-i', /<PLACEHOLDER:VERSION>/g, `${version}`, OUT_INDEX_PATH);
 }

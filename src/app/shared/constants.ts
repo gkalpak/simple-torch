@@ -1,4 +1,5 @@
 export interface IEnv {
+  readonly production: boolean;
   readonly version: string;
 }
 
@@ -11,6 +12,9 @@ export const EMOJI = {
   noEntrySign: '🚫',
 };
 
-export const ENV: IEnv = (window as IWindowWithEnv).ENV || {version: 'N/A'};
+export const ENV: IEnv = (window as IWindowWithEnv).ENV || {
+  production: false,
+  version: 'N/A',
+};
 
 export const WIN: IWindowWithEnv = window;
