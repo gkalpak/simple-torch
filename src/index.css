@@ -14,3 +14,16 @@ body {
 body > header-ce {
   z-index: 10;  /* To render `box-shadow` above main content. */
 }
+
+body .no-script-message {
+  align-items: center;
+  color: red;
+  display: flex;
+  font-size: 2em;
+  font-style: italic;
+  font-weight: bold;
+  height: 100vh;
+  justify-content: center;
+  padding: 20px;
+  text-align: center;
+}
