@@ -31,7 +31,7 @@
     "postversion": "git push && git push --tags",
     "~~compile": "tsc --project ./",
     "~~compile-watch": "npm run ~~compile -- --watch",
-    "~~generate-app": "node --eval \"require('shelljs/global'); set('-e'); mkdir('-p', 'out/'); cp('-r', 'src/!(app|test)', 'out/'); sed('-i', /X\\.Y\\.Z-VERSION/g, process.env.npm_package_version, 'out/index.html');\"",
+    "~~generate-app": "node scripts/generate-app",
     "~~generate-app-watch": "watch \"npm run ~~generate-app\" src/ --filter=watch-filters/generate-app.filter.js",
     "~~serve": "light-server --bind=localhost --serve=out/",
     "~~serve-watch": "npm run ~~serve -- --port=4001 --quiet --watchexp=out/**",
