@@ -20,6 +20,7 @@ export class HeaderCe extends BaseCe {
 
     header {
       align-items: center;
+      /* To be kept in sync with \`manifest.webmanifest\` and \`index.html > meta[name="theme-color"]\`. */
       background-color: rgb(33, 33, 33);
       color: darkgray;
       display: flex;

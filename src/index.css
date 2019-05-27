@@ -3,6 +3,7 @@
 }
 
 body {
+  /* To be kept in sync with \`manifest.webmanifest\`. */
   background-color: rgb(66, 55, 66);
   display: flex;
   flex-direction: column;

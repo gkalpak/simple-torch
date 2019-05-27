@@ -1,0 +1,21 @@
+{
+  "background_color": "rgb(66, 55, 66)",
+  "description": "A simple torch PWA using the `MediaDevices` API.",
+  "display": "standalone",
+  "icons": [
+    {
+      "src": "assets/images/simple-torch.svg",
+      "type": "image/svg+xml",
+      "sizes": "16x16 32x32 64x64 128x128 256x256"
+    }, {
+      "src": "favicon.png",
+      "type": "image/png",
+      "sizes": "128x128"
+    }
+  ],
+  "name": "GK Simple Torch",
+  "orientation": "portrait",
+  "short_name": "Simple Torch",
+  "start_url": "/?utm_source=homescreen",
+  "theme_color": "rgb(33, 33, 33)"
+}
