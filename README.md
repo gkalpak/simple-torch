@@ -51,8 +51,8 @@ ServiceWorker. To avoid surprises, the app is, by default, served on different p
 
 The following npm scripts are available and can help during testing:
 
-- `lint`: Lint the source code.
-- `test`: Lint the source code and run the automated tests.
+- `lint`: Lint the app source code (TypeScript) and helper scripts (JavaScript).
+- `test`: Lint the code and run the automated tests.
 
 <sub>
 
