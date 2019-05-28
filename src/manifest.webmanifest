@@ -6,11 +6,19 @@
     {
       "src": "assets/images/simple-torch.svg",
       "type": "image/svg+xml",
-      "sizes": "16x16 32x32 64x64 128x128 256x256"
+      "sizes": "16x16 32x32 64x64 128x128 192x192 256x256 512x512"
     }, {
-      "src": "favicon.png",
+      "src": "assets/images/simple-torch-128x128.png",
       "type": "image/png",
       "sizes": "128x128"
+    }, {
+      "src": "assets/images/simple-torch-192x192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    }, {
+      "src": "assets/images/simple-torch-512x512.png",
+      "type": "image/png",
+      "sizes": "512x512"
     }
   ],
   "name": "GK Simple Torch",

@@ -29,8 +29,8 @@ The following npm scripts are available and can help during local development:
 - `dev`: Build (in dev mode), test and serve the app. Also, automatically reload and re-run tests whenever a file
   changes.
   _(Useful during development.)_
-- `generate-favicon`: Generates `favicon.png` based on `simple-torch.svg`. This needs to be manually run, when the logo
-  (in SVG format) changes.
+- `generate-icons`: Generates several `simple-torch-<W>x<H>.png` icons (used as favicons and in `manifest.webmanifest`)
+  based on `simple-torch.svg`. This needs to be manually run, when the logo (in SVG format) changes.
 - `serve-prod`: Build (in production mode) and serve the app.
   _(Unlike `dev` this does not watch the files for changes.)_
 
