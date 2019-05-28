@@ -31,7 +31,7 @@ The following npm scripts are available and can help during local development:
   _(Useful during development.)_
 - `generate-favicon`: Generates `favicon.png` based on `simple-torch.svg`. This needs to be manually run, when the logo
   (in SVG format) changes.
-- `serve`: Build (in production mode) and serve the app.
+- `serve-prod`: Build (in production mode) and serve the app.
   _(Unlike `dev` this does not watch the files for changes.)_
 
 Building the app in production mode has the following differences:
