@@ -12,7 +12,8 @@
     "outDir": "out/",
     "sourceMap": true,
     "strict": true,
-    "target": "es2018"
+    "target": "es2018",
+    "types": ["jasmine"]
   },
   "exclude": [
     "src/app/sw.ts"

@@ -51,14 +51,18 @@ ServiceWorker. To avoid surprises, the app is, by default, served on different p
 
 The following npm scripts are available and can help during testing:
 
+- `audit-web-app`: Audit a web-app (at the provided URL) for things like performance, accessibility, best practices,
+  PWA-readiness and SEO. It uses [Lighthouse][lighthouse] under the hood. See,
+  [scripts/audit-web-app.js][audit-web-app] for usage instructions.
+  _(You shouldn't need to run this manually. It is run by other scripts as necessary.)_
 - `lint`: Lint the app source code (TypeScript) and helper scripts (JavaScript).
-- `test`: Lint the code and run the automated tests.
+- `test`: Lint the code and run the automated tests (unit, end-to-end (e2e), web-app audits).
 
 <sub>
 
 _**NOTE**:_
 _Adding automated tests is still a work in progress._
-_Currently there are a few unit tests and no end-to-end (e2e) tests_ :scream: :scream: :scream:
+_Currently there are a few unit tests and no e2e tests_ :scream: :scream: :scream:
 
 </sub>
 
@@ -75,18 +79,18 @@ The following npm scripts are available and can help with releasing/deploying a 
 
 Things I want to (but won't necessarily) do:
 
-- Refine functionality:
-  - Make it a PWA.
-    - Check whether an explicit install prompt in needed.
-    - Test PWA (e.g. using Lighthouse).
 - Add more unit tests (and update documentation for the `test` script).
 - Add e2e tests (and update documentation for the `test` script).
   Relevant resources:
   - https://www.protractortest.org/#/api?view=ProtractorBy.prototype.addLocator
   - https://gist.github.com/ChadKillingsworth/d4cb3d30b9d7fbc3fd0af93c2a133a53
+- Refine functionality:
+  - Check whether an explicit install prompt is needed.
 - Add CI support.
 
 
+[audit-web-app]: scripts/audit-web-app.js
 [mdn-media-devices]: https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices
 [mdn-pwa]: https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps
 [mdn-sw]: https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API
+[lighthouse]: https://developers.google.com/web/tools/lighthouse
