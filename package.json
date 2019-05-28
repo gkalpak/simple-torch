@@ -29,7 +29,7 @@
     "serve-prod": "npm run ~~serve-prod",
     "pretest": "npm run build",
     "test": "run-s lint ~~test-unit ~~test-e2e",
-    "preversion": "run-s lint ~~compile ~~test-unit",
+    "preversion": "run-s lint build ~~test-unit",
     "postversion": "git push && git push --tags",
     "~~compile": "tsc --project ./",
     "~~compile-sw": "tsc --project tsconfig.sw.json",
