@@ -37,6 +37,15 @@ The following npm scripts are available and can help during local development:
 Building the app in production mode has the following differences:
 1. The `ENV.production` global JavaScript variable is set to `true`.
 2. The ServiceWorker script (`sw.js`) is also built.
+3. The ServiceWorker is registered at runtime (as a result of the above).
+
+<sub>
+
+_**NOTE**:_
+_Even if the app is built in dev mode, it may still be (temporarily) controlled by a previously installed
+ServiceWorker. To avoid surprises, the app is, by default, served on different ports based on the mode is built in._
+
+</sub>
 
 ### Testing
 
@@ -45,10 +54,13 @@ The following npm scripts are available and can help during testing:
 - `lint`: Lint the source code.
 - `test`: Lint the source code and run the automated tests.
 
+<sub>
+
 _**NOTE**:_
 _Adding automated tests is still a work in progress._
-_Currently there are a few unit tests and no end-to-end (e2e) tests :scream: :scream: :scream:_
+_Currently there are a few unit tests and no end-to-end (e2e) tests_ :scream: :scream: :scream:
 
+</sub>
 
 ### Releasing/Deploying
 
@@ -65,7 +77,8 @@ Things I want to (but won't necessarily) do:
 
 - Refine functionality:
   - Make it a PWA.
-    - Test PWA (e.g. Lighthouse).
+    - Check whether an explicit install prompt in needed.
+    - Test PWA (e.g. using Lighthouse).
 - Add more unit tests (and update documentation for the `test` script).
 - Add e2e tests (and update documentation for the `test` script).
   Relevant resources:
