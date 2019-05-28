@@ -1,11 +1,11 @@
 import {WIN} from '../shared/constants.js';
-import {pascalToKebabCase} from '../shared/utils.js';
+import {Utils} from '../shared/utils.service.js';
 
 
 export type IInitializedCe<T extends BaseCe> = T & {shadowRoot: NonNullable<T['shadowRoot']>};
 
 export abstract class BaseCe extends HTMLElement {
-  public static get tagName(): string { return pascalToKebabCase(this.name); }
+  public static get tagName(): string { return this.utils.pascalToKebabCase(this.name); }
   protected static readonly template: string = '&lt;base-ce&gt;Not implemented yet.&lt;/base-ce&gt;';
   protected static readonly style: string = '';
   private static readonly baseStyle: string = `
@@ -17,6 +17,8 @@ export abstract class BaseCe extends HTMLElement {
       font-family: inherit;
     }
   `;
+  private static utils: Utils = Utils.getInstance();
+
   protected readonly clazz: typeof BaseCe = (this.constructor as typeof BaseCe);
 
   public static register(): Promise<void> {

@@ -1,5 +1,6 @@
 import {BaseCe, IInitializedCe} from '../../../app/components/base.ce.js';
 import {WIN} from '../../../app/shared/constants.js';
+import {Utils} from '../../../app/shared/utils.service.js';
 import {microtick, normalizeWhitespace} from '../test-utils.js';
 
 
@@ -17,10 +18,19 @@ describe('BaseCe', () => {
   });
 
   describe('.tagName', () => {
+    let pascalToKebabCaseSpy: jasmine.Spy;
+
+    beforeEach(() => pascalToKebabCaseSpy = spyOn(Utils.getInstance(), 'pascalToKebabCase').and.callThrough());
+
     it('should be derived from the class name', () => {
       expect(BaseCe.tagName).toBe('base-ce');
+      expect(pascalToKebabCaseSpy).toHaveBeenCalledWith(BaseCe.name);
+
       expect(TestBaseCe.tagName).toBe('test-base-ce');
+      expect(pascalToKebabCaseSpy).toHaveBeenCalledWith(TestBaseCe.name);
+
       expect(FancyDivCe.tagName).toBe('fancy-div-ce');
+      expect(pascalToKebabCaseSpy).toHaveBeenCalledWith(FancyDivCe.name);
     });
   });
 
