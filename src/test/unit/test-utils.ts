@@ -2,6 +2,11 @@ import {BaseCe, IInitializedCe} from '../../app/components/base.ce.js';
 import {WIN} from '../../app/shared/constants.js';
 
 
+export interface IMockPropertyHelpers<T, P extends keyof T> {
+  setMockValue(mockValue: T[P]): void;
+  restoreOriginalValue(): void;
+}
+
 export const getNormalizedTextContent = (elem: IInitializedCe<BaseCe>): string => {
   const html = elem.shadowRoot.innerHTML.replace(/<(style)>[^]*?<\/\1>/g, '');
   const temp = Object.assign(WIN.document.createElement('div'), {innerHTML: html});
@@ -18,7 +23,30 @@ export const macrotickWithMockedClock = async () => {
 
 export const microtick = (): Promise<void> => new Promise(resolve => resolve());
 
+
+export const mockProperty = <T, P extends keyof T>(ctx: T, prop: P): IMockPropertyHelpers<T, P> => {
+  const originalDescriptor = Object.getOwnPropertyDescriptor(ctx, prop);
+
+  const setMockValue = (mockValue: T[P]) => ctx[prop] = mockValue;
+  const restoreOriginalValue = () => originalDescriptor ?
+    Object.defineProperty(ctx, prop, originalDescriptor) :
+    delete ctx[prop];
+
+  beforeEach(() => Object.defineProperty(ctx, prop, {
+    configurable: true,
+    enumerable: true,
+    value: ctx[prop],
+    writable: true,
+  }));
+  afterEach(restoreOriginalValue);
+
+  return {setMockValue, restoreOriginalValue};
+};
+
 export const normalizeWhitespace = (input: string): string => input.replace(/\s+/g, ' ').trim();
+
+export const reversePromise = (promise: Promise<unknown>): Promise<unknown> =>
+  promise.then(() => Promise.reject('Promise did not reject.'), err => err);
 
 export const setupCeContainer = () => {
   const container = document.createElement('div');

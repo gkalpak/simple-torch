@@ -1,5 +1,6 @@
+import {WIN} from '../../../app/shared/constants.js';
 import {Utils} from '../../../app/shared/utils.service.js';
-import {macrotickWithMockedClock, microtick} from '../test-utils.js';
+import {macrotick, macrotickWithMockedClock, microtick, mockProperty, reversePromise} from '../test-utils.js';
 
 
 describe('Utils', () => {
@@ -15,6 +16,101 @@ describe('Utils', () => {
       const instance2 = Utils.getInstance();
 
       expect(instance2).toBe(instance1);
+    });
+  });
+
+  describe('#onLoad()', () => {
+    const {setMockValue: setMockReadyState} = mockProperty(WIN.document, 'readyState');
+    let callbackSpy: jasmine.Spy;
+
+    beforeEach(() => callbackSpy = jasmine.createSpy('callback'));
+
+    it('should return a promise', async () => {
+      setMockReadyState('complete');
+      const promise = utils.onLoad(callbackSpy);
+
+      expect(promise).toEqual(jasmine.any(Promise));
+      await promise;
+    });
+
+    it('should run the callback asap (but still async), if document is already loaded', async () => {
+      setMockReadyState('complete');
+
+      utils.onLoad(callbackSpy);
+      expect(callbackSpy).not.toHaveBeenCalled();
+
+      await microtick();
+      expect(callbackSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('should run the callback upon `window.onload`, if document is not already loaded', async () => {
+      setMockReadyState('loading');
+
+      utils.onLoad(callbackSpy);
+      await microtick();
+      expect(callbackSpy).not.toHaveBeenCalled();
+
+      WIN.dispatchEvent(new Event('load'));
+      await microtick();
+      expect(callbackSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('should run once upon `window.onload` (in case there are multiple `onload` events fired)', async () => {
+      setMockReadyState('loading');
+
+      utils.onLoad(callbackSpy);
+
+      WIN.dispatchEvent(new Event('load'));
+      WIN.dispatchEvent(new Event('load'));
+      await microtick();
+      expect(callbackSpy).toHaveBeenCalledTimes(1);
+
+      WIN.dispatchEvent(new Event('load'));
+      WIN.dispatchEvent(new Event('load'));
+      await microtick();
+      expect(callbackSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('should resolve asap, if the callback is sync', async () => {
+      const doneSpy = jasmine.createSpy('done');
+
+      utils.onLoad(callbackSpy).then(doneSpy);
+      expect(callbackSpy).not.toHaveBeenCalled();
+      expect(doneSpy).not.toHaveBeenCalled();
+
+      await macrotick();
+      expect(callbackSpy).toHaveBeenCalledTimes(1);
+      expect(doneSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('should resolve once the callback resolves, if it is async', async () => {
+      const doneSpy = jasmine.createSpy('done');
+      let callbackResolve!: () => void;
+      callbackSpy.and.returnValue(new Promise(resolve => callbackResolve = resolve));
+
+      utils.onLoad(callbackSpy).then(doneSpy);
+      await macrotick();
+      expect(doneSpy).not.toHaveBeenCalled();
+
+      callbackResolve();
+      await macrotick();
+      expect(doneSpy).toHaveBeenCalledTimes(1);
+    });
+
+    it('should reject, if the callback throws', async () => {
+      const expectedErr = new Error('test');
+      callbackSpy.and.callFake(() => { throw expectedErr; });
+
+      const actualErr = await reversePromise(utils.onLoad(callbackSpy));
+      expect(actualErr).toBe(expectedErr);
+    });
+
+    it('should reject, if the callback rejects', async () => {
+      const expectedErr = new Error('test');
+      callbackSpy.and.callFake(() => Promise.reject(expectedErr));
+
+      const actualErr = await reversePromise(utils.onLoad(callbackSpy));
+      expect(actualErr).toBe(expectedErr);
     });
   });
 
@@ -85,6 +181,7 @@ describe('Utils', () => {
     beforeEach(() => {
       checkSpy = jasmine.createSpy('check');
       doneSpy = jasmine.createSpy('done');
+
       jasmine.clock().install();
     });
 
