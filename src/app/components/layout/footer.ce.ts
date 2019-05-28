@@ -20,7 +20,7 @@ export class FooterCe extends BaseCe {
     footer {
       align-items: center;
       background-color: rgb(33, 33, 33);
-      color: gray;
+      color: darkgray;
       display: flex;
       font-size: 0.75em;
       justify-content: center;
