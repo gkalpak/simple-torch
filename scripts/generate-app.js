@@ -3,12 +3,12 @@
 // Imports
 const {resolve} = require('path');
 const sh = require('shelljs');
-const {hash, hashFile} = require('./hash-utils');
+const {hash, hashFile} = require('./utils/hash-utils');
 
 sh.set('-e');
 
 // Constants
-const ROOT_DIR = resolve(__dirname, '..');
+const ROOT_DIR = resolve(`${__dirname}/..`);
 const OUT_DIR = `${ROOT_DIR}/out`;
 const OUT_INDEX_PATH = `${OUT_DIR}/index.html`;
 const OUT_SW_PATH = `${OUT_DIR}/sw.js`;
