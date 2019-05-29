@@ -1,5 +1,7 @@
 export interface IEnv {
   readonly production: boolean;
+  readonly repoUrl: string;
+  readonly sha: string;
   readonly version: string;
 }
 
@@ -14,6 +16,8 @@ export const EMOJI = {
 
 export const ENV: IEnv = (window as IWindowWithEnv).ENV || {
   production: false,
+  repoUrl: 'N/A',
+  sha: 'N/A',
   version: 'N/A',
 };
 

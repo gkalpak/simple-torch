@@ -3,6 +3,7 @@
 // Imports
 const {resolve} = require('path');
 const sh = require('shelljs');
+const {repository, version} = require('../package.json');
 const {hash, hashFile} = require('./utils/hash-utils');
 
 sh.set('-e');
@@ -20,7 +21,8 @@ _main(process.argv.slice(2));
 async function _main(args) {
   try {
     const production = args.includes('--production');
-    const version = process.env.npm_package_version;
+    const repoUrl = repository.url.replace(/^git\+/, '').replace(/\.git$/, '');
+    const sha = sh.exec('git rev-parse --verify HEAD', {silent: true}).trim();
 
     // Copy files.
     sh.mkdir('-p', OUT_DIR);
@@ -28,6 +30,8 @@ async function _main(args) {
 
     // Replace ENV placeholders.
     sh.sed('-i', /<PLACEHOLDER:PRODUCTION>/g, `${production}`, OUT_INDEX_PATH);
+    sh.sed('-i', /<PLACEHOLDER:REPO_URL>/g, `${repoUrl}`, OUT_INDEX_PATH);
+    sh.sed('-i', /<PLACEHOLDER:SHA>/g, `${sha}`, OUT_INDEX_PATH);
     sh.sed('-i', /<PLACEHOLDER:VERSION>/g, `${version}`, OUT_INDEX_PATH);
 
     // In production mode...
