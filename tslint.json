@@ -16,6 +16,7 @@
     "no-skipped-test": true,
     "object-literal-key-quotes": false,
     "quotemark": [true, "single"],
+    "space-before-function-paren": false,
     "variable-name": [true, "allow-leading-underscore", "allow-trailing-underscore", "ban-keywords", "check-format"]
   },
   "rulesDirectory": [
