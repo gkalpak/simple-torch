@@ -99,7 +99,6 @@ export class TorchCe extends BaseCe {
   private readonly clickSound: ISound = this.sounds.getSound('/assets/audio/click.ogg', 0.15);
   private state: State = State.Unitialized;
   private trackInfoPromise: Promise<ITrackInfo> = Promise.resolve(EMPTY_TRACK_INFO);
-  private updateState: (newState: State, extraMsg?: string) => void = () => undefined;
 
   protected async initialize(): Promise<IInitializedCe<this>> {
     const self = await super.initialize();
@@ -127,15 +126,16 @@ export class TorchCe extends BaseCe {
 
       this.state = newState;
 
-      this.getTrackInfo().
+      return this.getTrackInfo().
         then(({track}) => track && track.applyConstraints({advanced: [{torch: on}]})).
         catch(err => this.onError(err));
     };
 
     try {
-      updateState(State.Initializing);
-
-      const {track, hasTorch} = await this.getTrackInfo(true);
+      const [, {track, hasTorch}] = await Promise.all([
+        updateState(State.Initializing),
+        this.getTrackInfo(true),
+      ]);
 
       if (!hasTorch) {
         const permissionState = (await navigator.permissions.query({name: 'camera'})).state;
@@ -148,7 +148,7 @@ export class TorchCe extends BaseCe {
       }
 
       WIN.document.addEventListener('visibilitychange', () => this.onVisibilityChange());
-      updateState(State.On);
+      await updateState(State.On);
     } catch (err) {
       this.onError(err);
     }
@@ -162,7 +162,7 @@ export class TorchCe extends BaseCe {
     const {track} = await this.getTrackInfo();
     if (track) track.stop();
 
-    this.updateState(State.Disabled, err.message);
+    await this.updateState(State.Disabled, err.message);
   }
 
   private async getTrackInfo(renewIfNecessary = false): Promise<ITrackInfo> {
@@ -205,5 +205,9 @@ export class TorchCe extends BaseCe {
     } else if (this.state === State.On) {
       track.applyConstraints({advanced: [{torch: true}]});
     }
+  }
+
+  private async updateState(newState: State, extraMsg?: string): Promise<void> {
+    return undefined;
   }
 }
