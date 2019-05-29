@@ -107,7 +107,7 @@ export class TorchCe extends BaseCe {
     const statusMsgExtraElem = self.shadowRoot.querySelector('.status-message-extra')!;
 
     const onClick = () => this.onClick();
-    const updateState = this.updateState = (newState: State, extraMsg?: string) => {
+    const updateState = this.updateState = async (newState: State, extraMsg?: string) => {
       if ((newState !== State.Off) && (newState !== State.On)) {
         torchElem.removeEventListener('click', onClick);
       } else if ((this.state !== State.Off) && (this.state !== State.On)) {
@@ -126,9 +126,8 @@ export class TorchCe extends BaseCe {
 
       this.state = newState;
 
-      return this.getTrackInfo().
-        then(({track}) => track && track.applyConstraints({advanced: [{torch: on}]})).
-        catch(err => this.onError(err));
+      const {track} = await this.getTrackInfo();
+      if (track) track.applyConstraints({advanced: [{torch: on}]});
     };
 
     try {
@@ -190,7 +189,7 @@ export class TorchCe extends BaseCe {
   }
 
   private onClick(): void {
-    this.updateState((this.state === State.Off) ? State.On : State.Off);
+    this.updateState((this.state === State.Off) ? State.On : State.Off).catch(err => this.onError(err));
     if (!this.settings.muted) this.clickSound.play();
   }
 
