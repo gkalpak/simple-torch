@@ -1,4 +1,4 @@
-import {EMOJI, ENV, WIN} from '../../../app/shared/constants.js';
+import {EMOJI, ENV, WIN, ZERO_WIDTH_SPACE} from '../../../app/shared/constants.js';
 
 
 describe('shared/constants', () => {
@@ -24,6 +24,13 @@ describe('shared/constants', () => {
   describe('WIN', () => {
     it('should be `window`', () => {
       expect(WIN).toBe(window);
+    });
+  });
+
+  describe('ZERO_WIDTH_SPACE', () => {
+    it('should be a zero-width space', () => {
+      expect(ZERO_WIDTH_SPACE).toBe('​');
+      expect(ZERO_WIDTH_SPACE.length).toBe(1);
     });
   });
 });

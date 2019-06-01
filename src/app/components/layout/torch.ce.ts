@@ -1,4 +1,4 @@
-import {EMOJI, WIN} from '../../shared/constants.js';
+import {EMOJI, WIN, ZERO_WIDTH_SPACE} from '../../shared/constants.js';
 import {ISettings, Settings} from '../../shared/settings.service.js';
 import {ISound, Sounds} from '../../shared/sounds.service.js';
 import {Utils} from '../../shared/utils.service.js';
@@ -18,7 +18,6 @@ const enum State {
   On,
 }
 
-const ZERO_WIDTH_SPACE = '\u200b';
 const EMPTY_TRACK_INFO: ITrackInfo = {track: undefined, hasTorch: false};
 
 export class TorchCe extends BaseCe {

@@ -22,3 +22,5 @@ export const ENV: IEnv = (window as IWindowWithEnv).ENV || {
 };
 
 export const WIN: IWindowWithEnv = window;
+
+export const ZERO_WIDTH_SPACE = '\u200b';
