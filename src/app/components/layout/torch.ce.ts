@@ -11,7 +11,7 @@ interface ITrackInfo {
 }
 
 const enum State {
-  Unitialized,
+  Uninitialized,
   Initializing,
   Disabled,
   Off,
@@ -22,21 +22,24 @@ const EMPTY_TRACK_INFO: ITrackInfo = {track: undefined, hasTorch: false};
 
 export class TorchCe extends BaseCe {
   private static readonly statusMessages = {
-    [State.Unitialized]: '-',
+    [State.Uninitialized]: '-',
     [State.Initializing]: 'INITIALIZING...',
     [State.Disabled]: 'NOT AVAILABLE',
     [State.Off]: 'OFF',
     [State.On]: 'ON',
   };
   private static readonly statusEmojis = {
-    [State.Unitialized]: ZERO_WIDTH_SPACE,
+    [State.Uninitialized]: ZERO_WIDTH_SPACE,
     [State.Initializing]: EMOJI.hourglassNotDone,
     [State.Disabled]: EMOJI.noEntrySign,
     [State.Off]: ZERO_WIDTH_SPACE,
     [State.On]: ZERO_WIDTH_SPACE,
   };
   protected static readonly template = `
-    <external-svg-ce class="dark no-bg off torch with-effects" src="/assets/images/simple-torch.svg"></external-svg-ce>
+    <external-svg-ce
+        class="dark no-bg off torch uninitialized with-effects"
+        src="/assets/images/simple-torch.svg">
+    </external-svg-ce>
     <loader-ce class="loader"></loader-ce>
     <div class="status">
       <div>
@@ -63,7 +66,7 @@ export class TorchCe extends BaseCe {
       right: 0;
       top: 20px;
     }
-    .torch:not(.unitialized):not(.initializing) ~ .loader {
+    .torch:not(.uninitialized):not(.initializing) ~ .loader {
       display: none;
     }
 
@@ -96,7 +99,7 @@ export class TorchCe extends BaseCe {
   private readonly utils: Utils = Utils.getInstance();
 
   private readonly clickSound: ISound = this.sounds.getSound('/assets/audio/click.ogg', 0.15);
-  private state: State = State.Unitialized;
+  private state: State = State.Uninitialized;
   private trackInfoPromise: Promise<ITrackInfo> = Promise.resolve(EMPTY_TRACK_INFO);
 
   protected async initialize(): Promise<IInitializedCe<this>> {
@@ -115,7 +118,7 @@ export class TorchCe extends BaseCe {
 
       const on = newState === State.On;
 
-      torchElem.classList.toggle('uninitialized', newState === State.Unitialized);
+      torchElem.classList.toggle('uninitialized', newState === State.Uninitialized);
       torchElem.classList.toggle('initializing', newState === State.Initializing);
       torchElem.classList.toggle('disabled', newState === State.Disabled);
       torchElem.classList.toggle('off', !on);
