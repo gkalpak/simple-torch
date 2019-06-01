@@ -1,5 +1,5 @@
 import {BaseCe, IInitializedCe} from '../../app/components/base.ce.js';
-import {WIN} from '../../app/shared/constants.js';
+import {WIN, ZERO_WIDTH_SPACE} from '../../app/shared/constants.js';
 
 
 export interface IMockPropertyHelpers<T, P extends keyof T> {
@@ -10,7 +10,7 @@ export interface IMockPropertyHelpers<T, P extends keyof T> {
 export const getNormalizedTextContent = (elem: IInitializedCe<BaseCe>): string => {
   const html = elem.shadowRoot.innerHTML.replace(/<(style)>[^]*?<\/\1>/g, '');
   const temp = Object.assign(WIN.document.createElement('div'), {innerHTML: html});
-  return normalizeWhitespace(temp.textContent || '');
+  return normalizeWhitespace(temp.textContent);
 };
 
 export const macrotick = (): Promise<void> => new Promise(resolve => setTimeout(resolve, 0));
@@ -43,7 +43,9 @@ export const mockProperty = <T, P extends keyof T>(ctx: T, prop: P): IMockProper
   return {setMockValue, restoreOriginalValue};
 };
 
-export const normalizeWhitespace = (input: string): string => input.replace(/\s+/g, ' ').trim();
+export const normalizeWhitespace = (input: string | null): string => (input || '').
+  replace(new RegExp(`[\\s${ZERO_WIDTH_SPACE}]+`, 'g'), ' ').
+  trim();
 
 export const reversePromise = (promise: Promise<unknown>): Promise<unknown> =>
   promise.then(() => Promise.reject('Promise did not reject.'), err => err);
