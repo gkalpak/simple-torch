@@ -173,7 +173,13 @@ export class TorchCe extends BaseCe {
         throw new Error(errorMessage);
       }
 
-      WIN.document.addEventListener('visibilitychange', () => this.onVisibilityChange());
+      const onVisibilityChange = () => this.onVisibilityChange();
+      WIN.document.addEventListener('visibilitychange', onVisibilityChange);
+
+      this.cleanUpFns.push(
+          () => WIN.document.removeEventListener('visibilitychange', onVisibilityChange),
+          () => this.stopTrack());
+
       await updateState(State.On);
     } catch (err) {
       this.onError(err);
@@ -189,10 +195,7 @@ export class TorchCe extends BaseCe {
 
   protected async onError(err: Error): Promise<void> {
     super.onError(err);
-
-    const {track} = await this.getTrackInfo();
-    if (track) track.stop();
-
+    await this.stopTrack();
     await this.updateState(State.Disabled, err.message);
   }
 
@@ -211,5 +214,10 @@ export class TorchCe extends BaseCe {
 
   protected async updateState(newState: State, extraMsg?: string): Promise<void> {
     return undefined;
+  }
+
+  private async stopTrack(): Promise<void> {
+    const {track} = await this.getTrackInfo();
+    if (track) track.stop();
   }
 }

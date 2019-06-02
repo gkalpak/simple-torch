@@ -5,7 +5,14 @@ import {EMOJI, WIN} from '../../../../app/shared/constants.js';
 import {Settings} from '../../../../app/shared/settings.service.js';
 import {Sounds} from '../../../../app/shared/sounds.service.js';
 import {Utils} from '../../../../app/shared/utils.service.js';
-import {mockProperty, normalizeWhitespace, reversePromise, setupCeContainer, spyProperty} from '../../test-utils.js';
+import {
+  microtick,
+  mockProperty,
+  normalizeWhitespace,
+  reversePromise,
+  setupCeContainer,
+  spyProperty,
+} from '../../test-utils.js';
 
 
 describe('TorchCe', () => {
@@ -257,6 +264,29 @@ describe('TorchCe', () => {
 
         WIN.document.dispatchEvent(evt);
         expect(onVisibilityChangeSpy).toHaveBeenCalledTimes(2);
+      });
+
+      it('should register a clean-up function to remove the `visibilitychange` listener from `document`', async () => {
+        const evt = new Event('visibilitychange');
+        await initCe(elem);
+
+        WIN.document.dispatchEvent(evt);
+        expect(onVisibilityChangeSpy).toHaveBeenCalledTimes(1);
+
+        onVisibilityChangeSpy.calls.reset();
+        elem.disconnectedCallback();
+
+        WIN.document.dispatchEvent(evt);
+        expect(onVisibilityChangeSpy).not.toHaveBeenCalled();
+      });
+
+      it('should register a clean-up function to stop the track (if active)', async () => {
+        await initCe(elem);
+        expect(mockTrack.readyState).toBe('live');
+
+        elem.disconnectedCallback();
+        await microtick();
+        expect(mockTrack.readyState).toBe('ended');
       });
     });
 
