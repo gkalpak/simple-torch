@@ -79,7 +79,7 @@ The following npm scripts are available and can help with releasing/deploying a 
 
 Things I want to (but won't necessarily) do:
 
-- Add `BaseCe#dispose()` (no-op) and `TorchCe#dispose()` (e.g. remove event listener on `document`).
+- Specify clean-up functions in `TorchCe` (e.g. to remove `visibilitychange` event listener from `document`).
 - Add e2e tests (and update documentation for the `test` script).
   - Also, verify `ENV`.
   Relevant resources:

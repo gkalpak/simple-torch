@@ -113,6 +113,81 @@ describe('BaseCe', () => {
     });
   });
 
+  describe('#disconnectedCallback()', () => {
+    let testElem: TestBaseCe;
+    let cleanUpLog: number[];
+    let consoleErrorSpy: jasmine.Spy;
+    let onErrorSpy: jasmine.Spy;
+    let cleanUpSpies: jasmine.Spy[];
+
+    beforeEach(() => {
+      testElem = new TestBaseCe();
+      cleanUpLog = [];
+
+      onErrorSpy = spyOn(testElem, 'onError');
+      consoleErrorSpy = spyOn(console, 'error');
+      cleanUpSpies = [
+        jasmine.createSpy('cleanUp1').and.callFake(() => cleanUpLog.push(1)),
+        jasmine.createSpy('cleanUp2').and.callFake(() => cleanUpLog.push(2)),
+        jasmine.createSpy('cleanUp3').and.callFake(() => cleanUpLog.push(3)),
+      ];
+
+      testElem.cleanUpFns.push(...cleanUpSpies);
+    });
+
+    it('should mark the element as `cleaned up`, so it cannot be re-used', async () => {
+      expect(() => testElem.connectedCallback()).not.toThrow();
+      expect(() => testElem.connectedCallback()).not.toThrow();
+
+      testElem.disconnectedCallback();
+
+      expect(() => testElem.connectedCallback()).toThrowError(
+          'Trying to re-use already disposed custom element \'<test-base-ce>\'. ' +
+          'Once \'<test-base-ce>\' elements are removed from the DOM, they cannot be re-inserted.');
+    });
+
+    it('should call the clean-up functions in reverse order', () => {
+      testElem.disconnectedCallback();
+      expect(cleanUpLog).toEqual([3, 2, 1]);
+    });
+
+    it('should empty the list clean-up functions', () => {
+      expect(testElem.cleanUpFns.length).toBeGreaterThan(0);
+
+      testElem.disconnectedCallback();
+      expect(testElem.cleanUpFns.length).toBe(0);
+    });
+
+    it('should call dynamically added clean-up functions', () => {
+      cleanUpSpies[1].and.callFake(() => {
+        cleanUpLog.push(2);
+        testElem.cleanUpFns.push(() => cleanUpLog.push(4));
+      });
+
+      testElem.disconnectedCallback();
+
+      expect(cleanUpLog).toEqual([3, 2, 4, 1]);
+      expect(testElem.cleanUpFns.length).toBe(0);
+    });
+
+    it('should call all clean-up functions, even if some fail', () => {
+      cleanUpSpies[1].and.throwError('`cleanUp2()` failed');
+      testElem.disconnectedCallback();
+
+      expect(cleanUpLog).toEqual([3, 1]);
+      expect(testElem.cleanUpFns.length).toBe(0);
+    });
+
+    it('should log appropriate error message, but not call `onError()`', () => {
+      cleanUpSpies[1].and.throwError('`cleanUp2()` failed');
+      testElem.disconnectedCallback();
+
+      expect(onErrorSpy).not.toHaveBeenCalled();
+      expect(consoleErrorSpy).toHaveBeenCalledWith(
+          new Error('Error cleaning up custom element \'<test-base-ce>\': `cleanUp2()` failed'));
+    });
+  });
+
   describe('#initialize()', () => {
     it('should return the element instance (even if already initialized)', async () => {
       const testBaseElem = new TestBaseCe();
@@ -220,6 +295,7 @@ describe('BaseCe', () => {
     public static readonly template: typeof BaseCe.template;
     public static readonly style: typeof BaseCe.style;
     public readonly clazz!: BaseCe['clazz'];
+    public readonly cleanUpFns!: BaseCe['cleanUpFns'];
 
     public initialize(...args: Parameters<BaseCe['initialize']>) {
       return super.initialize(...args);

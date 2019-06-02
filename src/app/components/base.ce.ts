@@ -20,6 +20,8 @@ export abstract class BaseCe extends HTMLElement {
   private static utils: Utils = Utils.getInstance();
 
   protected readonly clazz: typeof BaseCe = (this.constructor as typeof BaseCe);
+  protected readonly cleanUpFns: Array<() => void> = [];
+  private cleanedUp = false;
 
   public static register(): Promise<void> {
     const registry = WIN.customElements;
@@ -28,10 +30,29 @@ export abstract class BaseCe extends HTMLElement {
   }
 
   public connectedCallback(): void {
+    if (this.cleanedUp) {
+      throw new Error(
+          `Trying to re-use already disposed custom element '<${this.clazz.tagName}>'. ` +
+          `Once '<${this.clazz.tagName}>' elements are removed from the DOM, they cannot be re-inserted.`);
+    }
+
     this.initialize().catch(err => {
       err.message = `Error initializing custom element '<${this.clazz.tagName}>': ${err.message}`;
       this.onError(err);
     });
+  }
+
+  public disconnectedCallback(): void {
+    this.cleanedUp = true;
+
+    while (this.cleanUpFns.length) {
+      try {
+        this.cleanUpFns.pop()!();
+      } catch (err) {
+        err.message = `Error cleaning up custom element '<${this.clazz.tagName}>': ${err.message}`;
+        console.error(err);
+      }
+    }
   }
 
   protected async initialize(): Promise<IInitializedCe<this>> {
