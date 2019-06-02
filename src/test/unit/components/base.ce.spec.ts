@@ -36,28 +36,28 @@ describe('BaseCe', () => {
 
   describe('.template', () => {
     it('should have a default value', () => {
-      expect(TestBaseCe._template).toBe('&lt;base-ce&gt;Not implemented yet.&lt;/base-ce&gt;');
+      expect(TestBaseCe.template).toBe('&lt;base-ce&gt;Not implemented yet.&lt;/base-ce&gt;');
     });
 
     it('should support being overwritten per class', () => {
-      expect(FancyDivCe._template).toBe('<div>Fancy</div>');
+      expect(FancyDivCe.template).toBe('<div>Fancy</div>');
     });
   });
 
   describe('.style', () => {
     it('should have a default value', () => {
-      expect(TestBaseCe._style).toBe('');
+      expect(TestBaseCe.style).toBe('');
     });
 
     it('should support being overwritten per class', () => {
-      expect(FancyDivCe._style).toBe('div { color: orange; }');
+      expect(FancyDivCe.style).toBe('div { color: orange; }');
     });
   });
 
   describe('#clazz', () => {
     it('should reference each instance\'s constructor', () => {
-      expect(new TestBaseCe()._clazz).toBe(TestBaseCe);
-      expect(new FancyDivCe()._clazz).toBe(FancyDivCe);
+      expect(new TestBaseCe().clazz).toBe(TestBaseCe);
+      expect(new FancyDivCe().clazz).toBe(FancyDivCe);
     });
   });
 
@@ -110,32 +110,6 @@ describe('BaseCe', () => {
       await microtick();
 
       expect(onErrorSpy).toHaveBeenCalledWith(new Error('Error initializing custom element \'<test-base-ce>\': foo'));
-    });
-  });
-
-  describe('#onError()', () => {
-    let testElem: TestBaseCe;
-    let consoleErrorSpy: jasmine.Spy;
-    let windowAlertSpy: jasmine.Spy;
-
-    beforeEach(() => {
-      testElem = new TestBaseCe();
-      consoleErrorSpy = spyOn(console, 'error');
-      windowAlertSpy = spyOn(WIN, 'alert');
-    });
-
-    it('should log the error', () => {
-      const err = new Error('foo');
-      testElem.onError(err);
-
-      expect(consoleErrorSpy).toHaveBeenCalledWith(err);
-    });
-
-    it('should alert about the error', () => {
-      const err = new Error('foo');
-      testElem.onError(err);
-
-      expect(windowAlertSpy).toHaveBeenCalledWith('ERROR: foo');
     });
   });
 
@@ -215,11 +189,37 @@ describe('BaseCe', () => {
     });
   });
 
+  describe('#onError()', () => {
+    let testElem: TestBaseCe;
+    let consoleErrorSpy: jasmine.Spy;
+    let windowAlertSpy: jasmine.Spy;
+
+    beforeEach(() => {
+      testElem = new TestBaseCe();
+      consoleErrorSpy = spyOn(console, 'error');
+      windowAlertSpy = spyOn(WIN, 'alert');
+    });
+
+    it('should log the error', () => {
+      const err = new Error('foo');
+      testElem.onError(err);
+
+      expect(consoleErrorSpy).toHaveBeenCalledWith(err);
+    });
+
+    it('should alert about the error', () => {
+      const err = new Error('foo');
+      testElem.onError(err);
+
+      expect(windowAlertSpy).toHaveBeenCalledWith('ERROR: foo');
+    });
+  });
+
   // Helpers
   class TestBaseCe extends BaseCe {
-    public static get _template() { return this.template; }
-    public static get _style() { return this.style; }
-    public get _clazz() { return this.clazz; }
+    public static readonly template: typeof BaseCe.template;
+    public static readonly style: typeof BaseCe.style;
+    public readonly clazz!: BaseCe['clazz'];
 
     public initialize(...args: Parameters<BaseCe['initialize']>) {
       return super.initialize(...args);
