@@ -62,7 +62,7 @@ The following npm scripts are available and can help during testing:
 
 _**NOTE**:_
 _Adding automated tests is still a work in progress._
-_Currently there are a few unit tests and no e2e tests_ :scream: :scream: :scream:
+_Currently there are unit tests but no e2e tests :scream: :scream: :scream:_
 
 </sub>
 
@@ -79,13 +79,15 @@ The following npm scripts are available and can help with releasing/deploying a 
 
 Things I want to (but won't necessarily) do:
 
-- Add more unit tests (and update documentation for the `test` script).
+- Add `BaseCe#dispose()` (no-op) and `TorchCe#dispose()` (e.g. remove event listener on `document`).
 - Add e2e tests (and update documentation for the `test` script).
+  - Also, verify `ENV`.
   Relevant resources:
   - https://www.protractortest.org/#/api?view=ProtractorBy.prototype.addLocator
   - https://gist.github.com/ChadKillingsworth/d4cb3d30b9d7fbc3fd0af93c2a133a53
-- Refine functionality:
-  - Check whether an explicit install prompt is needed.
+- Consider adding snapshot/screenshot testing (different screen resolutions and states (torch on/off, muted/unmuted, etc.)).
+  Relevant resources:
+  - https://www.npmjs.com/package/protractor-image-comparison
 - Add CI support.
 
 

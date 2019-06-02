@@ -10,7 +10,7 @@ interface ITrackInfo {
   hasTorch: boolean;
 }
 
-const enum State {
+export const enum State {
   Uninitialized,
   Initializing,
   Disabled,
@@ -18,7 +18,7 @@ const enum State {
   On,
 }
 
-const EMPTY_TRACK_INFO: ITrackInfo = {track: undefined, hasTorch: false};
+export const EMPTY_TRACK_INFO: ITrackInfo = {track: undefined, hasTorch: false};
 
 export class TorchCe extends BaseCe {
   private static readonly statusMessages = {
@@ -94,13 +94,38 @@ export class TorchCe extends BaseCe {
     .torch.initializing { cursor: progress; }
   `;
 
+  protected state: State = State.Uninitialized;
+  protected trackInfoPromise: Promise<ITrackInfo> = Promise.resolve(EMPTY_TRACK_INFO);
+
   private readonly settings: ISettings = Settings.getInstance();
   private readonly sounds: Sounds = Sounds.getInstance();
   private readonly utils: Utils = Utils.getInstance();
 
   private readonly clickSound: ISound = this.sounds.getSound('/assets/audio/click.ogg', 0.15);
-  private state: State = State.Uninitialized;
-  private trackInfoPromise: Promise<ITrackInfo> = Promise.resolve(EMPTY_TRACK_INFO);
+
+  protected async getTrackInfo(renewIfNecessary = false): Promise<ITrackInfo> {
+    let trackInfo = await this.trackInfoPromise;
+    const noActiveTrack = !trackInfo.track || (trackInfo.track.readyState === 'ended');
+
+    if (noActiveTrack) {
+      if (renewIfNecessary) {
+        this.trackInfoPromise = WIN.navigator.mediaDevices.
+          getUserMedia({video: {facingMode: 'environment'}}).
+          catch(() => undefined).
+          then(stream => stream && stream.getVideoTracks().pop()).
+          then(async track => ({
+            hasTorch: !!track && await this.utils.waitAndCheck(100, 25, () => !!track.getCapabilities().torch),
+            track,
+          }));
+
+        trackInfo = await this.trackInfoPromise;
+      } else {
+        trackInfo = EMPTY_TRACK_INFO;
+      }
+    }
+
+    return trackInfo;
+  }
 
   protected async initialize(): Promise<IInitializedCe<this>> {
     const self = await super.initialize();
@@ -139,7 +164,7 @@ export class TorchCe extends BaseCe {
       ]);
 
       if (!hasTorch) {
-        const permissionState = (await navigator.permissions.query({name: 'camera'})).state;
+        const permissionState = (await WIN.navigator.permissions.query({name: 'camera'})).state;
         const errorMessage = (permissionState === 'denied') ?
           'Access to camera denied. Please, give permission in browser settings.' : (permissionState === 'prompt') ?
           'Access to camera not granted. Please, give permission when prompted.' :
@@ -157,6 +182,11 @@ export class TorchCe extends BaseCe {
     return self;
   }
 
+  protected async onClick(): Promise<void> {
+    if (!this.settings.muted) this.clickSound.play();
+    await this.updateState((this.state === State.Off) ? State.On : State.Off).catch(err => this.onError(err));
+  }
+
   protected async onError(err: Error): Promise<void> {
     super.onError(err);
 
@@ -166,36 +196,7 @@ export class TorchCe extends BaseCe {
     await this.updateState(State.Disabled, err.message);
   }
 
-  private async getTrackInfo(renewIfNecessary = false): Promise<ITrackInfo> {
-    let trackInfo = await this.trackInfoPromise;
-    const noActiveTrack = !trackInfo.track || (trackInfo.track.readyState === 'ended');
-
-    if (noActiveTrack) {
-      if (renewIfNecessary) {
-        this.trackInfoPromise = WIN.navigator.mediaDevices.
-          getUserMedia({video: {facingMode: 'environment'}}).
-          catch(() => undefined).
-          then(stream => stream && stream.getVideoTracks().pop()).
-          then(async track => ({
-            hasTorch: !!track && await this.utils.waitAndCheck(100, 25, () => !!track.getCapabilities().torch),
-            track,
-          }));
-
-        trackInfo = await this.trackInfoPromise;
-      } else {
-        trackInfo = EMPTY_TRACK_INFO;
-      }
-    }
-
-    return trackInfo;
-  }
-
-  private onClick(): void {
-    this.updateState((this.state === State.Off) ? State.On : State.Off).catch(err => this.onError(err));
-    if (!this.settings.muted) this.clickSound.play();
-  }
-
-  private async onVisibilityChange(): Promise<void> {
+  protected async onVisibilityChange(): Promise<void> {
     const {track} = await this.getTrackInfo(!WIN.document.hidden);
     if (!track) return;
 
@@ -208,7 +209,7 @@ export class TorchCe extends BaseCe {
     }
   }
 
-  private async updateState(newState: State, extraMsg?: string): Promise<void> {
+  protected async updateState(newState: State, extraMsg?: string): Promise<void> {
     return undefined;
   }
 }

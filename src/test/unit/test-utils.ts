@@ -7,6 +7,15 @@ export interface IMockPropertyHelpers<T, P extends keyof T> {
   restoreOriginalValue(): void;
 }
 
+export interface IPropertySpyHelpers<T, P extends keyof T> {
+  getSpy: jasmine.Spy;
+  setSpy: jasmine.Spy;
+
+  installSpies(): void;
+  uninstallSpies(): void;
+  setMockValue(value: T[P]): void;
+}
+
 export const getNormalizedTextContent = (elem: IInitializedCe<BaseCe>): string => {
   const html = elem.shadowRoot.innerHTML.replace(/<(style)>[^]*?<\/\1>/g, '');
   const temp = Object.assign(WIN.document.createElement('div'), {innerHTML: html});
@@ -23,24 +32,13 @@ export const macrotickWithMockedClock = async () => {
 
 export const microtick = (): Promise<void> => new Promise(resolve => resolve());
 
-
 export const mockProperty = <T, P extends keyof T>(ctx: T, prop: P): IMockPropertyHelpers<T, P> => {
-  const originalDescriptor = Object.getOwnPropertyDescriptor(ctx, prop);
+  const {setMockValue, installSpies, uninstallSpies} = spyProperty(ctx, prop);
 
-  const setMockValue = (mockValue: T[P]) => ctx[prop] = mockValue;
-  const restoreOriginalValue = () => originalDescriptor ?
-    Object.defineProperty(ctx, prop, originalDescriptor) :
-    delete ctx[prop];
+  beforeEach(installSpies);
+  afterEach(uninstallSpies);
 
-  beforeEach(() => Object.defineProperty(ctx, prop, {
-    configurable: true,
-    enumerable: true,
-    value: ctx[prop],
-    writable: true,
-  }));
-  afterEach(restoreOriginalValue);
-
-  return {setMockValue, restoreOriginalValue};
+  return {setMockValue, restoreOriginalValue: uninstallSpies};
 };
 
 export const normalizeWhitespace = (input: string | null): string => (input || '').
@@ -66,4 +64,28 @@ export const setupCeContainer = () => {
 
     return elem as IInitializedCe<T>;
   };
+};
+
+export const spyProperty = <T, P extends keyof T>(ctx: T, prop: P): IPropertySpyHelpers<T, P> => {
+  const originalDescriptor = Object.getOwnPropertyDescriptor(ctx, prop);
+
+  let value = ctx[prop];
+  const setMockValue = (mockValue: typeof value) => value = mockValue;
+  const setSpy = jasmine.createSpy(`set ${prop}`).and.callFake(setMockValue);
+  const getSpy = jasmine.createSpy(`get ${prop}`).and.callFake(() => value);
+
+  const installSpies = () => {
+    value = ctx[prop];
+    Object.defineProperty(ctx, prop, {
+      configurable: true,
+      enumerable: originalDescriptor ? originalDescriptor.enumerable : true,
+      get: getSpy,
+      set: setSpy,
+    });
+  };
+  const uninstallSpies = () => originalDescriptor ?
+    Object.defineProperty(ctx, prop, originalDescriptor) :
+    delete ctx[prop];
+
+  return {installSpies, uninstallSpies, setMockValue, getSpy, setSpy};
 };
