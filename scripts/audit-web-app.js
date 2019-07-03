@@ -6,19 +6,23 @@
  * node scripts/audit-web-app <url> <min-scores> [<log-file>]
  * ```
  *
- * Fails if the score in any category is below the scores specified in `<min-scores>`. `<min-scores>` is either a number
- * (in which case it is interpreted as `default:<min-score>`) or a string of comma-separated values of the form
- * `key:value`, where `key` is one of `accessibility`, `best-practices`, `performance`, `pwa`, `seo` or `default` and
- * `value` is a number (between 0 and 100). If `default` defaults to 100 (the highest score) and all other categories
- * default to the value of `default`. E.g.:
- * - `95`
- * - `default:95`
- * - `default:95,pwa:100`
- * - `performance:90`
+ * Runs audits against the specified URL on specific categories (accessibility, best practices, performance, PWA, SEO).
+ * It fails, if the score in any category is below the score specified in `<min-scores>`. (Only runs audits for the
+ * specified categories.)
+ *
+ * `<min-scores>` is either a number (in which case it is interpreted as `all:<min-score>`) or a list of comma-separated
+ * strings of the form `key:value`, where `key` is one of `accessibility`, `best-practices`, `performance`, `pwa`, `seo`
+ * or `all` and `value` is a number (between 0 and 100).
+ *
+ * Examples:
+ * - `95` _(Same as `all:95`.)_
+ * - `all:95` _(Run audits for all categories and require a score of 95 or higher.)_
+ * - `all:95,pwa:100` _(Same as `all:95`, except that a scope of 100 is required for the `pwa` category.)_
+ * - `performance:90` _(Only run audits for the `performance` category and require a score of 90 or higher.)_
  *
  * If `<log-file>` is defined, the full results will be logged there.
  *
- * (Skips HTTPS-related audits, when run for HTTP URL.)
+ * (Skips HTTPS-related audits, when run for an HTTP URL.)
  */
 
 // Imports
@@ -29,8 +33,15 @@ const logger = require('lighthouse-logger');
 
 // Constants
 const CHROME_LAUNCH_OPTS = {chromeFlags: ['--headless']};
-const LIGHTHOUSE_FLAGS = {logLevel: 'info'};
+const LIGHTHOUSE_FLAGS = {logLevel: process.env.CI ? 'error' : 'info'};
 const VIEWER_URL = 'https://googlechrome.github.io/lighthouse/viewer';
+const AUDIT_CATEGORIES = [
+  'accessibility',
+  'best-practices',
+  'performance',
+  'pwa',
+  'seo',
+];
 const SKIPPED_HTTPS_AUDITS = [
   'redirects-http',
   'uses-http2',
@@ -43,19 +54,23 @@ _main(process.argv.slice(2));
 async function _main(args) {
   const {url, minScores, logFile} = parseInput(args);
   const isOnHttp = /^http:/.test(url);
-  const config = {extends: 'lighthouse:default'};
+  const lhConfig = {extends: 'lighthouse:default'};
+  const lhFlags = {...LIGHTHOUSE_FLAGS, onlyCategories: Object.keys(minScores)};
 
   console.info(`Running web-app audits for '${url}'...`);
+  console.info(`  Audit categories: ${lhFlags.onlyCategories.join(', ')}`);
 
   // If testing on HTTP, skip HTTPS-specific tests.
   // (Note: Browsers special-case localhost and run ServiceWorker even on HTTP.)
-  if (isOnHttp) skipHttpsAudits(config);
+  if (isOnHttp) skipHttpsAudits(lhConfig);
 
-  logger.setLevel(LIGHTHOUSE_FLAGS.logLevel);
+  logger.setLevel(lhFlags.logLevel);
 
   try {
-    const results = await launchChromeAndRunLighthouse(url, LIGHTHOUSE_FLAGS, config);
+    const startTime = Date.now();
+    const results = await launchChromeAndRunLighthouse(url, lhFlags, lhConfig);
     const success = await processResults(results, logFile, minScores);
+    console.info(`\n(Completed in ${((Date.now() - startTime) / 1000).toFixed(1)}s.)`);
 
     if (!success) {
       throw new Error('One or more scores are too low.');
@@ -82,44 +97,48 @@ async function launchChromeAndRunLighthouse(url, flags, config) {
 
 function onError(err) {
   console.error(err);
+  console.error('\n');
   process.exit(1);
 }
 
 function parseInput(args) {
   const [url, minScoresRaw, logFile] = args;
-  const minScores = parseMinScores(minScoresRaw);
-  const minScoresValid = Object.values(minScores).every(x => (0 <= x) && (x <= 1));
 
   if (!url) {
     onError('Invalid arguments: <url> not specified.');
-  } else if (!minScoresValid) {
-    onError('Invalid arguments: <min-scores> has non-numeric or out-of-range values.');
+  } else if (!minScoresRaw) {
+    onError('Invalid arguments: <min-scores> not specified.');
+  }
+
+  const minScores = parseMinScores(minScoresRaw || '');
+  const unknownCategories = Object.keys(minScores).filter(cat => !AUDIT_CATEGORIES.includes(cat));
+  const allValuesValid = Object.values(minScores).every(x => (0 <= x) && (x <= 1));
+
+  if (unknownCategories.length > 0) {
+    onError(`Invalid arguments: <min-scores> contains unknown category(-ies): ${unknownCategories.join(', ')}`);
+  } else if (!allValuesValid) {
+    onError(`Invalid arguments: <min-scores> has non-numeric or out-of-range values: ${minScoresRaw}`);
   }
 
   return {url, minScores, logFile};
 }
 
 function parseMinScores(raw) {
-  const knownCategories = ['accessibility', 'best-practices', 'performance', 'pwa', 'seo'];
-
   if (/^\d+$/.test(raw)) {
-    raw = `default:${raw}`;
+    raw = `all:${raw}`;
   }
 
   const minScores = raw.
     split(',').
     map(x => x.split(':')).
-    reduce((aggr, [key, val]) => (aggr[key] = Number(val) / 100, aggr), {default: 1});
-  const unknownCategories = Object.
-    keys(minScores).
-    filter(cat => (cat !== 'default') && !knownCategories.includes(cat));
+    reduce((aggr, [key, val]) => (aggr[key] = Number(val) / 100, aggr), {});
 
-  if (unknownCategories.length > 0) {
-    throw new Error(`Unknown category(-ies): ${unknownCategories.join(', ')}`);
+  if (minScores.hasOwnProperty('all')) {
+    AUDIT_CATEGORIES.forEach(cat => minScores.hasOwnProperty(cat) || (minScores[cat] = minScores.all));
+    delete minScores.all;
   }
 
-  return knownCategories.reduce((aggr, cat) =>
-    (aggr[cat] = minScores.hasOwnProperty(cat) ? minScores[cat] : minScores.default, aggr), {});
+  return minScores;
 }
 
 async function processResults(results, logFile, minScores) {
@@ -154,7 +173,7 @@ async function processResults(results, logFile, minScores) {
 }
 
 function skipHttpsAudits(config) {
-  console.info(`Skipping HTTPS-related audits (${SKIPPED_HTTPS_AUDITS.join(', ')})...`);
+  console.info(`  Skipping HTTPS-related audits: ${SKIPPED_HTTPS_AUDITS.join(', ')}`);
   const settings = config.settings || (config.settings = {});
   settings.skipAudits = SKIPPED_HTTPS_AUDITS;
 }
