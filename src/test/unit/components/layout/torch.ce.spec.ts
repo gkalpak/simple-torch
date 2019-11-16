@@ -24,7 +24,8 @@ describe('TorchCe', () => {
   beforeAll(() => TestTorchCe.register());
 
   beforeEach(() => {
-    permissionsQuerySpy = spyOn(WIN.navigator.permissions, 'query').and.returnValue(Promise.resolve({state: 'denied'}));
+    permissionsQuerySpy = spyOn(WIN.navigator.permissions, 'query').and.
+      returnValue(Promise.resolve(new MockPermissionStatus('denied')));
     getTrackInfoSpy = spyOn(TestTorchCe.prototype, 'getTrackInfo').and.returnValue(Promise.resolve(EMPTY_TRACK_INFO));
     onErrorSpy = spyOn(TestTorchCe.prototype, 'onError');
   });
@@ -296,7 +297,7 @@ describe('TorchCe', () => {
       beforeEach(() => onVisibilityChangeSpy = spyOn(elem, 'onVisibilityChange'));
 
       it('should abort and report an error, when permission explicitly denied', async () => {
-        permissionsQuerySpy.and.returnValue(Promise.resolve({state: 'denied'}));
+        permissionsQuerySpy.and.returnValue(Promise.resolve(new MockPermissionStatus('denied')));
 
         await initCe(elem);
         WIN.document.dispatchEvent(new Event('visibilitychange'));
@@ -308,7 +309,7 @@ describe('TorchCe', () => {
       });
 
       it('should abort and report an error, when permission not granted', async () => {
-        permissionsQuerySpy.and.returnValue(Promise.resolve({state: 'prompt'}));
+        permissionsQuerySpy.and.returnValue(Promise.resolve(new MockPermissionStatus('prompt')));
 
         await initCe(elem);
         WIN.document.dispatchEvent(new Event('visibilitychange'));
@@ -320,7 +321,7 @@ describe('TorchCe', () => {
       });
 
       it('should abort and report an error, when no camera detected', async () => {
-        permissionsQuerySpy.and.returnValue(Promise.resolve({state: 'granted'}));
+        permissionsQuerySpy.and.returnValue(Promise.resolve(new MockPermissionStatus('granted')));
         getTrackInfoSpy.and.returnValue(Promise.resolve(EMPTY_TRACK_INFO));
 
         await initCe(elem);
@@ -332,7 +333,7 @@ describe('TorchCe', () => {
       });
 
       it('should abort and report an error, when no torch detected', async () => {
-        permissionsQuerySpy.and.returnValue(Promise.resolve({state: 'granted'}));
+        permissionsQuerySpy.and.returnValue(Promise.resolve(new MockPermissionStatus('granted')));
         getTrackInfoSpy.and.returnValue(Promise.resolve({track: new MockMediaStreamTrack(), hasTorch: false}));
 
         await initCe(elem);
@@ -805,6 +806,14 @@ describe('TorchCe', () => {
 
     public stop(): void {
       this.readyState = 'ended';
+    }
+  }
+
+  class MockPermissionStatus extends EventTarget implements PermissionStatus {
+    public readonly onchange: null;
+
+    constructor(public readonly state: PermissionState) {
+      super();
     }
   }
 

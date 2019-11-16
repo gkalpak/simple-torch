@@ -2,7 +2,7 @@ import {WIN} from '../shared/constants.js';
 import {Utils} from '../shared/utils.service.js';
 
 
-export type IInitializedCe<T extends BaseCe> = T & {shadowRoot: NonNullable<T['shadowRoot']>};
+export type IInitializedCe<T extends BaseCe> = T & {shadowRoot: ShadowRoot};
 
 export abstract class BaseCe extends HTMLElement {
   public static get tagName(): string { return this.utils.pascalToKebabCase(this.name); }

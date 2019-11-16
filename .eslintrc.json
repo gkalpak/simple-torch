@@ -12,6 +12,7 @@
     "linebreak-style": [2, "unix"],
     "max-len": [2, 120],
     "no-console": 0,
+    "no-prototype-builtins": 0,
     "quotes": [2, "single"],
     "semi": [2, "always"]
   }
