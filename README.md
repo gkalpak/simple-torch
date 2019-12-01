@@ -9,7 +9,7 @@ To be used on mobile as a torch utility app, because I am fed up with existing a
 
 ## Usage
 
-The app is available at https://gk-simple-torch.firebaseapp.com/.
+The app is available at https://gk-simple-torch.web.app/.
 
 Once the app is loaded in a mobile browser supporting [PWAs][mdn-pwa], you can install the app on the home screen for
 easier access. The app uses a [ServiceWorker][mdn-sw], so it can work offline (on supporting browsers).
@@ -39,13 +39,10 @@ Building the app in production mode has the following differences:
 2. The ServiceWorker script (`sw.js`) is also built.
 3. The ServiceWorker is registered at runtime (as a result of the above).
 
-<sub>
-
-_**NOTE**:_
-_Even if the app is built in dev mode, it may still be (temporarily) controlled by a previously installed
-ServiceWorker. To avoid surprises, the app is, by default, served on different ports based on the mode is built in._
-
-</sub>
+> <sup><sub>ℹ️</sub></sup> _**NOTE**:_<br />
+> _Even if the app is built in dev mode, it may still be (temporarily) controlled by a previously installed
+> ServiceWorker. To avoid surprises, the app is, by default, served on different ports based on the mode it is built
+> in._
 
 ### Testing
 
@@ -58,13 +55,9 @@ The following npm scripts are available and can help during testing:
 - `lint`: Lint the app source code (TypeScript) and helper scripts (JavaScript).
 - `test`: Lint the code and run the automated tests (unit, end-to-end (e2e), web-app audits).
 
-<sub>
-
-_**NOTE**:_
-_Adding automated tests is still a work in progress._
-_Currently there are unit tests but no e2e tests :scream: :scream: :scream:_
-
-</sub>
+> <sup><sub>⚠️</sub></sup> _**NOTE**:_<br />
+> _Adding automated tests is still a work in progress._<br />
+> _Currently there are unit tests but no e2e tests_ <sup>:scream: :scream: :scream:</sup>
 
 ### Releasing/Deploying
 
