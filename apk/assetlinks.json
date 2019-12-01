@@ -1,0 +1,14 @@
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "xyz.appmaker.lbonaf",
+      "sha256_cert_fingerprints": [
+        "85:03:F9:E5:F1:27:B2:6E:12:4C:C6:08:BB:A5:9D:DD:12:7B:78:48:09:3D:F1:17:27:6A:FC:25:15:7A:9E:2C"
+      ]
+    }
+  }
+]
