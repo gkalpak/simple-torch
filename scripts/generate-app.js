@@ -29,6 +29,7 @@ async function _main(args) {
     sh.mkdir('-p', OUT_DIR);
     sh.cp('-r', 'src/!(app|test)', OUT_DIR);
 
+    sh.rm('-rf', OUT_ASSETLINKS_DIR);
     sh.mkdir(OUT_ASSETLINKS_DIR);
     sh.cp('apk/assetlinks.json', OUT_ASSETLINKS_DIR);
 

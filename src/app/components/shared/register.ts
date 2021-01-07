@@ -6,7 +6,7 @@ import {LogoCe} from './logo.ce.js';
 import {VersionCe} from './version.ce.js';
 
 
-const components: Array<typeof BaseCe> = [
+const components: (typeof BaseCe & CustomElementConstructor)[] = [
   ExternalSvgCe,
   FlexSpacerCe,
   LoaderCe,

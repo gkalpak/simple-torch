@@ -10,7 +10,7 @@ const SIMPLE_TORCH_SVG_PATH = `${ROOT_DIR}/src/assets/images/simple-torch.svg`;
 const SIZES = [128, 192, 512];
 
 // Run
-_main(process.argv.slice(2));
+_main();
 
 // Helpers
 async function _main() {

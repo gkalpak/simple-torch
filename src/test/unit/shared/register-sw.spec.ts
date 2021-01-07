@@ -180,7 +180,7 @@ describe('registerSw()', () => {
 
       public readonly ready = Promise.resolve(this.$registration);
       public readonly register = jasmine.createSpy('mockSwContainer.register').and.callFake(() =>
-        new Promise((resolve, reject) => this.$registerDeferred = {resolve, reject}));
+        new Promise<void>((resolve, reject) => this.$registerDeferred = {resolve, reject}));
     }
   });
 });

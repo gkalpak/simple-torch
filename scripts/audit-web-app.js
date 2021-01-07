@@ -32,7 +32,7 @@ const printer = require('lighthouse/lighthouse-cli/printer');
 const logger = require('lighthouse-logger');
 
 // Constants
-const CHROME_LAUNCH_OPTS = {chromeFlags: ['--headless']};
+const CHROME_LAUNCH_OPTS = {chromeFlags: ['--headless', '--use-fake-ui-for-media-stream']};
 const LIGHTHOUSE_FLAGS = {logLevel: process.env.CI ? 'error' : 'info'};
 const VIEWER_URL = 'https://googlechrome.github.io/lighthouse/viewer';
 const AUDIT_CATEGORIES = [

@@ -158,10 +158,13 @@ export class TorchCe extends BaseCe {
     };
 
     try {
-      const [, {track, hasTorch}] = await Promise.all([
-        updateState(State.Initializing),
-        this.getTrackInfo(true),
-      ]);
+      // NOTE:
+      // Using `Promise.all()` here causes an "Unhandled promise rejection" error when both promises
+      // fail (e.g. during tests). This sounds like a bug (but not sure where) ¯\_(ツ)_/¯
+      // The `updateState()` call should complete fairly quickly, though, so serial execution should
+      // not have a noticeable impact here.
+      await updateState(State.Initializing);
+      const {track, hasTorch} = await this.getTrackInfo(true);
 
       if (!hasTorch) {
         const permissionState = (await WIN.navigator.permissions.query({name: 'camera'})).state;

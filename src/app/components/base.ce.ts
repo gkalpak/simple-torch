@@ -20,10 +20,10 @@ export abstract class BaseCe extends HTMLElement {
   private static utils: Utils = Utils.getInstance();
 
   protected readonly clazz: typeof BaseCe = (this.constructor as typeof BaseCe);
-  protected readonly cleanUpFns: Array<() => void> = [];
+  protected readonly cleanUpFns: (() => void)[] = [];
   private cleanedUp = false;
 
-  public static register(): Promise<void> {
+  public static register(this: typeof BaseCe & CustomElementConstructor): Promise<void> {
     const registry = WIN.customElements;
     registry.define(this.tagName, this);
     return registry.whenDefined(this.tagName);

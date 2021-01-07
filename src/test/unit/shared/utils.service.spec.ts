@@ -86,7 +86,7 @@ describe('Utils', () => {
     it('should resolve once the callback resolves, if it is async', async () => {
       const doneSpy = jasmine.createSpy('done');
       let callbackResolve!: () => void;
-      callbackSpy.and.returnValue(new Promise(resolve => callbackResolve = resolve));
+      callbackSpy.and.returnValue(new Promise<void>(resolve => callbackResolve = resolve));
 
       utils.onLoad(callbackSpy).then(doneSpy);
       await macrotick();

@@ -5,7 +5,7 @@ import {HeaderCe} from './header.ce.js';
 import {TorchCe} from './torch.ce.js';
 
 
-const components: Array<typeof BaseCe> = [
+const components: (typeof BaseCe & CustomElementConstructor)[] = [
   ContentCe,
   FooterCe,
   HeaderCe,
