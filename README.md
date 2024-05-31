@@ -39,7 +39,7 @@ Building the app in production mode has the following differences:
 2. The ServiceWorker script (`sw.js`) is also built.
 3. The ServiceWorker is registered at runtime (as a result of the above).
 
-> <sup><sub>ℹ️</sub></sup> _**NOTE**:_<br />
+> [!IMPORTANT]
 > _Even if the app is built in dev mode, it may still be (temporarily) controlled by a previously installed
 > ServiceWorker. To avoid surprises, the app is, by default, served on different ports based on the mode it is built
 > in._
@@ -55,9 +55,9 @@ The following npm scripts are available and can help during testing:
 - `lint`: Lint the app source code (TypeScript) and helper scripts (JavaScript).
 - `test`: Lint the code and run the automated tests (unit, end-to-end (e2e), web-app audits).
 
-> <sup><sub>⚠️</sub></sup> _**NOTE**:_<br />
+> [!WARNING]
 > _Adding automated tests is still a work in progress._<br />
-> _Currently there are unit tests but no e2e tests_ <sup>:scream: :scream: :scream:</sup>
+> _Currently there are unit tests but no e2e tests_ :scream: :scream: :scream:
 
 ### Releasing/Deploying
 
@@ -74,12 +74,12 @@ Things I want to (but won't necessarily) do:
 
 - Add e2e tests (and update documentation for the `test` script).
   - Also, verify `ENV`.
-  Relevant resources:
-  - https://www.protractortest.org/#/api?view=ProtractorBy.prototype.addLocator
-  - https://gist.github.com/ChadKillingsworth/d4cb3d30b9d7fbc3fd0af93c2a133a53
+  - Relevant resources:
+    - https://www.protractortest.org/#/api?view=ProtractorBy.prototype.addLocator
+    - https://gist.github.com/ChadKillingsworth/d4cb3d30b9d7fbc3fd0af93c2a133a53
 - Consider adding snapshot/screenshot testing (different screen resolutions and states (torch on/off, muted/unmuted, etc.)).
-  Relevant resources:
-  - https://www.npmjs.com/package/protractor-image-comparison
+  - Relevant resources:
+    - https://www.npmjs.com/package/protractor-image-comparison
 - Add CI support.
 
 
