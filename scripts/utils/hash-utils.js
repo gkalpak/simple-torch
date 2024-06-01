@@ -1,8 +1,8 @@
 'use strict';
 
 // Imports
-const {createHash} = require('crypto');
-const {createReadStream} = require('fs');
+const {createHash} = require('node:crypto');
+const {createReadStream} = require('node:fs');
 
 // Enum: Algorithm
 const Algorithm = {

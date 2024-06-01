@@ -1,7 +1,7 @@
 'use strict';
 
 // Imports
-const {resolve} = require('path');
+const {resolve} = require('node:path');
 const sh = require('shelljs');
 const {repository, version} = require('../package.json');
 const {hash, hashFile} = require('./utils/hash-utils');

@@ -1,7 +1,7 @@
 'use strict';
 
 // Imports
-const {resolve} = require('path');
+const {resolve} = require('node:path');
 const {convertToSizes} = require('./utils/svg-to-pngs');
 
 // Constants
