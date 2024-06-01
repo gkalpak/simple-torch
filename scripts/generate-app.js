@@ -11,7 +11,6 @@ sh.set('-e');
 // Constants
 const ROOT_DIR = resolve(`${__dirname}/..`);
 const OUT_DIR = `${ROOT_DIR}/out`;
-const OUT_ASSETLINKS_DIR = `${OUT_DIR}/.well-known`;
 const OUT_INDEX_PATH = `${OUT_DIR}/index.html`;
 const OUT_SW_PATH = `${OUT_DIR}/sw.js`;
 
@@ -28,10 +27,6 @@ async function _main(args) {
     // Copy files.
     sh.mkdir('-p', OUT_DIR);
     sh.cp('-r', 'src/!(app|test)', OUT_DIR);
-
-    sh.rm('-rf', OUT_ASSETLINKS_DIR);
-    sh.mkdir(OUT_ASSETLINKS_DIR);
-    sh.cp('apk/assetlinks.json', OUT_ASSETLINKS_DIR);
 
     // Replace ENV placeholders.
     sh.sed('-i', /<PLACEHOLDER:PRODUCTION>/g, `${production}`, OUT_INDEX_PATH);
