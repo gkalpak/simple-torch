@@ -30,7 +30,7 @@ export class Settings implements ISettings {
   }
 
   private get<T extends keyof ISettings>(key: T, fallbackValue: ISettings[T]): ISettings[T] {
-    return this.values.hasOwnProperty(key) ? this.values[key] as ISettings[T] : fallbackValue;
+    return Object.hasOwn(this.values, key) ? this.values[key] as ISettings[T] : fallbackValue;
   }
 
   private set<T extends keyof ISettings>(key: T, value: ISettings[T]): void {

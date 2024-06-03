@@ -1,6 +1,10 @@
 // Karma configuration file.
 // More info: https://karma-runner.github.io/1.0/config/configuration-file.html
 
+/**
+ * @param {import('karma').Config} config
+ * @return void;
+ */
 module.exports = config => config.set({
   browsers: ['ChromeHeadless'],
   client: {
@@ -10,12 +14,14 @@ module.exports = config => config.set({
     },
   },
   files: [
+    /* eslint-disable sort-keys */
     {pattern: 'out/**/*.js.map', included: false, watched: false},
     {pattern: 'out/assets/**', included: false},
     {pattern: 'out/app/**/*.js', included: false},
     {pattern: 'out/test/unit/test-utils.js', included: false},
     {pattern: 'out/test/unit/patch-env.js', type: 'module'},
     {pattern: 'out/test/unit/**/*.js', type: 'module'},
+    /* eslint-enable sort-keys */
   ],
   frameworks: ['jasmine'],
   middleware: [
@@ -66,9 +72,11 @@ function exitOn404MiddlewareFactory(server) {
       const requester = (req.headers.referer || '').
         replace(new RegExp(`^${req.headers.origin || ''}/base/([^?#]*).*$`), '$1');
 
-      server.dieOnError(
-        `Missing resource '${requestee}' (requested from '${requester}').\n` +
-        `If you want to make a dummy request, start the URL with '/dummy/' (e.g. '/dummy/${requestee}').`);
+      server.log.error(new Error(
+          `Missing resource '${requestee}' (requested from '${requester}').\n` +
+          `If you want to make a dummy request, start the URL with '/dummy/' (e.g. '/dummy/${requestee}').`));
+
+      server._close(1);
     }
   };
 }
@@ -78,7 +86,7 @@ function JasmineSeedReporter(baseReporterDecorator) {
 
   this.onBrowserComplete = (browser, result) => {
     const seed = result.order && result.order.random && result.order.seed;
-    if (seed) this.write(`${browser}: Randomized with seed ${seed}.\n`);
+    if (seed) /** @type {any} */(this).write(`${browser}: Randomized with seed ${seed}.\n`);
   };
 
   this.onRunComplete = () => undefined;

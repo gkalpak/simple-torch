@@ -1,16 +1,15 @@
-'use strict';
-
 // Imports
-const {createConverter} = require('convert-svg-to-png');
+import convertSvgToPng from 'convert-svg-to-png';
+
 
 // Exports
-module.exports = {
+export {
   convertToSizes,
 };
 
 // Helpers
 async function convertToSizes(inputFilePath, sizes) {
-  const converter = createConverter();
+  const converter = convertSvgToPng.createConverter({});
   const convertedFilePaths = [];
 
   try {
@@ -18,7 +17,7 @@ async function convertToSizes(inputFilePath, sizes) {
       const width = size;
       const height = size;
       const outputFilePath = inputFilePath.replace(/\.svg$/, `-${width}x${height}.png`);
-      convertedFilePaths.push(await converter.convertFile(inputFilePath, {width, height, outputFilePath}));
+      convertedFilePaths.push(await converter.convertFile(inputFilePath, {height, outputFilePath, width}));
     }
   } finally {
     await converter.destroy();

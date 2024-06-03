@@ -23,10 +23,10 @@ export abstract class BaseCe extends HTMLElement {
   protected readonly cleanUpFns: (() => void)[] = [];
   private cleanedUp = false;
 
-  public static register(this: typeof BaseCe & CustomElementConstructor): Promise<void> {
+  public static async register(this: typeof BaseCe & CustomElementConstructor): Promise<void> {
     const registry = WIN.customElements;
     registry.define(this.tagName, this);
-    return registry.whenDefined(this.tagName);
+    await registry.whenDefined(this.tagName);
   }
 
   public connectedCallback(): void {
@@ -49,8 +49,9 @@ export abstract class BaseCe extends HTMLElement {
       try {
         this.cleanUpFns.pop()!();
       } catch (err) {
-        err.message = `Error cleaning up custom element '<${this.clazz.tagName}>': ${err.message}`;
-        console.error(err);
+        const err2 = (err instanceof Error) ? err : new Error(`${err}`);
+        err2.message = `Error cleaning up custom element '<${this.clazz.tagName}>': ${err2.message}`;
+        console.error(err2);
       }
     }
   }
@@ -71,8 +72,12 @@ export abstract class BaseCe extends HTMLElement {
     return this as IInitializedCe<this>;
   }
 
-  protected onError(err: Error): void {
-    console.error(err);
-    WIN.alert(`ERROR: ${err.message}`);
+  protected async onError(err: unknown): Promise<Error> {
+    const err2 = (err instanceof Error) ? err : new Error(`${err}`);
+
+    console.error(err2);
+    WIN.alert(`ERROR: ${err2.message}`);
+
+    return err2;
   }
 }

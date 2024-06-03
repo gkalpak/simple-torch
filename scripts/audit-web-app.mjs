@@ -1,9 +1,7 @@
-'use strict';
-
 /**
  * Usage:
  * ```sh
- * node scripts/audit-web-app <url> <min-scores> [<log-file>]
+ * node scripts/audit-web-app.mjs <url> <min-scores> [<log-file>]
  * ```
  *
  * Runs audits against the specified URL on specific categories (accessibility, best practices, performance, PWA, SEO).
@@ -26,14 +24,23 @@
  */
 
 // Imports
-const chromeLauncher = require('chrome-launcher');
-const lighthouse = require('lighthouse');
-const printer = require('lighthouse/lighthouse-cli/printer');
-const logger = require('lighthouse-logger');
+import {argv, env, exit} from 'node:process';
+
+import {launch as launchChrome} from 'chrome-launcher';
+import lighthouse from 'lighthouse';
+import {OutputMode as LhReportOutputMode, write as writeLhReport} from 'lighthouse/cli/printer.js';
+import logger from 'lighthouse-logger';
+import puppeteer from 'puppeteer';
+
 
 // Constants
-const CHROME_LAUNCH_OPTS = {chromeFlags: ['--headless', '--use-fake-ui-for-media-stream']};
-const LIGHTHOUSE_FLAGS = {logLevel: process.env.CI ? 'error' : 'info'};
+/** @type {import('chrome-launcher').Options} */
+const CHROME_LAUNCH_OPTS = {
+  chromeFlags: ['--headless', '--use-fake-ui-for-media-stream'],
+  chromePath: puppeteer.executablePath(),
+};
+/** @type {import('lighthouse').Flags} */
+const LIGHTHOUSE_FLAGS = {logLevel: env.CI ? 'error' : 'info'};
 const VIEWER_URL = 'https://googlechrome.github.io/lighthouse/viewer';
 const AUDIT_CATEGORIES = [
   'accessibility',
@@ -48,23 +55,25 @@ const SKIPPED_HTTPS_AUDITS = [
 ];
 
 // Run
-_main(process.argv.slice(2));
+_main(argv.slice(2));
 
 // Helpers
 async function _main(args) {
   const {url, minScores, logFile} = parseInput(args);
   const isOnHttp = /^http:/.test(url);
+  /** @type {import('lighthouse').Config} */
   const lhConfig = {extends: 'lighthouse:default'};
+  /** @type {import('lighthouse').Flags} */
   const lhFlags = {...LIGHTHOUSE_FLAGS, onlyCategories: Object.keys(minScores)};
 
   console.info(`Running web-app audits for '${url}'...`);
-  console.info(`  Audit categories: ${lhFlags.onlyCategories.join(', ')}`);
+  console.info(`  Audit categories: ${lhFlags.onlyCategories?.join(', ')}`);
 
   // If testing on HTTP, skip HTTPS-specific tests.
   // (Note: Browsers special-case localhost and run ServiceWorker even on HTTP.)
   if (isOnHttp) skipHttpsAudits(lhConfig);
 
-  logger.setLevel(lhFlags.logLevel);
+  logger.setLevel(lhFlags.logLevel ?? 'info');
 
   try {
     const startTime = Date.now();
@@ -85,7 +94,7 @@ function formatScore(score) {
 }
 
 async function launchChromeAndRunLighthouse(url, flags, config) {
-  const chrome = await chromeLauncher.launch(CHROME_LAUNCH_OPTS);
+  const chrome = await launchChrome(CHROME_LAUNCH_OPTS);
   flags.port = chrome.port;
 
   try {
@@ -98,7 +107,7 @@ async function launchChromeAndRunLighthouse(url, flags, config) {
 function onError(err) {
   console.error(err);
   console.error('\n');
-  process.exit(1);
+  exit(1);
 }
 
 function parseInput(args) {
@@ -120,7 +129,7 @@ function parseInput(args) {
     onError(`Invalid arguments: <min-scores> has non-numeric or out-of-range values: ${minScoresRaw}`);
   }
 
-  return {url, minScores, logFile};
+  return {logFile, minScores, url};
 }
 
 function parseMinScores(raw) {
@@ -133,8 +142,8 @@ function parseMinScores(raw) {
     map(x => x.split(':')).
     reduce((aggr, [key, val]) => (aggr[key] = Number(val) / 100, aggr), {});
 
-  if (minScores.hasOwnProperty('all')) {
-    AUDIT_CATEGORIES.forEach(cat => minScores.hasOwnProperty(cat) || (minScores[cat] = minScores.all));
+  if (Object.hasOwn(minScores, 'all')) {
+    AUDIT_CATEGORIES.forEach(cat => Object.hasOwn(minScores, cat) || (minScores[cat] = minScores.all));
     delete minScores.all;
   }
 
@@ -150,7 +159,7 @@ async function processResults(results, logFile, minScores) {
     console.log(`\nSaving results in '${logFile}'...`);
     console.log(`  LightHouse viewer: ${VIEWER_URL}`);
 
-    await printer.write(report, printer.OutputMode.json, logFile);
+    await writeLhReport(report, LhReportOutputMode.json, logFile);
   }
 
   console.info(`\nLighthouse version: ${lhVersion}`);
@@ -164,7 +173,7 @@ async function processResults(results, logFile, minScores) {
     const passed = !isNaN(score) && (score >= minScore);
 
     console.info(
-      `  - ${paddedTitle}  ${formatScore(score)}  (Required: ${formatScore(minScore)})  ${passed ? 'OK' : 'FAILED'}`);
+        `  - ${paddedTitle}  ${formatScore(score)}  (Required: ${formatScore(minScore)})  ${passed ? 'OK' : 'FAILED'}`);
 
     return aggr && passed;
   }, true);

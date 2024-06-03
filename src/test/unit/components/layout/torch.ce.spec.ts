@@ -24,9 +24,8 @@ describe('TorchCe', () => {
   beforeAll(() => TestTorchCe.register());
 
   beforeEach(() => {
-    permissionsQuerySpy = spyOn(WIN.navigator.permissions, 'query').and.
-      returnValue(Promise.resolve(new MockPermissionStatus('denied')));
-    getTrackInfoSpy = spyOn(TestTorchCe.prototype, 'getTrackInfo').and.returnValue(Promise.resolve(EMPTY_TRACK_INFO));
+    permissionsQuerySpy = spyOn(WIN.navigator.permissions, 'query').and.resolveTo(new MockPermissionStatus('denied'));
+    getTrackInfoSpy = spyOn(TestTorchCe.prototype, 'getTrackInfo').and.resolveTo(EMPTY_TRACK_INFO);
     onErrorSpy = spyOn(TestTorchCe.prototype, 'onError');
   });
 
@@ -73,9 +72,9 @@ describe('TorchCe', () => {
       elem = await initCe(TestTorchCe);
       mockTrack = new MockMediaStreamTrack();
 
-      utilsWaitAndCheckSpy = spyOn(utils, 'waitAndCheck').and.returnValue(Promise.resolve(false));
+      utilsWaitAndCheckSpy = spyOn(utils, 'waitAndCheck').and.resolveTo(false);
       getUserMediaSpy = spyOn(WIN.navigator.mediaDevices, 'getUserMedia').and.
-        returnValue(Promise.resolve({getVideoTracks: () => [mockTrack]} as unknown as MediaStream));
+        resolveTo({getVideoTracks: () => [mockTrack]} as unknown as MediaStream);
 
       getTrackInfoSpy.and.callThrough();
     });
@@ -88,7 +87,7 @@ describe('TorchCe', () => {
         await elem.getTrackInfo(true);
         const trackInfo = await getTrackInfo();
 
-        expect(trackInfo).toEqual({track: mockTrack as unknown as MediaStreamTrack, hasTorch: false});
+        expect(trackInfo).toEqual({hasTorch: false, track: mockTrack as unknown as MediaStreamTrack});
       });
 
       it('should return empty track info, if there is no track info', async () => {
@@ -118,7 +117,7 @@ describe('TorchCe', () => {
       it('should retrieve and return the track info', async () => {
         const trackInfo = await getTrackInfo();
 
-        expect(trackInfo).toEqual({track: mockTrack as unknown as MediaStreamTrack, hasTorch: false});
+        expect(trackInfo).toEqual({hasTorch: false, track: mockTrack as unknown as MediaStreamTrack});
         expect(getUserMediaSpy).toHaveBeenCalledWith({video: {facingMode: 'environment'}});
       });
 
@@ -156,28 +155,28 @@ describe('TorchCe', () => {
       });
 
       it('should return empty track info, if `getUserMedia()` fails', async () => {
-        getUserMediaSpy.and.returnValue(Promise.reject('test'));
+        getUserMediaSpy.and.rejectWith('test');
         const trackInfo = await getTrackInfo();
 
         expect(trackInfo).toEqual(EMPTY_TRACK_INFO);
       });
 
       it('should return empty track info, if `MediaStream` has no video tracks', async () => {
-        getUserMediaSpy.and.returnValue(Promise.resolve({getVideoTracks: () => []}));
+        getUserMediaSpy.and.resolveTo({getVideoTracks: () => []});
         const trackInfo = await getTrackInfo();
 
         expect(trackInfo).toEqual(EMPTY_TRACK_INFO);
       });
 
       it('should fail, if detecting torch support fails', async () => {
-        utilsWaitAndCheckSpy.and.returnValue(Promise.reject('test'));
+        utilsWaitAndCheckSpy.and.rejectWith('test');
         const rejection = await reversePromise(getTrackInfo());
 
         expect(rejection).toBe('test');
       });
 
       it('should detect whether the track supports torch', async () => {
-        utilsWaitAndCheckSpy.and.returnValue(Promise.resolve(true));
+        utilsWaitAndCheckSpy.and.resolveTo(true);
         const {hasTorch} = await getTrackInfo();
 
         expect(hasTorch).toBe(true);
@@ -223,7 +222,7 @@ describe('TorchCe', () => {
       const mockTrack = new MockMediaStreamTrack(true);
 
       spyOn(mockTrack, 'applyConstraints').and.throwError('`applyConstraints()` failed');
-      getTrackInfoSpy.and.returnValue(Promise.resolve({track: mockTrack, hasTorch: true}));
+      getTrackInfoSpy.and.resolveTo({hasTorch: true, track: mockTrack});
 
       await initCe(elem);
 
@@ -238,7 +237,7 @@ describe('TorchCe', () => {
         mockTrack = new MockMediaStreamTrack(true);
 
         onVisibilityChangeSpy = spyOn(elem, 'onVisibilityChange');
-        getTrackInfoSpy.and.returnValue(Promise.resolve({track: mockTrack, hasTorch: true}));
+        getTrackInfoSpy.and.resolveTo({hasTorch: true, track: mockTrack});
       });
 
       it('should set the state to `On`', async () => {
@@ -297,7 +296,7 @@ describe('TorchCe', () => {
       beforeEach(() => onVisibilityChangeSpy = spyOn(elem, 'onVisibilityChange'));
 
       it('should abort and report an error, when permission explicitly denied', async () => {
-        permissionsQuerySpy.and.returnValue(Promise.resolve(new MockPermissionStatus('denied')));
+        permissionsQuerySpy.and.resolveTo(new MockPermissionStatus('denied'));
 
         await initCe(elem);
         WIN.document.dispatchEvent(new Event('visibilitychange'));
@@ -309,7 +308,7 @@ describe('TorchCe', () => {
       });
 
       it('should abort and report an error, when permission not granted', async () => {
-        permissionsQuerySpy.and.returnValue(Promise.resolve(new MockPermissionStatus('prompt')));
+        permissionsQuerySpy.and.resolveTo(new MockPermissionStatus('prompt'));
 
         await initCe(elem);
         WIN.document.dispatchEvent(new Event('visibilitychange'));
@@ -321,8 +320,8 @@ describe('TorchCe', () => {
       });
 
       it('should abort and report an error, when no camera detected', async () => {
-        permissionsQuerySpy.and.returnValue(Promise.resolve(new MockPermissionStatus('granted')));
-        getTrackInfoSpy.and.returnValue(Promise.resolve(EMPTY_TRACK_INFO));
+        permissionsQuerySpy.and.resolveTo(new MockPermissionStatus('granted'));
+        getTrackInfoSpy.and.resolveTo(EMPTY_TRACK_INFO);
 
         await initCe(elem);
         WIN.document.dispatchEvent(new Event('visibilitychange'));
@@ -333,8 +332,8 @@ describe('TorchCe', () => {
       });
 
       it('should abort and report an error, when no torch detected', async () => {
-        permissionsQuerySpy.and.returnValue(Promise.resolve(new MockPermissionStatus('granted')));
-        getTrackInfoSpy.and.returnValue(Promise.resolve({track: new MockMediaStreamTrack(), hasTorch: false}));
+        permissionsQuerySpy.and.resolveTo(new MockPermissionStatus('granted'));
+        getTrackInfoSpy.and.resolveTo({hasTorch: false, track: new MockMediaStreamTrack()});
 
         await initCe(elem);
         WIN.document.dispatchEvent(new Event('visibilitychange'));
@@ -356,7 +355,7 @@ describe('TorchCe', () => {
     beforeEach(async () => {
       elem = await initCe(TestTorchCe);
       clickPlaySpy = spyOn(clickSound, 'play');
-      updateStateSpy = spyOn(elem, 'updateState').and.returnValue(Promise.resolve());
+      updateStateSpy = spyOn(elem, 'updateState').and.resolveTo();
     });
 
     it('should play a click sound, unless muted', async () => {
@@ -395,7 +394,7 @@ describe('TorchCe', () => {
     });
 
     it('should pass `updateState()` error to `onError()`', async () => {
-      updateStateSpy.and.returnValue(Promise.reject('test'));
+      updateStateSpy.and.rejectWith('test');
       await elem.onClick();
 
       expect(onErrorSpy).toHaveBeenCalledWith('test');
@@ -409,7 +408,9 @@ describe('TorchCe', () => {
     beforeEach(async () => {
       elem = await initCe(TestTorchCe);
 
-      superOnErrorSpy = spyOn(BaseCe.prototype as any, 'onError');
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      superOnErrorSpy = spyOn(BaseCe.prototype as any, 'onError').and.
+        callFake((err: unknown) => (err instanceof Error) ? err : new Error(`${err}`));
       onErrorSpy.and.callThrough();
     });
 
@@ -422,7 +423,7 @@ describe('TorchCe', () => {
 
     it('should stop the track (if any)', async () => {
       const mockTrack = new MockMediaStreamTrack();
-      getTrackInfoSpy.and.returnValue(Promise.resolve({track: mockTrack}));
+      getTrackInfoSpy.and.resolveTo({track: mockTrack});
 
       expect(mockTrack.readyState).toBe('live');
 
@@ -450,12 +451,12 @@ describe('TorchCe', () => {
     const createMockTrack = (stopped = false) =>
       Object.assign(new MockMediaStreamTrack(true), stopped && {readyState: 'ended'});
     const testCases: IOnVisibilityChangeTestCase[] = [
-      // tslint:disable: object-literal-sort-keys
       {
         description: '(state: Off, track: none)',
         initialState: State.Off,
+
         getInitialTrack: () => undefined,
-        verifyOutcome: async (initialTrack, lastTrack) => {
+        verifyOutcome: async (_initialTrack, lastTrack) => {
           expect(lastTrack).toBeDefined();
           expect(lastTrack!.isTorchOn()).toBe(false);
         },
@@ -463,8 +464,9 @@ describe('TorchCe', () => {
       {
         description: '(state: On, track: none)',
         initialState: State.On,
+
         getInitialTrack: () => undefined,
-        verifyOutcome: async (initialTrack, lastTrack) => {
+        verifyOutcome: async (_initialTrack, lastTrack) => {
           expect(lastTrack).toBeDefined();
           expect(lastTrack!.isTorchOn()).toBe(true);
         },
@@ -472,6 +474,7 @@ describe('TorchCe', () => {
       {
         description: '(state: Off, track: stopped)',
         initialState: State.Off,
+
         getInitialTrack: () => createMockTrack(true),
         verifyOutcome: async (initialTrack, lastTrack) => {
           expect(lastTrack).not.toBe(initialTrack);
@@ -487,6 +490,7 @@ describe('TorchCe', () => {
       {
         description: '(state: On, track: stopped)',
         initialState: State.On,
+
         getInitialTrack: () => createMockTrack(true),
         verifyOutcome: async (initialTrack, lastTrack) => {
           expect(lastTrack).not.toBe(initialTrack);
@@ -502,6 +506,7 @@ describe('TorchCe', () => {
       {
         description: '(state: Off, track: active)',
         initialState: State.Off,
+
         getInitialTrack: () => createMockTrack(),
         verifyOutcome: async (initialTrack, lastTrack) => {
           expect(lastTrack).not.toBe(initialTrack);
@@ -517,6 +522,7 @@ describe('TorchCe', () => {
       {
         description: '(state: On, track: active)',
         initialState: State.On,
+
         getInitialTrack: () => createMockTrack(),
         verifyOutcome: async (initialTrack, lastTrack) => {
           expect(lastTrack).toBe(initialTrack);
@@ -526,7 +532,6 @@ describe('TorchCe', () => {
           expect(lastTrack!.isTorchOn()).toBe(true);
         },
       },
-      // tslint:enable: object-literal-sort-keys
     ];
 
     testCases.forEach(({description, initialState, getInitialTrack, verifyOutcome}) => describe(description, () => {
@@ -586,7 +591,7 @@ describe('TorchCe', () => {
 
     it('should switch the torch on/off, if a track is active', async () => {
       const mockTrack = new MockMediaStreamTrack(true);
-      getTrackInfoSpy.and.returnValue(Promise.resolve({track: mockTrack, hasTorch: true}));
+      getTrackInfoSpy.and.resolveTo({hasTorch: true, track: mockTrack});
 
       await elem.updateState(State.Uninitialized);
       expect(mockTrack.isTorchOn()).toBe(false);
@@ -616,7 +621,7 @@ describe('TorchCe', () => {
     });
 
     it('should reject, if retrieving track info fails', async () => {
-      getTrackInfoSpy.and.returnValue(Promise.reject('test'));
+      getTrackInfoSpy.and.rejectWith('test');
       const rejection = await reversePromise(elem.updateState(State.On));
 
       expect(rejection).toBe('test');
@@ -783,10 +788,11 @@ describe('TorchCe', () => {
   // Helpers
   class MockMediaStreamTrack {
     public readyState: MediaStreamTrackState = 'live';
-    public readonly $capabilities: MediaTrackCapabilities = {torch: this.hasTorch};
+    public readonly $capabilities: MediaTrackCapabilities = {};
     public $constraints: MediaTrackConstraints = {};
 
     constructor(private readonly hasTorch = false) {
+      this.$capabilities.torch = this.hasTorch;
     }
 
     public applyConstraints(constraints: MediaTrackConstraints): Promise<void> {
@@ -810,7 +816,8 @@ describe('TorchCe', () => {
   }
 
   class MockPermissionStatus extends EventTarget implements PermissionStatus {
-    public readonly onchange: null;
+    public readonly name = 'mock';
+    public readonly onchange = null;
 
     constructor(public readonly state: PermissionState) {
       super();
@@ -818,8 +825,8 @@ describe('TorchCe', () => {
   }
 
   class TestTorchCe extends TorchCe {
-    public state!: TorchCe['state'];
-    public trackInfoPromise!: TorchCe['trackInfoPromise'];
+    declare public state: TorchCe['state'];
+    declare public trackInfoPromise: TorchCe['trackInfoPromise'];
 
     public getTrackInfo(...args: Parameters<TorchCe['getTrackInfo']>) {
       return super.getTrackInfo(...args);

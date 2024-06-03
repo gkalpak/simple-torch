@@ -175,12 +175,14 @@ describe('registerSw()', () => {
 
     // Helpers
     class MockServiceWorkerContainer {
+      // eslint-disable-next-line jasmine/no-unsafe-spy
       public readonly $registration = {update: jasmine.createSpy('mockSwRegistration.update')};
-      public $registerDeferred!: {resolve: () => void, reject: (err: any) => void};
+      public $registerDeferred!: {resolve: () => void, reject: (err: unknown) => void};
 
       public readonly ready = Promise.resolve(this.$registration);
+      // eslint-disable-next-line jasmine/no-unsafe-spy
       public readonly register = jasmine.createSpy('mockSwContainer.register').and.callFake(() =>
-        new Promise<void>((resolve, reject) => this.$registerDeferred = {resolve, reject}));
+        new Promise<void>((resolve, reject) => this.$registerDeferred = {reject, resolve}));
     }
   });
 });

@@ -2,7 +2,7 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "lib": [
-      "es2018",
+      "es2022",
       "webworker"
     ]
   },

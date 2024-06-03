@@ -1,11 +1,12 @@
-'use strict';
-
 // Imports
-const {resolve} = require('node:path');
-const {convertToSizes} = require('./utils/svg-to-pngs');
+import {resolve} from 'node:path';
+import {exit} from 'node:process';
+
+import {convertToSizes} from './utils/svg-to-pngs.mjs';
+
 
 // Constants
-const ROOT_DIR = resolve(`${__dirname}/..`);
+const ROOT_DIR = resolve(`${import.meta.dirname}/..`);
 const SIMPLE_TORCH_SVG_PATH = `${ROOT_DIR}/src/assets/images/simple-torch.svg`;
 const SIZES = [128, 192, 512];
 
@@ -18,6 +19,6 @@ async function _main() {
     await convertToSizes(SIMPLE_TORCH_SVG_PATH, SIZES);
   } catch (err) {
     console.error(err);
-    process.exit(1);
+    exit(1);
   }
 }

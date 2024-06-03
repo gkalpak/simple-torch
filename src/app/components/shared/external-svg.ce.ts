@@ -8,7 +8,7 @@ export class ExternalSvgCe extends BaseCe {
   protected static readonly cache = new Map<string, Promise<string>>();
   private svgElem: SVGSVGElement | null = null;
 
-  public attributeChangedCallback(attr: string, oldValue: string, newValue: string): void {
+  public attributeChangedCallback(attr: string, _oldValue: string, newValue: string): void {
     switch (attr) {
       case 'class':
         this.updateClass(newValue);

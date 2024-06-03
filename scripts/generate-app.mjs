@@ -1,27 +1,31 @@
-'use strict';
-
 // Imports
-const {resolve} = require('node:path');
-const sh = require('shelljs');
-const {repository, version} = require('../package.json');
-const {hash, hashFile} = require('./utils/hash-utils');
+import {resolve} from 'node:path';
+import {argv, exit} from 'node:process';
+
+import sh from 'shelljs';
+
+import {hash, hashFile} from './utils/hash-utils.mjs';
+
 
 sh.set('-e');
 
 // Constants
-const ROOT_DIR = resolve(`${__dirname}/..`);
+const ROOT_DIR = resolve(`${import.meta.dirname}/..`);
+const PKG_PATH = `${ROOT_DIR}/package.json`;
 const OUT_DIR = `${ROOT_DIR}/out`;
 const OUT_INDEX_PATH = `${OUT_DIR}/index.html`;
 const OUT_SW_PATH = `${OUT_DIR}/sw.js`;
 
 // Run
-_main(process.argv.slice(2));
+_main(argv.slice(2));
 
 // Helpers
 async function _main(args) {
   try {
     const production = args.includes('--production');
-    const repoUrl = repository.url.replace(/^git\+/, '').replace(/\.git$/, '');
+    /** @type {import('../package.json')} */
+    const pkg = JSON.parse(sh.cat(PKG_PATH));
+    const repoUrl = pkg.repository.url.replace(/^git\+/, '').replace(/\.git$/, '');
     const sha = sh.exec('git rev-parse --verify HEAD', {silent: true}).trim();
 
     // Copy files.
@@ -32,7 +36,7 @@ async function _main(args) {
     sh.sed('-i', /<PLACEHOLDER:PRODUCTION>/g, `${production}`, OUT_INDEX_PATH);
     sh.sed('-i', /<PLACEHOLDER:REPO_URL>/g, `${repoUrl}`, OUT_INDEX_PATH);
     sh.sed('-i', /<PLACEHOLDER:SHA>/g, `${sha}`, OUT_INDEX_PATH);
-    sh.sed('-i', /<PLACEHOLDER:VERSION>/g, `${version}`, OUT_INDEX_PATH);
+    sh.sed('-i', /<PLACEHOLDER:VERSION>/g, `${pkg.version}`, OUT_INDEX_PATH);
 
     // In production mode...
     if (production) {
@@ -48,7 +52,7 @@ async function _main(args) {
     }
   } catch (err) {
     console.error(err);
-    process.exit(1);
+    exit(1);
   }
 }
 
@@ -67,8 +71,7 @@ function swCreateFilesToCacheReplacement(files, hashes) {
 }
 
 function swFindFilesToCache() {
-  return sh.
-    ls('-lR', OUT_DIR).
+  return /** @type {import('node:fs').Dirent[] & import('shelljs').ShellArray} */ (sh.ls('-lR', OUT_DIR)).
     filter(x => x.isFile() && !x.name.startsWith('test/') && !x.name.endsWith('.map') && (x.name !== 'sw.js')).
     map(x => x.name);
 }

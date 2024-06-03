@@ -18,7 +18,7 @@ export const enum State {
   On,
 }
 
-export const EMPTY_TRACK_INFO: ITrackInfo = {track: undefined, hasTorch: false};
+export const EMPTY_TRACK_INFO: ITrackInfo = {hasTorch: false, track: undefined};
 
 export class TorchCe extends BaseCe {
   private static readonly statusMessages = {
@@ -167,11 +167,18 @@ export class TorchCe extends BaseCe {
       const {track, hasTorch} = await this.getTrackInfo(true);
 
       if (!hasTorch) {
-        const permissionState = (await WIN.navigator.permissions.query({name: 'camera'})).state;
+        let permissionState = 'initializing';
+        try {
+          // Chrome supports `name`, while Firefox does not.
+          // See also: https://developer.mozilla.org/en-US/docs/Web/API/Permissions/query
+          permissionState = (await WIN.navigator.permissions.query({name: 'camera' as PermissionName})).state;
+        } catch {
+          permissionState = 'unknown';
+        }
         const errorMessage = (permissionState === 'denied') ?
           'Access to camera denied. Please, give permission in browser settings.' : (permissionState === 'prompt') ?
-          'Access to camera not granted. Please, give permission when prompted.' :
-          `Unable to detect ${!track ? 'camera' : 'torch'} on your device.`;
+            'Access to camera not granted. Please, give permission when prompted.' :
+            `Unable to detect ${!track ? 'camera' : 'torch'} on your device.`;
 
         throw new Error(errorMessage);
       }
@@ -196,10 +203,13 @@ export class TorchCe extends BaseCe {
     await this.updateState((this.state === State.Off) ? State.On : State.Off).catch(err => this.onError(err));
   }
 
-  protected async onError(err: Error): Promise<void> {
-    super.onError(err);
+  protected async onError(err: unknown): Promise<Error> {
+    const err2 = await super.onError(err);
+
     await this.stopTrack();
-    await this.updateState(State.Disabled, err.message);
+    await this.updateState(State.Disabled, err2.message);
+
+    return err2;
   }
 
   protected async onVisibilityChange(): Promise<void> {
@@ -215,7 +225,7 @@ export class TorchCe extends BaseCe {
     }
   }
 
-  protected async updateState(newState: State, extraMsg?: string): Promise<void> {
+  protected async updateState(_newState: State, _extraMsg?: string): Promise<void> {
     return undefined;
   }
 

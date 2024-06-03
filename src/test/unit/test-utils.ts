@@ -38,7 +38,7 @@ export const mockProperty = <T, P extends keyof T>(ctx: T, prop: P): IMockProper
   beforeEach(installSpies);
   afterEach(uninstallSpies);
 
-  return {setMockValue, restoreOriginalValue: uninstallSpies};
+  return {restoreOriginalValue: uninstallSpies, setMockValue};
 };
 
 export const normalizeWhitespace = (input: string | null): string => (input || '').
@@ -71,8 +71,10 @@ export const spyProperty = <T, P extends keyof T>(ctx: T, prop: P): IPropertySpy
 
   let value = ctx[prop];
   const setMockValue = (mockValue: typeof value) => value = mockValue;
-  const setSpy = jasmine.createSpy(`set ${prop}`).and.callFake(setMockValue);
-  const getSpy = jasmine.createSpy(`get ${prop}`).and.callFake(() => value);
+  /* eslint-disable jasmine/no-unsafe-spy */
+  const setSpy = jasmine.createSpy(`set ${String(prop)}`).and.callFake(setMockValue);
+  const getSpy = jasmine.createSpy(`get ${String(prop)}`).and.callFake(() => value);
+  /* eslint-enable jasmine/no-unsafe-spy */
 
   const installSpies = () => {
     value = ctx[prop];
@@ -87,5 +89,13 @@ export const spyProperty = <T, P extends keyof T>(ctx: T, prop: P): IPropertySpy
     Object.defineProperty(ctx, prop, originalDescriptor) :
     delete ctx[prop];
 
-  return {installSpies, uninstallSpies, setMockValue, getSpy, setSpy};
+  return {
+    installSpies,
+    uninstallSpies,
+
+    setMockValue,
+
+    getSpy,
+    setSpy,
+  };
 };

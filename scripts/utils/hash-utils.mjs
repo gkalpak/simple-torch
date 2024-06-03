@@ -1,8 +1,7 @@
-'use strict';
-
 // Imports
-const {createHash} = require('node:crypto');
-const {createReadStream} = require('node:fs');
+import {createHash} from 'node:crypto';
+import {createReadStream} from 'node:fs';
+
 
 // Enum: Algorithm
 const Algorithm = {
@@ -13,7 +12,7 @@ const Algorithm = {
 };
 
 // Exports
-module.exports = {
+export {
   Algorithm,
   hash,
   hashFile

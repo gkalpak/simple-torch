@@ -4,7 +4,7 @@ import {ISettings, Settings} from '../../../app/shared/settings.service.js';
 
 describe('Settings', () => {
   describe('#muted', () => {
-    beforeEach(() => spyOnProperty(WIN, 'localStorage', 'get').and.returnValue({}));
+    beforeEach(() => spyOnProperty(WIN, 'localStorage', 'get').and.returnValue(new MockStorage()));
 
     it('should return the value stored in `localStorage.muted`', () => {
       TestSettings.storeValues({muted: true});
@@ -19,11 +19,13 @@ describe('Settings', () => {
     });
 
     it('should correctly return falsy values', () => {
+      // eslint-disable-next-line  @typescript-eslint/no-explicit-any
       TestSettings.storeValues({muted: null as any});
       const settings = new TestSettings();
 
       expect(settings.muted).toBeNull();
 
+      // eslint-disable-next-line  @typescript-eslint/no-explicit-any
       settings.muted = undefined as any;
       expect(settings.muted).toBeUndefined();
     });
@@ -56,6 +58,20 @@ describe('Settings', () => {
   });
 
   // Helpers
+  class MockStorage implements Storage {
+    public get length(): never { return this.notImplemented(); }
+
+    public clear(): never { return this.notImplemented(); }
+    public getItem(): never { return this.notImplemented(); }
+    public key(): never { return this.notImplemented(); }
+    public removeItem(): never { return this.notImplemented(); }
+    public setItem(): never { return this.notImplemented(); }
+
+    protected notImplemented(): never {
+      throw new Error('[MockStorage] Method not implemented.');
+    }
+  }
+
   class TestSettings extends Settings {
     constructor() { super(); }
     public static retrieveValues(): Partial<ISettings> { return super.retrieveValues(); }

@@ -140,6 +140,7 @@ describe('Utils', () => {
 
   describe('#sleep()', () => {
     beforeEach(jasmine.clock().install);
+
     afterEach(jasmine.clock().uninstall);
 
     it('should return a promise', () => {

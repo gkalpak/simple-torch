@@ -1,7 +1,7 @@
 import {BaseCe, IInitializedCe} from '../../../../app/components/base.ce.js';
 import {ExternalSvgCe} from '../../../../app/components/shared/external-svg.ce.js';
 import {WIN} from '../../../../app/shared/constants.js';
-import {getNormalizedTextContent, macrotickWithMockedClock, microtick, setupCeContainer} from '../../test-utils.js';
+import {getNormalizedTextContent, macrotick, macrotickWithMockedClock, setupCeContainer} from '../../test-utils.js';
 
 
 describe('ExternalSvgCe', () => {
@@ -42,27 +42,27 @@ describe('ExternalSvgCe', () => {
     const elem = await initCe(TestExternalSvgCe, {src: '/foo/bar'});
     expect(fetchSpy).toHaveBeenCalledWith('/foo/bar');
 
-    await microtick();
+    await macrotick();  // Wait for `src` fetching to complete.
     expect(getNormalizedTextContent(elem)).toBe('<svg>/foo/bar</svg>');
   });
 
   it('should not load the same SVG twice', async () => {
     const elem1 = await initCe(TestExternalSvgCe, {src: '/foo/bar'});
-    await microtick();
+    await macrotick();  // Wait for `src` fetching to complete.
 
     expect(fetchSpy).toHaveBeenCalledWith('/foo/bar');
     expect(getNormalizedTextContent(elem1)).toBe('<svg>/foo/bar</svg>');
 
     fetchSpy.calls.reset();
     const elem2 = await initCe(TestExternalSvgCe, {src: '/foo/bar'});
-    await microtick();
+    await macrotick();  // Wait for `src` fetching to complete.
 
     expect(fetchSpy).not.toHaveBeenCalled();
     expect(getNormalizedTextContent(elem2)).toBe('<svg>/foo/bar</svg>');
 
     fetchSpy.calls.reset();
     const elem3 = await initCe(TestExternalSvgCe, {src: '/baz/qux'});
-    await microtick();
+    await macrotick();  // Wait for `src` fetching to complete.
 
     expect(fetchSpy).toHaveBeenCalledWith('/baz/qux');
     expect(getNormalizedTextContent(elem3)).toBe('<svg>/baz/qux</svg>');
@@ -70,6 +70,8 @@ describe('ExternalSvgCe', () => {
 
   it('should forward classes from the host element to the displayed SVG', async () => {
     const elem = await initCe(TestExternalSvgCe, {class: 'foo bar', src: '/baz/qux'});
+    await macrotick();  // Wait for `src` fetching to complete.
+
     const svg = elem.shadowRoot.querySelector('svg')!;
 
     expect(svg).not.toBeNull();
@@ -86,7 +88,7 @@ describe('ExternalSvgCe', () => {
     let fetchResolve: (body: string) => void;
 
     beforeEach(() => {
-      fetchSpy.and.callFake((url: string) => new Promise(resolve =>
+      fetchSpy.and.callFake((_url: string) => new Promise(resolve =>
         fetchResolve = (body: string) => resolve({text: () => body})));
 
       jasmine.clock().install();

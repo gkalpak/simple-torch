@@ -79,10 +79,13 @@ describe('BaseCe', () => {
     });
 
     it('should return a promise that resolves when the element is defined', async () => {
-      ceWhenDefinedSpy.and.returnValues(Promise.resolve('foo'), Promise.resolve('bar'));
+      expect(ceWhenDefinedSpy).not.toHaveBeenCalled();
 
-      expect(await TestBaseCe.register() as unknown).toBe('foo');
-      expect(await FancyDivCe.register() as unknown).toBe('bar');
+      await TestBaseCe.register();
+      expect(ceWhenDefinedSpy).toHaveBeenCalledWith(TestBaseCe.tagName);
+
+      await FancyDivCe.register();
+      expect(ceWhenDefinedSpy).toHaveBeenCalledWith(FancyDivCe.tagName);
     });
   });
 
@@ -93,8 +96,7 @@ describe('BaseCe', () => {
 
     beforeEach(() => {
       testElem = new TestBaseCe();
-      initializeSpy = spyOn(testElem, 'initialize').and.
-        returnValue(Promise.resolve(testElem as IInitializedCe<TestBaseCe>));
+      initializeSpy = spyOn(testElem, 'initialize').and.resolveTo(testElem as IInitializedCe<TestBaseCe>);
       onErrorSpy = spyOn(testElem, 'onError');
     });
 
@@ -104,7 +106,7 @@ describe('BaseCe', () => {
     });
 
     it('should call `onError()` (with an appropriate message), if `initialize()` fails', async () => {
-      initializeSpy.and.returnValue(Promise.reject(new Error('foo')));
+      initializeSpy.and.rejectWith(new Error('foo'));
 
       testElem.connectedCallback();
       await microtick();
@@ -292,10 +294,10 @@ describe('BaseCe', () => {
 
   // Helpers
   class TestBaseCe extends BaseCe {
-    public static readonly template: typeof BaseCe.template;
-    public static readonly style: typeof BaseCe.style;
-    public readonly clazz!: BaseCe['clazz'];
-    public readonly cleanUpFns!: BaseCe['cleanUpFns'];
+    declare public static readonly template: typeof BaseCe.template;
+    declare public static readonly style: typeof BaseCe.style;
+    declare public readonly clazz: BaseCe['clazz'];
+    declare public readonly cleanUpFns: BaseCe['cleanUpFns'];
 
     public initialize(...args: Parameters<BaseCe['initialize']>) {
       return super.initialize(...args);
