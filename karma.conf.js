@@ -1,6 +1,14 @@
 // Karma configuration file.
 // More info: https://karma-runner.github.io/1.0/config/configuration-file.html
 
+// Imports
+const {env} = require('node:process');
+
+const {executablePath} = require('puppeteer');
+
+
+env.CHROME_BIN = executablePath();
+
 /**
  * @param {import('karma').Config} config
  * @return void;
