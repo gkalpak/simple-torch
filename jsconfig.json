@@ -1,12 +1,22 @@
 {
   "compilerOptions": {
+    "allowUnreachableCode": false,
+    "allowUnusedLabels": false,
     "checkJs": true,
+    "exactOptionalPropertyTypes": true,
+    "lib": [
+      "ES2022",
+    ],
     "module": "ESNext",
     "moduleResolution": "Node",
     "newLine": "lf",
     "noEmit": true,
+    "noFallthroughCasesInSwitch": true,
     "noImplicitAny": false,
+    "noImplicitOverride": true,
     "noImplicitReturns": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noUncheckedIndexedAccess": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "resolveJsonModule": true,

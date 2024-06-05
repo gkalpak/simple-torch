@@ -4,7 +4,7 @@ import {BaseCe, IInitializedCe} from '../base.ce.js';
 
 export class ExternalSvgCe extends BaseCe {
   public static readonly observedAttributes = ['class'];
-  protected static readonly template = '';
+  protected static override readonly template = '';
   protected static readonly cache = new Map<string, Promise<string>>();
   private svgElem: SVGSVGElement | null = null;
 
@@ -16,7 +16,7 @@ export class ExternalSvgCe extends BaseCe {
     }
   }
 
-  protected async initialize(): Promise<IInitializedCe<this>> {
+  protected override async initialize(): Promise<IInitializedCe<this>> {
     const self = await super.initialize();
     const src = self.getAttribute('src');
 

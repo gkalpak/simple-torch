@@ -3,12 +3,12 @@ import {BaseCe} from '../base.ce.js';
 
 
 export class VersionCe extends BaseCe {
-  protected static readonly template = `
+  protected static override readonly template = `
     <a href="${ENV.repoUrl}/commits/${ENV.sha.slice(0, 9)}" title="SHA: ${ENV.sha}">
       v${ENV.version}
     </a>
   `;
-  protected static readonly style = `
+  protected static override readonly style = `
     a {
       color: inherit;
       text-decoration: none;

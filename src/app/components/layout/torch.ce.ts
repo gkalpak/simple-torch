@@ -35,7 +35,7 @@ export class TorchCe extends BaseCe {
     [State.Off]: ZERO_WIDTH_SPACE,
     [State.On]: ZERO_WIDTH_SPACE,
   };
-  protected static readonly template = `
+  protected static override readonly template = `
     <external-svg-ce
         class="dark no-bg off torch uninitialized with-effects"
         src="/assets/images/simple-torch.svg">
@@ -49,7 +49,7 @@ export class TorchCe extends BaseCe {
       <div class="status-message-extra"></div>
     </div>
   `;
-  protected static readonly style = `
+  protected static override readonly style = `
     :host {
       display: flex;
       flex-direction: column;
@@ -127,7 +127,7 @@ export class TorchCe extends BaseCe {
     return trackInfo;
   }
 
-  protected async initialize(): Promise<IInitializedCe<this>> {
+  protected override async initialize(): Promise<IInitializedCe<this>> {
     const self = await super.initialize();
     const torchElem = self.shadowRoot.querySelector('.torch')!;
     const statusMsgElem = self.shadowRoot.querySelector('.status-message')!;
@@ -203,7 +203,7 @@ export class TorchCe extends BaseCe {
     await this.updateState((this.state === State.Off) ? State.On : State.Off).catch(err => this.onError(err));
   }
 
-  protected async onError(err: unknown): Promise<Error> {
+  protected override async onError(err: unknown): Promise<Error> {
     const err2 = await super.onError(err);
 
     await this.stopTrack();

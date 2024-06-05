@@ -158,7 +158,7 @@ describe('ExternalSvgCe', () => {
       this.cache.clear();
     }
 
-    public onError(...args: Parameters<BaseCe['onError']>) {
+    public override onError(...args: Parameters<BaseCe['onError']>) {
       return super.onError(...args);
     }
   }

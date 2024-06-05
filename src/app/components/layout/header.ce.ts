@@ -3,7 +3,7 @@ import {BaseCe, IInitializedCe} from '../base.ce.js';
 
 
 export class HeaderCe extends BaseCe {
-  protected static readonly template = `
+  protected static override readonly template = `
     <header>
       <logo-ce class="logo"></logo-ce>
       <b>Simple Torch</b>
@@ -12,7 +12,7 @@ export class HeaderCe extends BaseCe {
       <external-svg-ce class="speaker" src="/assets/images/speaker.svg"></external-svg-ce>
     </header>
   `;
-  protected static readonly style = `
+  protected static override readonly style = `
     :host {
       box-shadow: 0 6px 10px 0 rgba(0, 0, 0, 0.14),
                   0 1px 18px 0 rgba(0, 0, 0, 0.12);
@@ -52,7 +52,7 @@ export class HeaderCe extends BaseCe {
 
   private settings: ISettings = Settings.getInstance();
 
-  protected async initialize(): Promise<IInitializedCe<this>> {
+  protected override async initialize(): Promise<IInitializedCe<this>> {
     const self = await super.initialize();
     const speaker = self.shadowRoot.querySelector('.speaker')!;
     const updateSpeaker = () => speaker.classList.toggle('muted', this.settings.muted);

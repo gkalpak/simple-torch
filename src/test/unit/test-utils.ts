@@ -57,7 +57,7 @@ export const setupCeContainer = () => {
 
   return async <T extends BaseCe>(ceClassOrInstance: (new() => T) | T, attrs: {[name: string]: string} = {}) => {
     const elem = (ceClassOrInstance instanceof BaseCe) ? ceClassOrInstance : new ceClassOrInstance();
-    Object.keys(attrs).forEach(name => elem.setAttribute(name, attrs[name]));
+    Object.entries(attrs).forEach(([name, value]) => elem.setAttribute(name, value));
 
     container.appendChild(elem);
     await macrotick();  // Wait for initialization to complete.
@@ -80,7 +80,7 @@ export const spyProperty = <T, P extends keyof T>(ctx: T, prop: P): IPropertySpy
     value = ctx[prop];
     Object.defineProperty(ctx, prop, {
       configurable: true,
-      enumerable: originalDescriptor ? originalDescriptor.enumerable : true,
+      enumerable: originalDescriptor?.enumerable ?? true,
       get: getSpy,
       set: setSpy,
     });

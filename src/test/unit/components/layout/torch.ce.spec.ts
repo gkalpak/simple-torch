@@ -828,23 +828,23 @@ describe('TorchCe', () => {
     declare public state: TorchCe['state'];
     declare public trackInfoPromise: TorchCe['trackInfoPromise'];
 
-    public getTrackInfo(...args: Parameters<TorchCe['getTrackInfo']>) {
+    public override getTrackInfo(...args: Parameters<TorchCe['getTrackInfo']>) {
       return super.getTrackInfo(...args);
     }
 
-    public onClick(...args: Parameters<TorchCe['onClick']>) {
+    public override onClick(...args: Parameters<TorchCe['onClick']>) {
       return super.onClick(...args);
     }
 
-    public onError(...args: Parameters<TorchCe['onError']>) {
+    public override onError(...args: Parameters<TorchCe['onError']>) {
       return super.onError(...args);
     }
 
-    public onVisibilityChange(...args: Parameters<TorchCe['onVisibilityChange']>) {
+    public override onVisibilityChange(...args: Parameters<TorchCe['onVisibilityChange']>) {
       return super.onVisibilityChange(...args);
     }
 
-    public updateState(...args: Parameters<TorchCe['updateState']>) {
+    public override updateState(...args: Parameters<TorchCe['updateState']>) {
       return super.updateState(...args);
     }
   }

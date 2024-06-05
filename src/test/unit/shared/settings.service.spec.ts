@@ -74,7 +74,7 @@ describe('Settings', () => {
 
   class TestSettings extends Settings {
     constructor() { super(); }
-    public static retrieveValues(): Partial<ISettings> { return super.retrieveValues(); }
-    public static storeValues(values: Partial<ISettings>): void { super.storeValues(values); }
+    public static override retrieveValues(): Partial<ISettings> { return super.retrieveValues(); }
+    public static override storeValues(values: Partial<ISettings>): void { super.storeValues(values); }
   }
 });

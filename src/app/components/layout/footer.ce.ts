@@ -2,7 +2,7 @@ import {BaseCe} from '../base.ce.js';
 
 
 export class FooterCe extends BaseCe {
-  protected static readonly template = `
+  protected static override readonly template = `
     <footer>
       <span>
         Copyright &copy; 2019
@@ -11,7 +11,7 @@ export class FooterCe extends BaseCe {
       </span>
     </footer>
   `;
-  protected static readonly style = `
+  protected static override readonly style = `
     :host {
       box-shadow: 0 -6px 10px 0 rgba(0, 0, 0, 0.1),
                   0 -1px 18px 0 rgba(0, 0, 0, 0.08);

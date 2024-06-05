@@ -7,7 +7,7 @@ const {env} = require('node:process');
 const {executablePath} = require('puppeteer');
 
 
-env.CHROME_BIN = executablePath();
+env['CHROME_BIN'] = executablePath();
 
 /**
  * @param {import('karma').Config} config

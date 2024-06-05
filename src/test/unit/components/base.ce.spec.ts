@@ -120,7 +120,7 @@ describe('BaseCe', () => {
     let cleanUpLog: number[];
     let consoleErrorSpy: jasmine.Spy;
     let onErrorSpy: jasmine.Spy;
-    let cleanUpSpies: jasmine.Spy[];
+    let cleanUpSpies: readonly [jasmine.Spy, jasmine.Spy, jasmine.Spy];
 
     beforeEach(() => {
       testElem = new TestBaseCe();
@@ -250,8 +250,8 @@ describe('BaseCe', () => {
       const attachShadowCalls = attachShadowSpy.calls.all();
 
       expect(attachShadowCalls.length).toBe(2);
-      expect(attachShadowCalls[0].object).toBe(initTestBaseElem);
-      expect(attachShadowCalls[1].object).toBe(initFancyDivElem);
+      expect(attachShadowCalls[0]!.object).toBe(initTestBaseElem);
+      expect(attachShadowCalls[1]!.object).toBe(initFancyDivElem);
 
       attachShadowSpy.calls.reset();
       initTestBaseElem.shadowRoot.innerHTML = 'FOO';
@@ -299,17 +299,17 @@ describe('BaseCe', () => {
     declare public readonly clazz: BaseCe['clazz'];
     declare public readonly cleanUpFns: BaseCe['cleanUpFns'];
 
-    public initialize(...args: Parameters<BaseCe['initialize']>) {
+    public override initialize(...args: Parameters<BaseCe['initialize']>) {
       return super.initialize(...args);
     }
 
-    public onError(...args: Parameters<BaseCe['onError']>) {
+    public override onError(...args: Parameters<BaseCe['onError']>) {
       return super.onError(...args);
     }
   }
 
   class FancyDivCe extends TestBaseCe {
-    public static readonly template = '<div>Fancy</div>';
-    public static readonly style = 'div { color: orange; }';
+    public static override readonly template = '<div>Fancy</div>';
+    public static override readonly style = 'div { color: orange; }';
   }
 });

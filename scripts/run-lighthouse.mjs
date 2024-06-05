@@ -40,7 +40,7 @@ const CHROME_LAUNCH_OPTS = {
   chromePath: puppeteer.executablePath(),
 };
 /** @type {import('lighthouse').Flags} */
-const LIGHTHOUSE_FLAGS = {logLevel: env.CI ? 'error' : 'info'};
+const LIGHTHOUSE_FLAGS = {logLevel: env['CI'] ? 'error' : 'info'};
 const VIEWER_URL = 'https://googlechrome.github.io/lighthouse/viewer';
 const AUDIT_CATEGORIES = [
   'accessibility',
