@@ -29,7 +29,7 @@
     "postrelease": "npm run deploy",
     "preserve-prod": "npm run build-prod",
     "serve-prod": "npm run ~~serve-prod",
-    "pretest": "npm run build",
+    "pretest": "run-s build ~~compile-sw",
     "test": "run-s lint ~~test-unit ~~test-e2e ~~audit-web-app-localhost",
     "preversion": "run-s lint build ~~test-unit ~~audit-web-app-localhost",
     "postversion": "git push && git push --tags",
