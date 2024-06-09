@@ -1,13 +1,13 @@
 import {EMOJI, WIN, ZERO_WIDTH_SPACE} from '../../shared/constants.js';
 import {ISettings, Settings} from '../../shared/settings.service.js';
 import {ISound, Sounds} from '../../shared/sounds.service.js';
-import {Utils} from '../../shared/utils.service.js';
 import {BaseCe, IInitializedCe} from '../base.ce.js';
 
 
 interface ITrackInfo {
-  track: MediaStreamTrack | undefined;
+  hasCamera: boolean;
   hasTorch: boolean;
+  track: MediaStreamTrack | undefined;
 }
 
 export const enum State {
@@ -18,7 +18,7 @@ export const enum State {
   On,
 }
 
-export const EMPTY_TRACK_INFO: ITrackInfo = {hasTorch: false, track: undefined};
+export const EMPTY_TRACK_INFO: ITrackInfo = {hasCamera: false, hasTorch: false, track: undefined};
 
 export class TorchCe extends BaseCe {
   private static readonly statusMessages = {
@@ -99,9 +99,34 @@ export class TorchCe extends BaseCe {
 
   private readonly settings: ISettings = Settings.getInstance();
   private readonly sounds: Sounds = Sounds.getInstance();
-  private readonly utils: Utils = Utils.getInstance();
 
   private readonly clickSound: ISound = this.sounds.getSound('/assets/audio/click.ogg', 0.15);
+
+  protected async acquireCameraPermission(): Promise<void> {
+    let permissionState: PermissionState | 'unknown' = 'unknown';
+
+    try {
+      // Chrome supports `name: camera`, while Firefox (and potentially other browsers) do not.
+      // See also: https://developer.mozilla.org/en-US/docs/Web/API/Permissions/query
+      permissionState = (await WIN.navigator.permissions.query({name: 'camera' as PermissionName})).state;
+    } catch {
+      // eslint-ignore-line no-empty
+    }
+
+    if ((permissionState === 'prompt') || (permissionState === 'unknown')) {
+      try {
+        await WIN.navigator.mediaDevices.getUserMedia({video: true});
+        permissionState = 'granted';
+      } catch {
+        permissionState = 'denied';
+      }
+    }
+
+    if (permissionState === 'denied') {
+      throw new Error(
+          'Unable to access camera. If supported on your device, please give permission in browser settings.');
+    }
+  }
 
   protected async getTrackInfo(renewIfNecessary = false): Promise<ITrackInfo> {
     let trackInfo = await this.trackInfoPromise;
@@ -109,14 +134,34 @@ export class TorchCe extends BaseCe {
 
     if (noActiveTrack) {
       if (renewIfNecessary) {
-        this.trackInfoPromise = WIN.navigator.mediaDevices.
-          getUserMedia({video: {facingMode: 'environment'}}).
-          catch(() => undefined).
-          then(stream => stream && stream.getVideoTracks().pop()).
-          then(async track => ({
-            hasTorch: !!track && await this.utils.waitAndCheck(100, 25, () => !!track.getCapabilities().torch),
-            track,
-          }));
+        this.trackInfoPromise = (async () => {
+          await this.acquireCameraPermission();
+
+          const devices = await WIN.navigator.mediaDevices.enumerateDevices();
+          const cameras = await devices.
+            filter((x): x is MediaDeviceInfo & {kind: 'videoinput'} => x.kind === 'videoinput').
+            reverse();  // Often, it is the last camera that has the torch.
+
+          for (const cam of cameras) {
+            const stream = await WIN.navigator.mediaDevices.getUserMedia({
+              video: {
+                deviceId: {exact: cam.deviceId},
+              },
+            });
+            const track = stream.getVideoTracks().pop();
+
+            if (track?.getCapabilities?.().torch === true) {
+              return {hasCamera: true, hasTorch: true, track};
+            } else {
+              track?.stop();
+            }
+          }
+
+          return {
+            ...EMPTY_TRACK_INFO,
+            hasCamera: cameras.length > 0,
+          };
+        })();
 
         trackInfo = await this.trackInfoPromise;
       } else {
@@ -164,23 +209,10 @@ export class TorchCe extends BaseCe {
       // The `updateState()` call should complete fairly quickly, though, so serial execution should
       // not have a noticeable impact here.
       await updateState(State.Initializing);
-      const {track, hasTorch} = await this.getTrackInfo(true);
+      const {hasCamera, hasTorch} = await this.getTrackInfo(true);
 
       if (!hasTorch) {
-        let permissionState = 'initializing';
-        try {
-          // Chrome supports `name`, while Firefox does not.
-          // See also: https://developer.mozilla.org/en-US/docs/Web/API/Permissions/query
-          permissionState = (await WIN.navigator.permissions.query({name: 'camera' as PermissionName})).state;
-        } catch {
-          permissionState = 'unknown';
-        }
-        const errorMessage = (permissionState === 'denied') ?
-          'Access to camera denied. Please, give permission in browser settings.' : (permissionState === 'prompt') ?
-            'Access to camera not granted. Please, give permission when prompted.' :
-            `Unable to detect ${!track ? 'camera' : 'torch'} on your device.`;
-
-        throw new Error(errorMessage);
+        throw new Error(`Unable to detect ${hasCamera ? 'torch' : 'camera'} on your device.`);
       }
 
       const onVisibilityChange = () => this.onVisibilityChange();

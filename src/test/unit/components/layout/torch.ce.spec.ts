@@ -1,10 +1,11 @@
+/* eslint-disable max-classes-per-file */
+
 import {BaseCe, IInitializedCe} from '../../../../app/components/base.ce.js';
 import {EMPTY_TRACK_INFO, State, TorchCe} from '../../../../app/components/layout/torch.ce.js';
 import {LoaderCe} from '../../../../app/components/shared/loader.ce.js';
 import {EMOJI, WIN} from '../../../../app/shared/constants.js';
 import {Settings} from '../../../../app/shared/settings.service.js';
 import {Sounds} from '../../../../app/shared/sounds.service.js';
-import {Utils} from '../../../../app/shared/utils.service.js';
 import {
   microtick,
   mockProperty,
@@ -17,14 +18,12 @@ import {
 
 describe('TorchCe', () => {
   const initCe = setupCeContainer();
-  let permissionsQuerySpy: jasmine.Spy;
   let getTrackInfoSpy: jasmine.Spy;
   let onErrorSpy: jasmine.Spy;
 
   beforeAll(() => TestTorchCe.register());
 
   beforeEach(() => {
-    permissionsQuerySpy = spyOn(WIN.navigator.permissions, 'query').and.resolveTo(new MockPermissionStatus('denied'));
     getTrackInfoSpy = spyOn(TestTorchCe.prototype, 'getTrackInfo').and.resolveTo(EMPTY_TRACK_INFO);
     onErrorSpy = spyOn(TestTorchCe.prototype, 'onError');
   });
@@ -61,132 +60,273 @@ describe('TorchCe', () => {
     expect(normalizeWhitespace(status.textContent)).toBe(`Status: INITIALIZING... ${EMOJI.hourglassNotDone}`);
   });
 
-  describe('#getTrackInfo()', () => {
-    const utils = Utils.getInstance();
-    let elem: TestTorchCe;
-    let mockTrack: MockMediaStreamTrack;
-    let utilsWaitAndCheckSpy: jasmine.Spy;
+  describe('#acquireCameraPermission()', () => {
+    let mockMediaDevices: MockMediaDevices;
     let getUserMediaSpy: jasmine.Spy;
+    let permissionsQuerySpy: jasmine.Spy;
+    let elem: TestTorchCe;
+
+    beforeEach(() => {
+      mockMediaDevices = new MockMediaDevices();
+
+      spyOnProperty(WIN.navigator, 'mediaDevices').and.returnValue(mockMediaDevices as unknown as MediaDevices);
+      getUserMediaSpy = spyOn(mockMediaDevices, 'getUserMedia').and.callThrough();
+      permissionsQuerySpy = spyOn(WIN.navigator.permissions, 'query').and.resolveTo(new MockPermissionStatus('denied'));
+
+      elem = new TestTorchCe();
+    });
+
+    it('should resolve if permission is already granted', async () => {
+      permissionsQuerySpy.and.resolveTo(new MockPermissionStatus('granted'));
+
+      await expectAsync(elem.acquireCameraPermission()).toBeResolved();
+      expect(getUserMediaSpy).not.toHaveBeenCalled();
+    });
+
+    it('should reject if permission is already denied', async () => {
+      permissionsQuerySpy.and.resolveTo(new MockPermissionStatus('denied'));
+
+      await expectAsync(elem.acquireCameraPermission()).toBeRejectedWithError(
+          'Unable to access camera. If supported on your device, please give permission in browser settings.');
+      expect(getUserMediaSpy).not.toHaveBeenCalled();
+    });
+
+    it('should resolve after prompting the user if permission is freshly granted', async () => {
+      permissionsQuerySpy.and.resolveTo(new MockPermissionStatus('prompt'));
+
+      await expectAsync(elem.acquireCameraPermission()).toBeResolved();
+      expect(getUserMediaSpy).toHaveBeenCalledOnceWith({video: true});
+    });
+
+    it('should reject after prompting the user if permission is freshly denied', async () => {
+      // Ensure there is no video input (i.e. camera).
+      mockMediaDevices.$devicesWithSpecs = new Map();
+      permissionsQuerySpy.and.resolveTo(new MockPermissionStatus('prompt'));
+
+      await expectAsync(elem.acquireCameraPermission()).toBeRejectedWithError(
+          'Unable to access camera. If supported on your device, please give permission in browser settings.');
+      expect(getUserMediaSpy).toHaveBeenCalledOnceWith({video: true});
+    });
+
+    it('should resolve if querying for `camera` permission is not supported but permission is granted', async () => {
+      permissionsQuerySpy.and.rejectWith('Unknown permission');
+
+      await expectAsync(elem.acquireCameraPermission()).toBeResolved();
+      expect(getUserMediaSpy).toHaveBeenCalledOnceWith({video: true});
+    });
+
+    it('should reject if querying for `camera` permission is not supported and permission is denied', async () => {
+      // Ensure there is no video input (i.e. camera).
+      mockMediaDevices.$devicesWithSpecs = new Map();
+      permissionsQuerySpy.and.rejectWith('Unknown permission');
+
+      await expectAsync(elem.acquireCameraPermission()).toBeRejectedWithError(
+          'Unable to access camera. If supported on your device, please give permission in browser settings.');
+      expect(getUserMediaSpy).toHaveBeenCalledOnceWith({video: true});
+    });
+  });
+
+  describe('#getTrackInfo()', () => {
+    let mockMediaDevices: MockMediaDevices;
+    let getUserMediaSpy: jasmine.Spy;
+    let acquireCameraPermissionSpy: jasmine.Spy;
+    let elem: TestTorchCe;
 
     beforeEach(async () => {
-      elem = await initCe(TestTorchCe);
-      mockTrack = new MockMediaStreamTrack();
+      mockMediaDevices = new MockMediaDevices();
 
-      utilsWaitAndCheckSpy = spyOn(utils, 'waitAndCheck').and.resolveTo(false);
-      getUserMediaSpy = spyOn(WIN.navigator.mediaDevices, 'getUserMedia').and.
-        resolveTo({getVideoTracks: () => [mockTrack]} as unknown as MediaStream);
-
+      spyOnProperty(WIN.navigator, 'mediaDevices').and.returnValue(mockMediaDevices as unknown as MediaDevices);
+      getUserMediaSpy = spyOn(mockMediaDevices, 'getUserMedia').and.callThrough();
+      acquireCameraPermissionSpy = spyOn(TestTorchCe.prototype, 'acquireCameraPermission').and.resolveTo();
       getTrackInfoSpy.and.callThrough();
+
+      elem = new TestTorchCe();
     });
 
     describe('(with `renewIfNecessary: false`)', () => {
-      // Helpers
-      const getTrackInfo = () => elem.getTrackInfo();
-
       it('should retrieve and return the existing track info', async () => {
-        await elem.getTrackInfo(true);
-        const trackInfo = await getTrackInfo();
+        await initCe(elem);
+        getUserMediaSpy.calls.reset();
+        acquireCameraPermissionSpy.calls.reset();
 
-        expect(trackInfo).toEqual({hasTorch: false, track: mockTrack as unknown as MediaStreamTrack});
+        const trackInfo = await elem.getTrackInfo();
+
+        expect(trackInfo).toEqual({hasCamera: true, hasTorch: true, track: jasmine.any(MockMediaStreamTrack)});
+        expect(getUserMediaSpy).not.toHaveBeenCalled();
+        expect(acquireCameraPermissionSpy).not.toHaveBeenCalled();
       });
 
       it('should return empty track info, if there is no track info', async () => {
-        const trackInfo = await getTrackInfo();
+        const trackInfo = await elem.getTrackInfo();
 
         expect(trackInfo).toEqual(EMPTY_TRACK_INFO);
         expect(getUserMediaSpy).not.toHaveBeenCalled();
+        expect(acquireCameraPermissionSpy).not.toHaveBeenCalled();
       });
 
       it('should return empty track info, if the previous track has been stopped', async () => {
-        const trackInfo1 = await elem.getTrackInfo(true);
+        await initCe(elem);
+        const trackInfo1 = await elem.getTrackInfo();
 
-        mockTrack.stop();
+        trackInfo1.track?.stop();
         getUserMediaSpy.calls.reset();
-        const trackInfo2 = await getTrackInfo();
+        acquireCameraPermissionSpy.calls.reset();
+
+        const trackInfo2 = await elem.getTrackInfo();
 
         expect(trackInfo1).not.toEqual(EMPTY_TRACK_INFO);
         expect(trackInfo2).toEqual(EMPTY_TRACK_INFO);
         expect(getUserMediaSpy).not.toHaveBeenCalled();
+        expect(acquireCameraPermissionSpy).not.toHaveBeenCalled();
       });
     });
 
     describe('(with `renewIfNecessary: true`)', () => {
-      // Helpers
-      const getTrackInfo = () => elem.getTrackInfo(true);
+      it('should get a new track, if there is currently no track', async () => {
+        const trackInfo = await elem.getTrackInfo(true);
 
-      it('should retrieve and return the track info', async () => {
-        const trackInfo = await getTrackInfo();
-
-        expect(trackInfo).toEqual({hasTorch: false, track: mockTrack as unknown as MediaStreamTrack});
-        expect(getUserMediaSpy).toHaveBeenCalledWith({video: {facingMode: 'environment'}});
-      });
-
-      it('should renew the track, if there is currently no track', async () => {
-        const trackInfo1 = await elem.getTrackInfo();
-        const trackInfo2 = await elem.getTrackInfo(true);
-
-        expect(trackInfo1).toBe(EMPTY_TRACK_INFO);
-        expect(trackInfo2).not.toEqual(trackInfo1);
+        expect(trackInfo).toEqual({hasCamera: true, hasTorch: true, track: jasmine.any(MockMediaStreamTrack)});
+        expect(acquireCameraPermissionSpy).toHaveBeenCalledOnceWith();
+        expect(getUserMediaSpy).toHaveBeenCalledWith({video: {deviceId: {exact: jasmine.any(String)}}});
       });
 
       it('should return the same track info, if no renewal is required', async () => {
-        const trackInfo1 = await getTrackInfo();
+        const trackInfo1 = await elem.getTrackInfo(true);
 
-        expect(getUserMediaSpy).toHaveBeenCalledTimes(1);
-
+        acquireCameraPermissionSpy.calls.reset();
         getUserMediaSpy.calls.reset();
-        const trackInfo2 = await getTrackInfo();
+
+        const trackInfo2 = await elem.getTrackInfo(true);
 
         expect(trackInfo2).toBe(trackInfo1);
+        expect(trackInfo2).toEqual({hasCamera: true, hasTorch: true, track: jasmine.any(MockMediaStreamTrack)});
+        expect(acquireCameraPermissionSpy).not.toHaveBeenCalled();
         expect(getUserMediaSpy).not.toHaveBeenCalled();
       });
 
       it('should renew the track, if the previous track has been stopped', async () => {
-        const trackInfo1 = await getTrackInfo();
+        const trackInfo1 = await elem.getTrackInfo(true);
 
-        expect(getUserMediaSpy).toHaveBeenCalledTimes(1);
-
-        mockTrack.stop();
+        trackInfo1.track?.stop();
+        acquireCameraPermissionSpy.calls.reset();
         getUserMediaSpy.calls.reset();
-        const trackInfo2 = await getTrackInfo();
+
+        const trackInfo2 = await elem.getTrackInfo(true);
 
         expect(trackInfo2).not.toBe(trackInfo1);
-        expect(getUserMediaSpy).toHaveBeenCalledTimes(1);
+        expect(trackInfo2).toEqual({hasCamera: true, hasTorch: true, track: jasmine.any(MockMediaStreamTrack)});
+        expect(acquireCameraPermissionSpy).toHaveBeenCalledOnceWith();
+        expect(getUserMediaSpy).toHaveBeenCalledWith({video: {deviceId: {exact: jasmine.any(String)}}});
       });
 
-      it('should return empty track info, if `getUserMedia()` fails', async () => {
-        getUserMediaSpy.and.rejectWith('test');
-        const trackInfo = await getTrackInfo();
+      it('should reject if permission to camera is denied', async () => {
+        acquireCameraPermissionSpy.and.rejectWith('Permission denied.');
 
-        expect(trackInfo).toEqual(EMPTY_TRACK_INFO);
+        await expectAsync(elem.getTrackInfo(true)).toBeRejectedWith('Permission denied.');
       });
 
-      it('should return empty track info, if `MediaStream` has no video tracks', async () => {
-        getUserMediaSpy.and.resolveTo({getVideoTracks: () => []});
-        const trackInfo = await getTrackInfo();
+      it('should return empty track info, if there is no camera', async () => {
+        mockMediaDevices.$devicesWithSpecs = new Map([
+          [new TestDeviceInfo('audiooutput', 'spkr-001'), {}],
+          [new TestDeviceInfo('audiooutput', 'spkr-002'), {}],
+          [new TestDeviceInfo('audioinput', 'mic-001'), {}],
+          [new TestDeviceInfo('audioinput', 'mic-002'), {}],
+        ]);
 
-        expect(trackInfo).toEqual(EMPTY_TRACK_INFO);
+        expect(await elem.getTrackInfo(true)).toEqual({hasCamera: false, hasTorch: false, track: undefined});
       });
 
-      it('should fail, if detecting torch support fails', async () => {
-        utilsWaitAndCheckSpy.and.rejectWith('test');
-        const rejection = await reversePromise(getTrackInfo());
+      it('should return empty track info, if there is no camera with torch', async () => {
+        mockMediaDevices.$devicesWithSpecs = new Map([
+          [new TestDeviceInfo('videoinput', 'cam-001'), {}],
+          [new TestDeviceInfo('videoinput', 'cam-002'), {}],
+        ]);
 
-        expect(rejection).toBe('test');
+        expect(await elem.getTrackInfo(true)).toEqual({hasCamera: true, hasTorch: false, track: undefined});
       });
 
-      it('should detect whether the track supports torch', async () => {
-        utilsWaitAndCheckSpy.and.resolveTo(true);
-        const {hasTorch} = await getTrackInfo();
+      it('should try all video input devices to find one that supports torch', async () => {
+        mockMediaDevices.$devicesWithSpecs = new Map([
+          [new TestDeviceInfo('audiooutput', 'spkr-001'), {}],
+          [new TestDeviceInfo('audioinput', 'mic-001'), {}],
+          [new TestDeviceInfo('videoinput', 'cam-001'), {}],
+          [new TestDeviceInfo('audiooutput', 'spkr-002'), {}],
+          [new TestDeviceInfo('audioinput', 'mic-002'), {}],
+          [new TestDeviceInfo('videoinput', 'cam-002'), {}],
+          [new TestDeviceInfo('audiooutput', 'spkr-003'), {}],
+          [new TestDeviceInfo('audioinput', 'mic-003'), {}],
+          [new TestDeviceInfo('videoinput', 'cam-003'), {}],
+        ]);
 
-        expect(hasTorch).toBe(true);
-        expect(utilsWaitAndCheckSpy).toHaveBeenCalledWith(100, 25, jasmine.any(Function));
+        await elem.getTrackInfo(true);
 
-        const checkHasTorchFn = utilsWaitAndCheckSpy.calls.mostRecent().args[2];
-        expect(checkHasTorchFn()).toBe(false);
+        expect(getUserMediaSpy).toHaveBeenCalledTimes(3);
+        expect(getUserMediaSpy).toHaveBeenCalledWith({video: {deviceId: {exact: 'cam-001'}}});
+        expect(getUserMediaSpy).toHaveBeenCalledWith({video: {deviceId: {exact: 'cam-002'}}});
+        expect(getUserMediaSpy).toHaveBeenCalledWith({video: {deviceId: {exact: 'cam-003'}}});
+      });
 
-        mockTrack.$capabilities.torch = true;
-        expect(checkHasTorchFn()).toBe(true);
+      it('should try video input devices in reverse order', async () => {
+        mockMediaDevices.$devicesWithSpecs = new Map([
+          [new TestDeviceInfo('videoinput', 'cam-001'), {}],
+          [new TestDeviceInfo('videoinput', 'cam-002'), {}],
+          [new TestDeviceInfo('videoinput', 'cam-003'), {}],
+        ]);
+
+        await elem.getTrackInfo(true);
+
+        expect(getUserMediaSpy.calls.allArgs()).toEqual([
+          [{video: {deviceId: {exact: 'cam-003'}}}],
+          [{video: {deviceId: {exact: 'cam-002'}}}],
+          [{video: {deviceId: {exact: 'cam-001'}}}],
+        ]);
+      });
+
+      it('should stop trying video input devices as soon as it finds one that supports torch', async () => {
+        mockMediaDevices.$devicesWithSpecs = new Map([
+          [new TestDeviceInfo('videoinput', 'cam-001'), {torch: true}],
+          [new TestDeviceInfo('videoinput', 'cam-002'), {torch: true}],
+          [new TestDeviceInfo('videoinput', 'cam-003'), {}],
+        ]);
+
+        await elem.getTrackInfo(true);
+
+        expect(getUserMediaSpy.calls.allArgs()).toEqual([
+          [{video: {deviceId: {exact: 'cam-003'}}}],
+          [{video: {deviceId: {exact: 'cam-002'}}}],
+        ]);
+      });
+
+      it('should stop tracks that do not support torch', async () => {
+        mockMediaDevices.$devicesWithSpecs = new Map([
+          [new TestDeviceInfo('videoinput', 'cam-001'), {}],
+          [new TestDeviceInfo('videoinput', 'cam-002'), {}],
+          [new TestDeviceInfo('videoinput', 'cam-003'), {}],
+        ]);
+
+        await elem.getTrackInfo(true);
+        const tracks = await Promise.
+          all(getUserMediaSpy.calls.all().map(x => x.returnValue as Promise<MockMediaStream>)).
+          then(mockStreams => mockStreams.map(x => x.$track));
+
+        expect(tracks.length).toBe(3);
+        expect(tracks.map(x => x.readyState)).toEqual(['ended', 'ended', 'ended']);
+      });
+
+      it('should not stop the track that does support torch', async () => {
+        mockMediaDevices.$devicesWithSpecs = new Map([
+          [new TestDeviceInfo('videoinput', 'cam-001'), {torch: true}],
+          [new TestDeviceInfo('videoinput', 'cam-002'), {}],
+          [new TestDeviceInfo('videoinput', 'cam-003'), {}],
+        ]);
+
+        await elem.getTrackInfo(true);
+        const tracks = await Promise.
+          all(getUserMediaSpy.calls.all().map(x => x.returnValue as Promise<MockMediaStream>)).
+          then(mockStreams => mockStreams.map(x => x.$track));
+
+        expect(tracks.length).toBe(3);
+        expect(tracks.map(x => x.readyState)).toEqual(['ended', 'ended', 'live']);
       });
     });
   });
@@ -237,7 +377,7 @@ describe('TorchCe', () => {
         mockTrack = new MockMediaStreamTrack(true);
 
         onVisibilityChangeSpy = spyOn(elem, 'onVisibilityChange');
-        getTrackInfoSpy.and.resolveTo({hasTorch: true, track: mockTrack});
+        getTrackInfoSpy.and.resolveTo({hasCamera: true, hasTorch: true, track: mockTrack});
       });
 
       it('should set the state to `On`', async () => {
@@ -295,32 +435,18 @@ describe('TorchCe', () => {
 
       beforeEach(() => onVisibilityChangeSpy = spyOn(elem, 'onVisibilityChange'));
 
-      it('should abort and report an error, when permission explicitly denied', async () => {
-        permissionsQuerySpy.and.resolveTo(new MockPermissionStatus('denied'));
+      it('should abort and report an error, when no torch detected', async () => {
+        getTrackInfoSpy.and.resolveTo({hasCamera: true, hasTorch: false, track: new MockMediaStreamTrack()});
 
         await initCe(elem);
         WIN.document.dispatchEvent(new Event('visibilitychange'));
 
         expect(elem.state).not.toBe(State.On);
         expect(onVisibilityChangeSpy).not.toHaveBeenCalled();
-        expect(onErrorSpy).toHaveBeenCalledWith(
-            new Error('Access to camera denied. Please, give permission in browser settings.'));
-      });
-
-      it('should abort and report an error, when permission not granted', async () => {
-        permissionsQuerySpy.and.resolveTo(new MockPermissionStatus('prompt'));
-
-        await initCe(elem);
-        WIN.document.dispatchEvent(new Event('visibilitychange'));
-
-        expect(elem.state).not.toBe(State.On);
-        expect(onVisibilityChangeSpy).not.toHaveBeenCalled();
-        expect(onErrorSpy).toHaveBeenCalledWith(
-            new Error('Access to camera not granted. Please, give permission when prompted.'));
+        expect(onErrorSpy).toHaveBeenCalledWith(new Error('Unable to detect torch on your device.'));
       });
 
       it('should abort and report an error, when no camera detected', async () => {
-        permissionsQuerySpy.and.resolveTo(new MockPermissionStatus('granted'));
         getTrackInfoSpy.and.resolveTo(EMPTY_TRACK_INFO);
 
         await initCe(elem);
@@ -331,16 +457,16 @@ describe('TorchCe', () => {
         expect(onErrorSpy).toHaveBeenCalledWith(new Error('Unable to detect camera on your device.'));
       });
 
-      it('should abort and report an error, when no torch detected', async () => {
-        permissionsQuerySpy.and.resolveTo(new MockPermissionStatus('granted'));
-        getTrackInfoSpy.and.resolveTo({hasTorch: false, track: new MockMediaStreamTrack()});
+      it('should abort and report an error, when permission not granted', async () => {
+        const mockError = new Error('Permission not granted.');
+        getTrackInfoSpy.and.throwError(mockError);
 
         await initCe(elem);
         WIN.document.dispatchEvent(new Event('visibilitychange'));
 
         expect(elem.state).not.toBe(State.On);
         expect(onVisibilityChangeSpy).not.toHaveBeenCalled();
-        expect(onErrorSpy).toHaveBeenCalledWith(new Error('Unable to detect torch on your device.'));
+        expect(onErrorSpy).toHaveBeenCalledWith(mockError);
       });
     });
   });
@@ -543,12 +669,15 @@ describe('TorchCe', () => {
         elem = await initCe(TestTorchCe);
         elem.state = initialState;
         elem.trackInfoPromise = Promise.resolve({
+          hasCamera: true,
           hasTorch: !!(initialTrack && initialTrack.$capabilities.torch),
           track: initialTrack as unknown as MediaStreamTrack,
         });
 
-        spyOn(WIN.navigator.mediaDevices, 'getUserMedia').and.callFake(() =>
-          Promise.resolve({getVideoTracks: () => [new MockMediaStreamTrack(true)]} as unknown as MediaStream));
+        spyOn(TestTorchCe.prototype, 'acquireCameraPermission').and.resolveTo();
+        spyOnProperty(WIN.navigator, 'mediaDevices').and.returnValue(new MockMediaDevices(new Map([
+          [new TestDeviceInfo('videoinput', 'cam-001'), {torch: true}],
+        ])) as unknown as MediaDevices);
 
         getTrackInfoSpy.and.callThrough();
         setMockHidden(false);
@@ -786,7 +915,67 @@ describe('TorchCe', () => {
   });
 
   // Helpers
-  class MockMediaStreamTrack {
+  class MockMediaDevices implements Pick<MediaDevices, 'enumerateDevices' | 'getUserMedia'> {
+    constructor(public $devicesWithSpecs = new Map([
+      [new TestDeviceInfo('audiooutput', 'spkr-001'), {}],
+      [new TestDeviceInfo('audioinput', 'mic-001'), {}],
+      [new TestDeviceInfo('videoinput', 'cam-001'), {}],
+      [new TestDeviceInfo('videoinput', 'cam-002'), {torch: true}],
+    ])) {
+    }
+
+    public enumerateDevices(): Promise<MediaDeviceInfo[]> {
+      return Promise.resolve([...this.$devicesWithSpecs.keys()]);
+    }
+
+    public async getUserMedia(constraints?: MediaStreamConstraints | undefined): Promise<MediaStream> {
+      const {audio = false, video = false} = constraints ?? {};
+
+      if (!audio && !video) {
+        throw new DOMException('No user media satisfies the constraints.', 'NotFoundError');
+      }
+
+      if (!video) {
+        throw new Error('Audio-only user media not supported by mock implementation.');
+      }
+
+      const cameras = (await this.enumerateDevices()).filter(x => x.kind === 'videoinput');
+      let matchedCamera: MediaDeviceInfo | null = null;
+
+      if ((video === true) || (video.deviceId === undefined)) {
+        matchedCamera = cameras[0] ?? null;
+      } else if (typeof video.deviceId === 'string') {
+        matchedCamera = cameras.find(x => x.deviceId === video.deviceId) ?? null;
+      } else if (Array.isArray(video.deviceId) || Array.isArray(video.deviceId?.exact) ||
+          Array.isArray(video.deviceId?.ideal)) {
+        throw new Error('Array constraints not supported by mock implementation.');
+      } else if (video.deviceId.exact !== undefined) {
+        const exactId = video.deviceId.exact;
+        matchedCamera = cameras.find(x => x.deviceId === exactId) ?? null;
+      } else if (video.deviceId.ideal !== undefined) {
+        const idealId = video.deviceId.ideal;
+        matchedCamera = cameras.find(x => x.deviceId === idealId) ?? cameras[0] ?? null;
+      }
+
+      if (matchedCamera === null) {
+        throw new DOMException('No user media satisfies the constraints.', 'NotFoundError');
+      }
+
+      const mockTrack = new MockMediaStreamTrack(this.$devicesWithSpecs.get(matchedCamera)?.torch);
+      return new MockMediaStream(mockTrack) as unknown as MediaStream;
+    }
+  }
+
+  class MockMediaStream implements Pick<MediaStream, 'getVideoTracks'> {
+    constructor(public $track = new MockMediaStreamTrack()) {
+    }
+
+    public getVideoTracks(): MediaStreamTrack[] {
+      return [this.$track as unknown as MediaStreamTrack];
+    }
+  }
+
+  class MockMediaStreamTrack implements Pick<MediaStreamTrack, 'applyConstraints' | 'getCapabilities' | 'stop'> {
     public readyState: MediaStreamTrackState = 'live';
     public readonly $capabilities: MediaTrackCapabilities = {};
     public $constraints: MediaTrackConstraints = {};
@@ -805,9 +994,7 @@ describe('TorchCe', () => {
     }
 
     public isTorchOn(): boolean {
-      return !!this.$capabilities.torch &&
-        !!this.$constraints.advanced &&
-        this.$constraints.advanced.some(x => !!x.torch);
+      return !!(this.$capabilities.torch && this.$constraints.advanced?.some(x => x.torch));
     }
 
     public stop(): void {
@@ -824,9 +1011,28 @@ describe('TorchCe', () => {
     }
   }
 
+  class TestDeviceInfo implements MediaDeviceInfo {
+    public readonly label: string;
+
+    constructor(
+        public readonly kind: MediaDeviceKind,
+        public readonly deviceId: string,
+        public readonly groupId = 'group-default') {
+      this.label = `${this.kind} ${this.deviceId} (${this.groupId})`;
+    }
+
+    public toJSON(): object {
+      return this;
+    }
+  }
+
   class TestTorchCe extends TorchCe {
     declare public state: TorchCe['state'];
     declare public trackInfoPromise: TorchCe['trackInfoPromise'];
+
+    public override acquireCameraPermission(): Promise<void> {
+      return super.acquireCameraPermission();
+    }
 
     public override getTrackInfo(...args: Parameters<TorchCe['getTrackInfo']>) {
       return super.getTrackInfo(...args);
