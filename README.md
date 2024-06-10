@@ -74,12 +74,7 @@ Things I want to (but won't necessarily) do:
 
 - Add e2e tests (and update documentation for the `test` script).
   - Also, verify `ENV`.
-  - Relevant resources:
-    - https://www.protractortest.org/#/api?view=ProtractorBy.prototype.addLocator
-    - https://gist.github.com/ChadKillingsworth/d4cb3d30b9d7fbc3fd0af93c2a133a53
 - Consider adding snapshot/screenshot testing (different screen resolutions and states (torch on/off, muted/unmuted, etc.)).
-  - Relevant resources:
-    - https://www.npmjs.com/package/protractor-image-comparison
 - Add CI support.
 
 
