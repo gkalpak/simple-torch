@@ -4,23 +4,23 @@
  * node scripts/audit-web-app.mjs <url> <min-scores> [<log-file>]
  * ```
  *
- * Runs audits against the specified URL on specific categories (accessibility, best practices, performance, PWA, SEO).
- * It fails, if the score in any category is below the score specified in `<min-scores>`. (Only runs audits for the
+ * Runs audits against the specified URL on specific categories (accessibility, best practices, performance, SEO). It
+ * fails, if the score in any category is below the score specified in `<min-scores>`. (Only runs audits for the
  * specified categories.)
  *
  * `<min-scores>` is either a number (in which case it is interpreted as `all:<min-score>`) or a list of comma-separated
- * strings of the form `key:value`, where `key` is one of `accessibility`, `best-practices`, `performance`, `pwa`, `seo`
- * or `all` and `value` is a number (between 0 and 100).
+ * strings of the form `key:value`, where `key` is one of `accessibility`, `best-practices`, `performance`, `seo` or
+ * `all` and `value` is a number (between 0 and 100).
  *
  * Examples:
  * - `95` _(Same as `all:95`.)_
  * - `all:95` _(Run audits for all categories and require a score of 95 or higher.)_
- * - `all:95,pwa:100` _(Same as `all:95`, except that a scope of 100 is required for the `pwa` category.)_
+ * - `all:95,seo:100` _(Same as `all:95`, except that a score of 100 is required for the `seo` category.)_
  * - `performance:90` _(Only run audits for the `performance` category and require a score of 90 or higher.)_
  *
  * If `<log-file>` is defined, the full results will be logged there.
  *
- * (Skips HTTPS-related audits, when run for an HTTP URL.)
+ * (Skips some audits that are not applicable or are known to fail.)
  */
 
 // Imports
@@ -46,12 +46,10 @@ const AUDIT_CATEGORIES = [
   'accessibility',
   'best-practices',
   'performance',
-  'pwa',
   'seo',
 ];
-const SKIPPED_HTTPS_AUDITS = [
-  'redirects-http',
-  'uses-http2',
+const SKIPPED_AUDITS = [
+  'errors-in-console',  // An error is expected, due to torch not being found/accessible.
 ];
 
 // Run
@@ -60,18 +58,21 @@ _main(argv.slice(2));
 // Helpers
 async function _main(args) {
   const {url, minScores, logFile} = parseInput(args);
-  const isOnHttp = /^http:/.test(url);
-  /** @type {import('lighthouse').Config} */
-  const lhConfig = {extends: 'lighthouse:default'};
   /** @type {import('lighthouse').Flags} */
-  const lhFlags = {...LIGHTHOUSE_FLAGS, onlyCategories: Object.keys(minScores)};
+  const lhFlags = {...LIGHTHOUSE_FLAGS};
+  /** @type {import('lighthouse').Config} */
+  const lhConfig = {
+    extends: 'lighthouse:default',
+    settings: {
+      onlyCategories: Object.keys(minScores),
+    },
+  };
 
   console.info(`Running web-app audits for '${url}'...`);
-  console.info(`  Audit categories: ${lhFlags.onlyCategories?.join(', ')}`);
+  console.info(`  Audit categories: ${lhConfig.settings?.onlyCategories?.join(', ')}`);
 
-  // If testing on HTTP, skip HTTPS-specific tests.
-  // (Note: Browsers special-case localhost and run ServiceWorker even on HTTP.)
-  if (isOnHttp) skipHttpsAudits(lhConfig);
+  // Skip some audits that are not applicable or are known to fail.
+  skipAudits(lhConfig, SKIPPED_AUDITS);
 
   logger.setLevel(lhFlags.logLevel ?? 'info');
 
@@ -181,8 +182,12 @@ async function processResults(results, logFile, minScores) {
   return success;
 }
 
-function skipHttpsAudits(config) {
-  console.info(`  Skipping HTTPS-related audits: ${SKIPPED_HTTPS_AUDITS.join(', ')}`);
+function skipAudits(config, skippedAudits) {
+  if (skippedAudits.length === 0) {
+    return;
+  }
+
+  console.info(`  Skipping audits: ${skippedAudits.join(', ')}`);
   const settings = config.settings || (config.settings = {});
-  settings.skipAudits = SKIPPED_HTTPS_AUDITS;
+  settings.skipAudits = skippedAudits;
 }
