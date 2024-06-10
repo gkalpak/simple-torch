@@ -12,7 +12,6 @@
     "Utility"
   ],
   "scripts": {
-    "audit-web-app": "run-s \"~~run-lighthouse -- {@}\" \"~~run-webhint -- {1}\" --",
     "prebuild": "npm run clean-up",
     "build": "run-p ~~compile ~~generate-app",
     "prebuild-prod": "npm run prebuild",
@@ -34,7 +33,7 @@
     "preversion": "run-s lint build ~~test-unit ~~audit-web-app-localhost",
     "postversion": "git push && git push --tags",
     "pre~~audit-web-app-localhost": "npm run build-prod",
-    "~~audit-web-app-localhost": "run-p --race \"~~serve-prod -- --quiet\" \"audit-web-app -- http://localhost:4002 all:100,performance:95 {1}\" --",
+    "~~audit-web-app-localhost": "run-p --race \"~~serve-prod -- --quiet\" \"~~run-web-app-audits -- http://localhost:4002 all:100,performance:95 {1}\" --",
     "~~compile": "tsc --project ./",
     "~~compile-sw": "tsc --project tsconfig.sw.json",
     "~~compile-watch": "npm run ~~compile -- --watch",
@@ -42,6 +41,7 @@
     "~~generate-app-watch": "watch \"npm run ~~generate-app\" src/ --filter=watch-filters/generate-app.filter.js",
     "~~lint-code": "eslint ./",
     "~~run-lighthouse": "node scripts/run-lighthouse.mjs",
+    "~~run-web-app-audits": "run-s \"~~run-lighthouse -- {@}\" \"~~run-webhint -- .\" --",
     "~~run-webhint": "hint",
     "~~serve": "light-server --bind=localhost --serve=out/",
     "~~serve-prod": "npm run ~~serve -- --port=4002 --no-reload",

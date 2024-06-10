@@ -3,10 +3,25 @@
     "web-recommended",
     "progressive-web-apps"
   ],
+  "connector": {
+    "name": "local"
+  },
   "formatters": [
     "stylish"
   ],
   "hints": {
-    "content-type": "off"
+    "content-type": "off",
+    "http-cache": "off",
+    "http-compression": "off",
+    "no-disallowed-headers": "off",
+    "no-friendly-error-pages": "off",
+    "no-html-only-headers": "off",
+    "no-http-redirects": "off",
+    "no-vulnerable-javascript-libraries": "off",
+    "ssllabs": "off",
+    "strict-transport-security": "off",
+    "stylesheet-limits": "off",
+    "validate-set-cookie-header": "off",
+    "x-content-type-options": "off"
   }
 }
