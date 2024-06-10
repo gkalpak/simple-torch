@@ -1,4 +1,5 @@
 /.firebase/
+/hint-report/
 /node_modules/
 /out/
 *.log

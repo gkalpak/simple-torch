@@ -48,9 +48,9 @@ Building the app in production mode has the following differences:
 
 The following npm scripts are available and can help during testing:
 
-- `audit-web-app`: Audit a web-app (at the provided URL) for things like performance, accessibility, best practices, and
-  SEO. It uses [Lighthouse][lighthouse] under the hood. See, [scripts/audit-web-app.js][audit-web-app] for usage
-  instructions.
+- `audit-web-app`: Audit a web-app (at the provided URL) for things like performance, accessibility, best practices,
+  SEO, PWA-readiness, etc. It uses [Lighthouse][lighthouse] and [webhint][webhint] under the hood. See, also,
+  [scripts/run-lighthouse.mjs][run-lighthouse] for usage instructions.
   _(You shouldn't need to run this manually. It is run by other scripts as necessary.)_
 - `lint`: Lint the app source code (TypeScript) and helper scripts (JavaScript).
 - `test`: Lint the code and run the automated tests (unit, end-to-end (e2e), web-app audits).
@@ -83,8 +83,9 @@ Things I want to (but won't necessarily) do:
 - Add CI support.
 
 
-[audit-web-app]: scripts/audit-web-app.js
 [mdn-media-devices]: https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices
 [mdn-pwa]: https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps
 [mdn-sw]: https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API
 [lighthouse]: https://developers.google.com/web/tools/lighthouse
+[run-lighthouse]: scripts/run-lighthouse.mjs
+[webhint]: https://webhint.io/

@@ -1,7 +1,7 @@
 /**
  * Usage:
  * ```sh
- * node scripts/audit-web-app.mjs <url> <min-scores> [<log-file>]
+ * node scripts/run-lighthouse.mjs <url> <min-scores> [<log-file>]
  * ```
  *
  * Runs audits against the specified URL on specific categories (accessibility, best practices, performance, SEO). It
