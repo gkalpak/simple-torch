@@ -84,7 +84,7 @@ export class TorchCe extends BaseCe {
     .torch {
       cursor: pointer;
       flex-grow: 1;
-      max-height: 75vh;
+      max-height: 75dvh;
       -webkit-tap-highlight-color: transparent;
     }
     .torch.disabled {

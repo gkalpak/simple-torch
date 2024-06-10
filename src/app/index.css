@@ -8,7 +8,7 @@ body {
   display: flex;
   flex-direction: column;
   font-family: sans-serif;
-  height: 100vh;
+  height: 100dvh;
   margin: 0;
   padding: 0;
 }
@@ -20,7 +20,7 @@ body .no-script-message {
   font-size: 2em;
   font-style: italic;
   font-weight: bold;
-  height: 100vh;
+  height: 100dvh;
   justify-content: center;
   padding: 20px;
   text-align: center;
