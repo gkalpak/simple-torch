@@ -3,8 +3,21 @@ import {ISettings, Settings} from '../../../app/shared/settings.service.js';
 
 
 describe('Settings', () => {
+  describe('.getInstance()', () => {
+    it('should return a `Settings` instance', () => {
+      expect(Settings.getInstance()).toEqual(jasmine.any(Settings));
+    });
+
+    it('should return the same instance on subsequent calls', () => {
+      const instance1 = Settings.getInstance();
+      const instance2 = Settings.getInstance();
+
+      expect(instance2).toBe(instance1);
+    });
+  });
+
   describe('#muted', () => {
-    beforeEach(() => spyOnProperty(WIN, 'localStorage', 'get').and.returnValue(new MockStorage()));
+    beforeEach(() => spyOnProperty(WIN, 'localStorage').and.returnValue(new MockStorage()));
 
     it('should return the value stored in `localStorage.muted`', () => {
       TestSettings.storeValues({muted: true});
@@ -44,16 +57,44 @@ describe('Settings', () => {
     });
   });
 
-  describe('.getInstance()', () => {
-    it('should return a `Settings` instance', () => {
-      expect(Settings.getInstance()).toEqual(jasmine.any(Settings));
+  describe('#torchDeviceId', () => {
+    beforeEach(() => spyOnProperty(WIN, 'localStorage').and.returnValue(new MockStorage()));
+
+    it('should return the value stored in `localStorage.torchDeviceId`', () => {
+      TestSettings.storeValues({torchDeviceId: 'foo'});
+      const settings = new TestSettings();
+
+      expect(settings.torchDeviceId).toBe('foo');
     });
 
-    it('should return the same instance on subsequent calls', () => {
-      const instance1 = Settings.getInstance();
-      const instance2 = Settings.getInstance();
+    it('should use a fallback value if `localStorage.torchDeviceId` is not set', () => {
+      const settings = new TestSettings();
+      expect(settings.torchDeviceId).toBe('');
+    });
 
-      expect(instance2).toBe(instance1);
+    it('should correctly return falsy values', () => {
+      // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+      TestSettings.storeValues({torchDeviceId: null as any});
+      const settings = new TestSettings();
+
+      expect(settings.torchDeviceId).toBeNull();
+
+      // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+      settings.torchDeviceId = undefined as any;
+      expect(settings.torchDeviceId).toBeUndefined();
+    });
+
+    it('should store the value to `localStorage.torchDeviceId`', () => {
+      const settings = new TestSettings();
+      expect(TestSettings.retrieveValues()).toEqual({});
+
+      settings.torchDeviceId = 'foo';
+      expect(settings.torchDeviceId).toBe('foo');
+      expect(TestSettings.retrieveValues()).toEqual({torchDeviceId: 'foo'});
+
+      settings.torchDeviceId = 'bar';
+      expect(settings.torchDeviceId).toBe('bar');
+      expect(TestSettings.retrieveValues()).toEqual({torchDeviceId: 'bar'});
     });
   });
 

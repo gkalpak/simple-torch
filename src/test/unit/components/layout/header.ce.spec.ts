@@ -57,7 +57,10 @@ describe('HeaderCe', () => {
     const initAndGetSpeaker = () => initCe(HeaderCe).
       then(elem => elem.shadowRoot.querySelector('external-svg-ce.speaker') as HTMLElement);
 
-    beforeEach(() => spyOn(Settings, 'getInstance').and.returnValue(mockSettings = {muted: false}));
+    beforeEach(() => {
+      mockSettings = {muted: false, torchDeviceId: ''};
+      spyOn(Settings, 'getInstance').and.returnValue(mockSettings);
+    });
 
     it('should be appropriately styled', async () => {
       const speaker = await initAndGetSpeaker();

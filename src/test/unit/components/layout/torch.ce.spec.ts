@@ -4,7 +4,7 @@ import {BaseCe, IInitializedCe} from '../../../../app/components/base.ce.js';
 import {EMPTY_TRACK_INFO, State, TorchCe} from '../../../../app/components/layout/torch.ce.js';
 import {LoaderCe} from '../../../../app/components/shared/loader.ce.js';
 import {EMOJI, WIN} from '../../../../app/shared/constants.js';
-import {Settings} from '../../../../app/shared/settings.service.js';
+import {ISettings, Settings} from '../../../../app/shared/settings.service.js';
 import {Sounds} from '../../../../app/shared/sounds.service.js';
 import {
   microtick,
@@ -18,12 +18,15 @@ import {
 
 describe('TorchCe', () => {
   const initCe = setupCeContainer();
+  let mockSettings: ISettings;
   let getTrackInfoSpy: jasmine.Spy;
   let onErrorSpy: jasmine.Spy;
 
   beforeAll(() => TestTorchCe.register());
 
   beforeEach(() => {
+    mockSettings = {muted: false, torchDeviceId: ''};
+    spyOn(Settings, 'getInstance').and.returnValue(mockSettings);
     getTrackInfoSpy = spyOn(TestTorchCe.prototype, 'getTrackInfo').and.resolveTo(EMPTY_TRACK_INFO);
     onErrorSpy = spyOn(TestTorchCe.prototype, 'onError');
   });
@@ -328,6 +331,50 @@ describe('TorchCe', () => {
         expect(tracks.length).toBe(3);
         expect(tracks.map(x => x.readyState)).toEqual(['ended', 'ended', 'live']);
       });
+
+      it('should store a matched video input device in settings', async () => {
+        mockMediaDevices.$devicesWithSpecs = new Map([
+          [new TestDeviceInfo('videoinput', 'cam-001'), {torch: true}],
+          [new TestDeviceInfo('videoinput', 'cam-002'), {torch: true}],
+          [new TestDeviceInfo('videoinput', 'cam-003'), {}],
+        ]);
+
+        await elem.getTrackInfo(true);
+
+        expect(mockSettings.torchDeviceId).toBe('cam-002');
+      });
+
+      it('should try a stored matched video input device from settings first', async () => {
+        mockSettings.torchDeviceId = 'cam-002';
+        mockMediaDevices.$devicesWithSpecs = new Map([
+          [new TestDeviceInfo('videoinput', 'cam-001'), {}],
+          [new TestDeviceInfo('videoinput', 'cam-002'), {torch: true}],
+          [new TestDeviceInfo('videoinput', 'cam-003'), {}],
+        ]);
+
+        await elem.getTrackInfo(true);
+
+        expect(mockSettings.torchDeviceId).toBe('cam-002');
+        expect(getUserMediaSpy).toHaveBeenCalledOnceWith({video: {deviceId: {exact: 'cam-002'}}});
+      });
+
+      it('should try other devices if a stored matched video input device from settings does not work', async () => {
+        mockSettings.torchDeviceId = 'cam-003';
+        mockMediaDevices.$devicesWithSpecs = new Map([
+          [new TestDeviceInfo('videoinput', 'cam-001'), {}],
+          [new TestDeviceInfo('videoinput', 'cam-002'), {torch: true}],
+          [new TestDeviceInfo('videoinput', 'cam-003'), {}],
+          [new TestDeviceInfo('videoinput', 'cam-004'), {}],
+        ]);
+
+        await elem.getTrackInfo(true);
+
+        expect(getUserMediaSpy).toHaveBeenCalledTimes(4);
+        expect(getUserMediaSpy).toHaveBeenCalledWith({video: {deviceId: {exact: 'cam-003'}}});
+        expect(getUserMediaSpy).toHaveBeenCalledWith({video: {deviceId: {exact: 'cam-004'}}});
+        expect(getUserMediaSpy).toHaveBeenCalledWith({video: {deviceId: {exact: 'cam-003'}}});
+        expect(getUserMediaSpy).toHaveBeenCalledWith({video: {deviceId: {exact: 'cam-002'}}});
+      });
     });
   });
 
@@ -472,7 +519,6 @@ describe('TorchCe', () => {
   });
 
   describe('#onClick()', () => {
-    const {setMockValue: setMockMuted} = mockProperty(Settings.getInstance(), 'muted');
     const clickSound = Sounds.getInstance().getSound('/assets/audio/click.ogg', 0.15);
     let elem: TestTorchCe;
     let clickPlaySpy: jasmine.Spy;
@@ -485,7 +531,7 @@ describe('TorchCe', () => {
     });
 
     it('should play a click sound, unless muted', async () => {
-      setMockMuted(false);
+      mockSettings.muted = false;
 
       await elem.onClick();
       expect(clickPlaySpy).toHaveBeenCalledTimes(1);
@@ -493,7 +539,7 @@ describe('TorchCe', () => {
       await elem.onClick();
       expect(clickPlaySpy).toHaveBeenCalledTimes(2);
 
-      setMockMuted(true);
+      mockSettings.muted = true;
       clickPlaySpy.calls.reset();
 
       await elem.onClick();
@@ -508,8 +554,7 @@ describe('TorchCe', () => {
 
         await elem.onClick();
 
-        expect(updateStateSpy).toHaveBeenCalledTimes(1);
-        expect(updateStateSpy).toHaveBeenCalledWith(newState);
+        expect(updateStateSpy).toHaveBeenCalledOnceWith(newState);
       };
 
       await test(State.Uninitialized, State.Off);

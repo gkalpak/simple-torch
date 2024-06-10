@@ -3,6 +3,7 @@ import {WIN} from './constants.js';
 
 export interface ISettings {
   muted: boolean;
+  torchDeviceId: string;
 }
 
 export class Settings implements ISettings {
@@ -11,6 +12,9 @@ export class Settings implements ISettings {
 
   public get muted(): boolean { return this.get('muted', false); }
   public set muted(newValue: boolean) { this.set('muted', newValue); }
+
+  public get torchDeviceId(): string { return this.get('torchDeviceId', ''); }
+  public set torchDeviceId(newValue: string) { this.set('torchDeviceId', newValue); }
 
   private readonly values: Partial<ISettings> = Settings.retrieveValues();
 

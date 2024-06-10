@@ -137,20 +137,19 @@ export class TorchCe extends BaseCe {
         this.trackInfoPromise = (async () => {
           await this.acquireCameraPermission();
 
-          const devices = await WIN.navigator.mediaDevices.enumerateDevices();
-          const cameras = await devices.
-            filter((x): x is MediaDeviceInfo & {kind: 'videoinput'} => x.kind === 'videoinput').
-            reverse();  // Often, it is the last camera that has the torch.
+          let hasCamera = false;
+          for await (const deviceId of this.getCameraDeviceIds()) {
+            hasCamera = true;
 
-          for (const cam of cameras) {
             const stream = await WIN.navigator.mediaDevices.getUserMedia({
               video: {
-                deviceId: {exact: cam.deviceId},
+                deviceId: {exact: deviceId},
               },
             });
             const track = stream.getVideoTracks().pop();
 
             if (track?.getCapabilities?.().torch === true) {
+              this.settings.torchDeviceId = deviceId;
               return {hasCamera: true, hasTorch: true, track};
             } else {
               track?.stop();
@@ -159,7 +158,7 @@ export class TorchCe extends BaseCe {
 
           return {
             ...EMPTY_TRACK_INFO,
-            hasCamera: cameras.length > 0,
+            hasCamera,
           };
         })();
 
@@ -264,5 +263,20 @@ export class TorchCe extends BaseCe {
   private async stopTrack(): Promise<void> {
     const {track} = await this.getTrackInfo();
     if (track) track.stop();
+  }
+
+  private async *getCameraDeviceIds(): AsyncGenerator<string> {
+    if (this.settings.torchDeviceId !== '') {
+      yield this.settings.torchDeviceId;
+    }
+
+    const devices = await WIN.navigator.mediaDevices.enumerateDevices();
+    const cameras = devices.
+      filter((x): x is MediaDeviceInfo & {kind: 'videoinput'} => x.kind === 'videoinput').
+      reverse();  // Often, it is the last camera that has the torch.
+
+    for (const cam of cameras) {
+      yield cam.deviceId;
+    }
   }
 }
