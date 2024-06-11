@@ -24,14 +24,14 @@ The following npm scripts are available and can help during local development:
 
 - `build`: Build the app (in dev mode; see below).
 - `build-prod`: Build the app (in production mode; see below).
-- `clean-up`: Remove the output directory.
+- `clean-up`: Remove the output directory.<br />
   _(You shouldn't need to run this manually. It is run by other scripts as necessary.)_
 - `dev`: Build (in dev mode), test and serve the app. Also, automatically reload and re-run tests whenever a file
-  changes.
+  changes.<br />
   _(Useful during development.)_
 - `generate-icons`: Generates several `simple-torch-<W>x<H>.png` icons (used as favicons and in `manifest.webmanifest`)
   based on `simple-torch.svg`. This needs to be manually run, when the logo (in SVG format) changes.
-- `serve-prod`: Build (in production mode) and serve the app.
+- `serve-prod`: Build (in production mode) and serve the app.<br />
   _(Unlike `dev` this does not watch the files for changes.)_
 
 Building the app in production mode has the following differences:
@@ -48,8 +48,15 @@ Building the app in production mode has the following differences:
 
 The following npm scripts are available and can help during testing:
 
-- `lint`: Lint the app source code (TypeScript) and helper scripts (JavaScript).
+- `lint`: Lint the app and tests source code (TypeScript) and helper scripts (JavaScript) and type-check the helper
+  scripts.<br />
+  _(The source code is type-checked as part of the build process.)_
 - `test`: Lint the code and run the automated tests (unit, end-to-end (e2e), web-app audits).
+- `test-unit`: Build the app and run the unit tests.
+- `test-e2e`: Build the app (in production mode) and run the end-to-end (e2e) tests.
+- `test-web-app`: Build the app (in production mode) and audit it for things like performance, accessibility, best
+  practices, SEO, PWA-readiness, etc. It uses [Lighthouse][lighthouse] and [webhint][webhint] under the hood.<br />
+  _(You shouldn't need to run this manually. It is run by other scripts as necessary.)_
 
 > [!WARNING]
 > _Adding automated tests is still a work in progress._<br />
@@ -59,7 +66,7 @@ The following npm scripts are available and can help during testing:
 
 The following npm scripts are available and can help with releasing/deploying a new version of the app:
 
-- `deploy`: Build the app (in production mode) and deploy it to Firebase.
+- `deploy`: Build the app (in production mode) and deploy it to Firebase.<br />
   _(You shouldn't need to run this manually. It is run as part of the `release` script.)_
 - `release`: Cut a new version of the app and deploy it to production.
 
