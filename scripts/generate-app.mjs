@@ -30,7 +30,7 @@ async function _main(args) {
 
     // Copy files.
     sh.mkdir('-p', OUT_DIR);
-    sh.cp('-r', 'src/!(app|test)', OUT_DIR);
+    sh.cp('-r', 'src/!(@types|app|test)', OUT_DIR);
 
     // Replace ENV placeholders.
     sh.sed('-i', /<PLACEHOLDER:PRODUCTION>/g, `${production}`, OUT_INDEX_PATH);
@@ -72,6 +72,6 @@ function swCreateFilesToCacheReplacement(files, hashes) {
 
 function swFindFilesToCache() {
   return /** @type {import('node:fs').Dirent[] & import('shelljs').ShellArray} */ (sh.ls('-lR', OUT_DIR)).
-    filter(x => x.isFile() && !x.name.startsWith('test/') && !x.name.endsWith('.map') && (x.name !== 'sw.js')).
+    filter(x => x.isFile() && !/(?:^test\/|\.(?:d\.ts|map|tsbuildinfo)$|^sw\.js$)/.test(x.name)).
     map(x => x.name);
 }

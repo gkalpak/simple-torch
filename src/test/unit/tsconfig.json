@@ -1,0 +1,18 @@
+{
+  "extends": "../../../tsconfig.json",
+  "compilerOptions": {
+    "composite": true,
+    "types": [
+      "jasmine",
+    ],
+  },
+  "references": [
+    {"path": "../../app/tsconfig.json"},
+  ],
+  "exclude": [
+  ],
+  "include": [
+    "../../@types/**/*.d.ts",
+    "**/*.ts",
+  ],
+}

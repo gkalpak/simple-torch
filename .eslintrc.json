@@ -95,7 +95,8 @@
       "parser": "@typescript-eslint/parser",
       "parserOptions": {
         "project": [
-          "./tsconfig.json",
+          "./src/app/tsconfig.json",
+          "./src/test/unit/tsconfig.json",
           "./tsconfig.sw.json"
         ]
       },
@@ -109,11 +110,7 @@
           },
           "typescript": {
             "alwaysTryTypes": true,
-            "extensions": [".js"],
-            "project": [
-              "./tsconfig.json",
-              "./tsconfig.sw.json"
-            ]
+            "extensions": [".js"]
           }
         }
       },

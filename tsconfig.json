@@ -2,7 +2,8 @@
   "compilerOptions": {
     "allowUnreachableCode": false,
     "allowUnusedLabels": false,
-    "declaration": false,
+    "declaration": true,
+    "declarationMap": true,
     "exactOptionalPropertyTypes": true,
     "lib": [
       "DOM",
@@ -19,18 +20,17 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "outDir": "out/",
+    "rootDir": "src/",
     "sourceMap": true,
     "strict": true,
     "target": "ES2022",
     "types": [
-      "jasmine",
     ],
   },
-  "exclude": [
-    "src/app/sw.ts",
+  "files": [
   ],
-  "include": [
-    "src/app/",
-    "src/test/",
+  "references": [
+    {"path": "src/app/tsconfig.json"},
+    {"path": "src/test/unit/tsconfig.json"},
   ],
 }

@@ -5,10 +5,12 @@
       "ES2022",
       "WebWorker",
     ],
+    "rootDir": "src/app/",
   },
   "exclude": [
   ],
   "include": [
+    "src/@types/**/*.d.ts",
     "src/app/sw.ts",
   ],
 }
