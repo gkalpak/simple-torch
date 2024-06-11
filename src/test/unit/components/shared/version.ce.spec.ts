@@ -26,7 +26,7 @@ describe('VersionCe', () => {
 
     expect(link).not.toBeNull();
     expect(link.textContent!.trim()).toBe('v1.33.7-foo');
-    expect(link.href).toBe('https://pro.vid.er/my/repo/commits/a1b2c3d4e');
-    expect(link.title).toBe('SHA: a1b2c3d4e5f');
+    expect(link.href).toBe('https://pro.vid.er/my/repo/commits/a1b2c3d4e5f');
+    expect(link.title).toBe('SHA: a1b2c3d4e5');
   });
 });

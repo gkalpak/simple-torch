@@ -4,7 +4,7 @@ import {BaseCe} from '../base.ce.js';
 
 export class VersionCe extends BaseCe {
   protected static override readonly template = `
-    <a href="${ENV.repoUrl}/commits/${ENV.sha.slice(0, 9)}" title="SHA: ${ENV.sha}">
+    <a href="${ENV.repoUrl}/commits/${ENV.sha}" title="SHA: ${ENV.sha.slice(0, 10)}">
       v${ENV.version}
     </a>
   `;
