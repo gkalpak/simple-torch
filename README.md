@@ -60,7 +60,7 @@ The following npm scripts are available and can help during testing:
 
 > [!WARNING]
 > _Adding automated tests is still a work in progress._<br />
-> _Currently there are unit tests but no e2e tests_ :scream: :scream: :scream:
+> _Specifically, e2e tests are currently minimal_ :scream:
 
 ### Releasing/Deploying
 
@@ -75,9 +75,11 @@ The following npm scripts are available and can help with releasing/deploying a 
 
 Things I want to (but won't necessarily) do:
 
-- Add e2e tests (and update documentation for the `test` script).
-  - Also, verify `ENV`.
+- Add more e2e tests (and update documentation for the `test` script).
 - Consider adding snapshot/screenshot testing (different screen resolutions and states (torch on/off, muted/unmuted, etc.)).
+  - Relevant resources:
+    - https://nodejs.org/api/test.html#snapshot-testing
+    - https://www.linkedin.com/pulse/implementing-visual-regression-testing-puppeteer-jest-cherish-dev-i3ave/
 - Add CI support.
 
 

@@ -1,0 +1,17 @@
+{
+  "extends": "../../../tsconfig.json",
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "composite": true,
+    "resolveJsonModule": true,
+  },
+  "references": [
+    {"path": "../../app/tsconfig.json"},
+  ],
+  "exclude": [
+  ],
+  "include": [
+    "../../@types/**/*.d.ts",
+    "**/*.mts",
+  ],
+}

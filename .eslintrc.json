@@ -97,6 +97,7 @@
         "project": [
           "./src/app/tsconfig.json",
           "./src/test/unit/tsconfig.json",
+          "./src/test/e2e/tsconfig.json",
           "./tsconfig.sw.json"
         ]
       },

@@ -32,5 +32,6 @@
   "references": [
     {"path": "src/app/tsconfig.json"},
     {"path": "src/test/unit/tsconfig.json"},
+    {"path": "src/test/e2e/tsconfig.json"},
   ],
 }

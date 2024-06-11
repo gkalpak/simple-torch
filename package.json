@@ -36,7 +36,7 @@
     "test-unit": "npm run ~~test-unit",
     "pretest-web-app": "npm run preserve-prod",
     "test-web-app": "npm run ~~test-web-app",
-    "preversion": "run-s lint build ~~test-unit ~~test-web-app",
+    "preversion": "npm test",
     "postversion": "git push && git push --tags",
     "~~compile-all": "run-p ~~compile-app ~~compile-sw",
     "~~compile-app": "tsc --build tsconfig.json",
@@ -45,13 +45,14 @@
     "~~generate-app": "node scripts/generate-app.mjs",
     "~~generate-app-watch": "watch \"npm run ~~generate-app\" src/app/ --filter=watch-filters/generate-app.filter.js",
     "~~lint-code": "eslint ./",
+    "~~run-e2e-tests": "node --enable-source-maps --test \"out/test/e2e/**/*.spec.mjs\"",
     "~~run-lighthouse": "node scripts/run-lighthouse.mjs",
     "~~run-web-app-audits": "run-s \"~~run-lighthouse -- {@}\" \"~~run-webhint -- .\" --",
     "~~run-webhint": "hint",
     "~~serve": "light-server --bind=localhost --serve=out/app/",
     "~~serve-prod": "npm run ~~serve -- --port=4002 --no-reload",
     "~~serve-watch": "npm run ~~serve -- --port=4001 --quiet --watchexp=out/app/**",
-    "~~test-e2e": "node --print \"'No e2e tests yet.\\n'\" && exit 1",
+    "~~test-e2e": "run-p --race \"~~serve-prod -- --quiet\" \"~~run-e2e-tests\"",
     "~~test-unit": "npm run ~~test-unit-watch -- --single-run",
     "~~test-unit-watch": "karma start",
     "~~test-web-app": "run-p --race \"~~serve-prod -- --quiet\" \"~~run-web-app-audits -- http://localhost:4002 all:100,performance:95 {1}\" --",
@@ -63,6 +64,9 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/gkalpak/simple-torch.git"
+  },
+  "engines": {
+    "node": ">=22.0.0"
   },
   "devDependencies": {
     "@gkalpak/cli-utils": "^0.1.10",
