@@ -92,10 +92,6 @@
       "plugins": [
         "@typescript-eslint"
       ],
-      "env": {
-		    "browser": true,
-        "node": false
-      },
       "parser": "@typescript-eslint/parser",
       "parserOptions": {
         "project": [
@@ -139,6 +135,13 @@
       }
     },
     {
+      "files": ["src/app/**"],
+      "env": {
+		    "browser": true,
+        "node": false
+      }
+    },
+    {
       "files": ["src/test/**"],
       "extends": [
         "plugin:jasmine/recommended"
@@ -146,9 +149,6 @@
       "plugins": [
         "jasmine"
       ],
-      "env": {
-        "jasmine": true
-      },
       "rules": {
         "jasmine/new-line-before-expect": "off",
         "jasmine/no-spec-dupes": ["warn", "branch"],
