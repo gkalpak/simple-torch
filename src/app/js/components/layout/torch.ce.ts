@@ -248,9 +248,7 @@ export class TorchCe extends BaseCe {
     if (!track) return;
 
     if (WIN.document.hidden) {
-      if (this.state === State.Off) {
-        track.stop();
-      }
+      track.stop();
     } else if (this.state === State.On) {
       track.applyConstraints({advanced: [{torch: true}]});
     }

@@ -696,7 +696,10 @@ describe('TorchCe', () => {
 
         getInitialTrack: () => createMockTrack(),
         verifyOutcome: async (initialTrack, lastTrack) => {
-          expect(lastTrack).toBe(initialTrack);
+          expect(lastTrack).not.toBe(initialTrack);
+
+          expect(initialTrack).toBeDefined();
+          expect(initialTrack!.readyState).toBe('ended');
 
           expect(lastTrack).toBeDefined();
           expect(lastTrack!.readyState).toBe('live');
