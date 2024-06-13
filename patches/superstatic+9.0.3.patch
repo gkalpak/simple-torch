@@ -1,0 +1,20 @@
+diff --git a/node_modules/superstatic/lib/providers/fs.js b/node_modules/superstatic/lib/providers/fs.js
+index 414d9fc..1975cd5 100644
+--- a/node_modules/superstatic/lib/providers/fs.js
++++ b/node_modules/superstatic/lib/providers/fs.js
+@@ -86,7 +86,14 @@ module.exports = function provider(options) {
+         try {
+             const stat = await multiStat(fullPathnames);
+             return {
+-                modified: stat.mtime.getTime(),
++                /*
++                 * [LOCAL-PATCH]
++                 * With Node.js v22, `mtime` is undefined, due to it being initially defined on `Stat.prototype`, which
++                 * means that the spread operator in `multiStat()` will not propagate it.
++                 * See, also, https://github.com/firebase/superstatic/issues/468#issuecomment-2166883064.
++                 */
++                //modified: stat.mtime.getTime(),
++                modified: Math.round(Number(stat.mtimeMs)),
+                 size: stat.size,
+                 etag: await fetchEtag(stat.pathname, stat),
+                 stream: fs.createReadStream(stat.pathname),
