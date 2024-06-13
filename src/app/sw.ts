@@ -29,7 +29,7 @@ sw.addEventListener('activate', evt => {
 
 sw.addEventListener('fetch', evt =>
   evt.respondWith(sw.caches.match(evt.request, {ignoreSearch: true}).
-    then(res => res || sw.fetch(evt.request))));
+    then(res => res ?? sw.fetch(evt.request))));
 
 // Helpers
 async function cleanUpObsoleteCaches() {
