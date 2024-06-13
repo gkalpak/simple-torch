@@ -3,7 +3,7 @@ import {BaseCe, IInitializedCe} from '../base.ce.js';
 
 export class LogoCe extends BaseCe {
   protected static override readonly template =
-    '<external-svg-ce src="/assets/images/simple-torch.svg"></external-svg-ce>';
+    '<external-svg-ce src="assets/images/simple-torch.svg"></external-svg-ce>';
   protected static override readonly style = ':host { cursor: pointer; }';
 
   protected override async initialize(): Promise<IInitializedCe<this>> {

@@ -1,5 +1,5 @@
-import {WIN} from '../../../app/shared/constants.js';
-import {Utils} from '../../../app/shared/utils.service.js';
+import {WIN} from '../../../app/js/shared/constants.js';
+import {Utils} from '../../../app/js/shared/utils.service.js';
 import {macrotick, macrotickWithMockedClock, microtick, mockProperty, reversePromise} from '../test-utils.js';
 
 

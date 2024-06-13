@@ -23,9 +23,9 @@ module.exports = config => config.set({
   },
   files: [
     /* eslint-disable sort-keys */
-    {pattern: 'out/**/*.js.map', included: false, watched: false},
-    {pattern: 'out/assets/**', included: false},
-    {pattern: 'out/app/**/*.js', included: false},
+    {pattern: 'out/app/**/*.js.map', included: false, watched: false},
+    {pattern: 'out/app/assets/**', included: false},
+    {pattern: 'out/app/js/**/*.js', included: false},
     {pattern: 'out/test/unit/test-utils.js', included: false},
     {pattern: 'out/test/unit/patch-env.js', type: 'module'},
     {pattern: 'out/test/unit/**/*.js', type: 'module'},
@@ -43,7 +43,7 @@ module.exports = config => config.set({
     {'reporter:jasmine-seed': ['type', JasmineSeedReporter]},
   ],
   preprocessors: {'out/**/*.js': ['sourcemap']},
-  proxies: {'/assets/': '/base/out/assets/'},
+  proxies: {'/assets/': '/base/out/app/assets/'},
   reporters: [
     'progress',
     'jasmine-seed',

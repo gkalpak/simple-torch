@@ -1,5 +1,5 @@
-import {WIN} from '../../../app/shared/constants.js';
-import {ISettings, Settings} from '../../../app/shared/settings.service.js';
+import {WIN} from '../../../app/js/shared/constants.js';
+import {ISettings, Settings} from '../../../app/js/shared/settings.service.js';
 
 
 describe('Settings', () => {

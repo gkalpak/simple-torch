@@ -1,5 +1,5 @@
-import {BaseCe} from '../../../../app/components/base.ce.js';
-import {LoaderCe} from '../../../../app/components/shared/loader.ce.js';
+import {BaseCe} from '../../../../app/js/components/base.ce.js';
+import {LoaderCe} from '../../../../app/js/components/shared/loader.ce.js';
 import {setupCeContainer} from '../../test-utils.js';
 
 
@@ -20,6 +20,6 @@ describe('LoaderCe', () => {
     const loader = elem.shadowRoot.querySelector<HTMLUnknownElement>('external-svg-ce')!;
 
     expect(loader).not.toBeNull();
-    expect(loader.getAttribute('src')).toBe('/assets/images/loader.svg');
+    expect(loader.getAttribute('src')).toBe('assets/images/loader.svg');
   });
 });

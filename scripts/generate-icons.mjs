@@ -7,7 +7,7 @@ import {convertToSizes} from './utils/svg-to-pngs.mjs';
 
 // Constants
 const ROOT_DIR = resolve(`${import.meta.dirname}/..`);
-const SIMPLE_TORCH_SVG_PATH = `${ROOT_DIR}/src/assets/images/simple-torch.svg`;
+const SIMPLE_TORCH_SVG_PATH = `${ROOT_DIR}/src/app/assets/images/simple-torch.svg`;
 const SIZES = [128, 192, 512];
 
 // Run

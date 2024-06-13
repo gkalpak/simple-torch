@@ -1,6 +1,6 @@
-import {BaseCe, IInitializedCe} from '../../../app/components/base.ce.js';
-import {WIN} from '../../../app/shared/constants.js';
-import {Utils} from '../../../app/shared/utils.service.js';
+import {BaseCe, IInitializedCe} from '../../../app/js/components/base.ce.js';
+import {WIN} from '../../../app/js/shared/constants.js';
+import {Utils} from '../../../app/js/shared/utils.service.js';
 import {microtick, normalizeWhitespace} from '../test-utils.js';
 
 

@@ -1,5 +1,5 @@
-import {BaseCe} from '../../../../app/components/base.ce.js';
-import {ContentCe} from '../../../../app/components/layout/content.ce.js';
+import {BaseCe} from '../../../../app/js/components/base.ce.js';
+import {ContentCe} from '../../../../app/js/components/layout/content.ce.js';
 import {setupCeContainer} from '../../test-utils.js';
 
 

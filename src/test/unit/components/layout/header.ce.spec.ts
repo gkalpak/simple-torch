@@ -1,6 +1,6 @@
-import {BaseCe} from '../../../../app/components/base.ce.js';
-import {HeaderCe} from '../../../../app/components/layout/header.ce.js';
-import {ISettings, Settings} from '../../../../app/shared/settings.service.js';
+import {BaseCe} from '../../../../app/js/components/base.ce.js';
+import {HeaderCe} from '../../../../app/js/components/layout/header.ce.js';
+import {ISettings, Settings} from '../../../../app/js/shared/settings.service.js';
 import {getNormalizedTextContent, setupCeContainer} from '../../test-utils.js';
 
 
@@ -36,7 +36,7 @@ describe('HeaderCe', () => {
     const speaker = elem.shadowRoot.querySelector('external-svg-ce.speaker')!;
 
     expect(speaker).not.toBeNull();
-    expect(speaker.getAttribute('src')).toBe('/assets/images/speaker.svg');
+    expect(speaker.getAttribute('src')).toBe('assets/images/speaker.svg');
   });
 
   describe('logo', () => {

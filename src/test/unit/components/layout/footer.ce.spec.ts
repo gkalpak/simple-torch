@@ -1,5 +1,5 @@
-import {BaseCe} from '../../../../app/components/base.ce.js';
-import {FooterCe} from '../../../../app/components/layout/footer.ce.js';
+import {BaseCe} from '../../../../app/js/components/base.ce.js';
+import {FooterCe} from '../../../../app/js/components/layout/footer.ce.js';
 import {getNormalizedTextContent, setupCeContainer} from '../../test-utils.js';
 
 

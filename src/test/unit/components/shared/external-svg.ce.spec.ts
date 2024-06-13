@@ -1,6 +1,6 @@
-import {BaseCe, IInitializedCe} from '../../../../app/components/base.ce.js';
-import {ExternalSvgCe} from '../../../../app/components/shared/external-svg.ce.js';
-import {WIN} from '../../../../app/shared/constants.js';
+import {BaseCe, IInitializedCe} from '../../../../app/js/components/base.ce.js';
+import {ExternalSvgCe} from '../../../../app/js/components/shared/external-svg.ce.js';
+import {WIN} from '../../../../app/js/shared/constants.js';
 import {getNormalizedTextContent, macrotick, macrotickWithMockedClock, setupCeContainer} from '../../test-utils.js';
 
 

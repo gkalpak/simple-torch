@@ -9,7 +9,7 @@ export class HeaderCe extends BaseCe {
       <b>Simple Torch</b>
       <version-ce class="version"></version-ce>
       <flex-spacer-ce></flex-spacer-ce>
-      <external-svg-ce class="speaker" src="/assets/images/speaker.svg"></external-svg-ce>
+      <external-svg-ce class="speaker" src="assets/images/speaker.svg"></external-svg-ce>
     </header>
   `;
   protected static override readonly style = `

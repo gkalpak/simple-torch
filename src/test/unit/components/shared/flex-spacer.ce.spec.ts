@@ -1,6 +1,6 @@
-import {BaseCe} from '../../../../app/components/base.ce.js';
-import {FlexSpacerCe} from '../../../../app/components/shared/flex-spacer.ce.js';
-import {WIN} from '../../../../app/shared/constants.js';
+import {BaseCe} from '../../../../app/js/components/base.ce.js';
+import {FlexSpacerCe} from '../../../../app/js/components/shared/flex-spacer.ce.js';
+import {WIN} from '../../../../app/js/shared/constants.js';
 import {getNormalizedTextContent, setupCeContainer} from '../../test-utils.js';
 
 

@@ -2,8 +2,10 @@
   "hosting": {
     "cleanUrls": true,
     "ignore": [
-      "test/**"
+      "**/*.d.ts",
+      "**/*.d.ts.map",
+      "**/*.tsbuildinfo"
     ],
-    "public": "out"
+    "public": "out/app/"
   }
 }

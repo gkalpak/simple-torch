@@ -4,4 +4,4 @@
  * @param {string} fileName
  * @return boolean
  */
-module.exports = fileName => !/^src([\\/])(?:app|test)(?:\1|$)/.test(fileName);
+module.exports = fileName => !/^src([\\/])app\1(?:js(?:\1|$)|sw\.ts$|tsconfig\.json$)/.test(fileName);

@@ -1,6 +1,6 @@
-import {BaseCe} from '../../../../app/components/base.ce.js';
-import {LogoCe} from '../../../../app/components/shared/logo.ce.js';
-import {WIN} from '../../../../app/shared/constants.js';
+import {BaseCe} from '../../../../app/js/components/base.ce.js';
+import {LogoCe} from '../../../../app/js/components/shared/logo.ce.js';
+import {WIN} from '../../../../app/js/shared/constants.js';
 import {setupCeContainer} from '../../test-utils.js';
 
 
@@ -28,7 +28,7 @@ describe('LogoCe', () => {
     const torch = elem.shadowRoot.querySelector<HTMLUnknownElement>('external-svg-ce')!;
 
     expect(torch).not.toBeNull();
-    expect(torch.getAttribute('src')).toBe('/assets/images/simple-torch.svg');
+    expect(torch.getAttribute('src')).toBe('assets/images/simple-torch.svg');
   });
 
   it('should toggle `.off` when clicking on the torch', async () => {

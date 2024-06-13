@@ -1,4 +1,4 @@
-import {IWindowWithEnv} from '../../app/shared/constants.js';
+import {IWindowWithEnv} from '../../app/js/shared/constants.js';
 
 
 (window as IWindowWithEnv).ENV = {

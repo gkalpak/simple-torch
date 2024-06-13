@@ -1,5 +1,5 @@
-import {BaseCe} from '../../../../app/components/base.ce.js';
-import {VersionCe} from '../../../../app/components/shared/version.ce.js';
+import {BaseCe} from '../../../../app/js/components/base.ce.js';
+import {VersionCe} from '../../../../app/js/components/shared/version.ce.js';
 import {getNormalizedTextContent, setupCeContainer} from '../../test-utils.js';
 
 

@@ -38,7 +38,7 @@ export class TorchCe extends BaseCe {
   protected static override readonly template = `
     <external-svg-ce
         class="dark no-bg off torch uninitialized with-effects"
-        src="/assets/images/simple-torch.svg">
+        src="assets/images/simple-torch.svg">
     </external-svg-ce>
     <loader-ce class="loader"></loader-ce>
     <div class="status">
@@ -100,7 +100,7 @@ export class TorchCe extends BaseCe {
   private readonly settings: ISettings = Settings.getInstance();
   private readonly sounds: Sounds = Sounds.getInstance();
 
-  private readonly clickSound: ISound = this.sounds.getSound('/assets/audio/click.ogg', 0.15);
+  private readonly clickSound: ISound = this.sounds.getSound('assets/audio/click.ogg', 0.15);
 
   protected async acquireCameraPermission(): Promise<void> {
     let permissionState: PermissionState | 'unknown' = 'unknown';

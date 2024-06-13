@@ -1,6 +1,6 @@
-import {ENV, WIN} from '../../../app/shared/constants.js';
-import {registerSw} from '../../../app/shared/register-sw.js';
-import {Utils} from '../../../app/shared/utils.service.js';
+import {ENV, WIN} from '../../../app/js/shared/constants.js';
+import {registerSw} from '../../../app/js/shared/register-sw.js';
+import {Utils} from '../../../app/js/shared/utils.service.js';
 import {macrotickWithMockedClock, microtick, mockProperty, reversePromise} from '../test-utils.js';
 
 

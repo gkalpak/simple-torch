@@ -13,8 +13,9 @@ sh.set('-e');
 const ROOT_DIR = resolve(`${import.meta.dirname}/..`);
 const PKG_PATH = `${ROOT_DIR}/package.json`;
 const OUT_DIR = `${ROOT_DIR}/out`;
-const OUT_INDEX_PATH = `${OUT_DIR}/index.html`;
-const OUT_SW_PATH = `${OUT_DIR}/sw.js`;
+const OUT_APP_DIR = `${OUT_DIR}/app`;
+const OUT_INDEX_PATH = `${OUT_APP_DIR}/index.html`;
+const OUT_SW_PATH = `${OUT_APP_DIR}/sw.js`;
 
 // Run
 _main(argv.slice(2));
@@ -29,8 +30,8 @@ async function _main(args) {
     const sha = sh.exec('git rev-parse --verify HEAD', {silent: true}).trim();
 
     // Copy files.
-    sh.mkdir('-p', OUT_DIR);
-    sh.cp('-r', 'src/!(@types|app|test)', OUT_DIR);
+    sh.mkdir('-p', OUT_APP_DIR);
+    sh.cp('-r', 'src/app/!(js|sw.ts|tsconfig.json)', OUT_APP_DIR);
 
     // Replace ENV placeholders.
     sh.sed('-i', /<PLACEHOLDER:PRODUCTION>/g, `${production}`, OUT_INDEX_PATH);
@@ -57,7 +58,7 @@ async function _main(args) {
 }
 
 function swComputeHashes(files) {
-  return Promise.all(files.map(filePath => hashFile(`${OUT_DIR}/${filePath}`)));
+  return Promise.all(files.map(filePath => hashFile(`${OUT_APP_DIR}/${filePath}`)));
 }
 
 function swCreateFilesToCacheReplacement(files, hashes) {
@@ -71,7 +72,7 @@ function swCreateFilesToCacheReplacement(files, hashes) {
 }
 
 function swFindFilesToCache() {
-  return /** @type {import('node:fs').Dirent[] & import('shelljs').ShellArray} */ (sh.ls('-lR', OUT_DIR)).
-    filter(x => x.isFile() && !/(?:^test\/|\.(?:d\.ts|map|tsbuildinfo)$|^sw\.js$)/.test(x.name)).
+  return /** @type {import('node:fs').Dirent[] & import('shelljs').ShellArray} */ (sh.ls('-lR', OUT_APP_DIR)).
+    filter(x => x.isFile() && !/(?:\.(?:d\.ts|map|tsbuildinfo)$|^sw\.js$)/.test(x.name)).
     map(x => x.name);
 }

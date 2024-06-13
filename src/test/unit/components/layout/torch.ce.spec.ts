@@ -1,11 +1,11 @@
 /* eslint-disable max-classes-per-file */
 
-import {BaseCe, IInitializedCe} from '../../../../app/components/base.ce.js';
-import {EMPTY_TRACK_INFO, State, TorchCe} from '../../../../app/components/layout/torch.ce.js';
-import {LoaderCe} from '../../../../app/components/shared/loader.ce.js';
-import {EMOJI, WIN} from '../../../../app/shared/constants.js';
-import {ISettings, Settings} from '../../../../app/shared/settings.service.js';
-import {Sounds} from '../../../../app/shared/sounds.service.js';
+import {BaseCe, IInitializedCe} from '../../../../app/js/components/base.ce.js';
+import {EMPTY_TRACK_INFO, State, TorchCe} from '../../../../app/js/components/layout/torch.ce.js';
+import {LoaderCe} from '../../../../app/js/components/shared/loader.ce.js';
+import {EMOJI, WIN} from '../../../../app/js/shared/constants.js';
+import {ISettings, Settings} from '../../../../app/js/shared/settings.service.js';
+import {Sounds} from '../../../../app/js/shared/sounds.service.js';
 import {
   microtick,
   mockProperty,
@@ -43,7 +43,7 @@ describe('TorchCe', () => {
     const torch = elem.shadowRoot.querySelector<HTMLUnknownElement>('external-svg-ce')!;
 
     expect(torch).not.toBeNull();
-    expect(torch.getAttribute('src')).toBe('/assets/images/simple-torch.svg');
+    expect(torch.getAttribute('src')).toBe('assets/images/simple-torch.svg');
     expect(torch.classList.contains('dark')).toBe(true);
     expect(torch.classList.contains('uninitialized')).toBe(false);
   });
@@ -519,7 +519,7 @@ describe('TorchCe', () => {
   });
 
   describe('#onClick()', () => {
-    const clickSound = Sounds.getInstance().getSound('/assets/audio/click.ogg', 0.15);
+    const clickSound = Sounds.getInstance().getSound('assets/audio/click.ogg', 0.15);
     let elem: TestTorchCe;
     let clickPlaySpy: jasmine.Spy;
     let updateStateSpy: jasmine.Spy;

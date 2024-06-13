@@ -1,5 +1,5 @@
-import {BaseCe, IInitializedCe} from '../../app/components/base.ce.js';
-import {WIN, ZERO_WIDTH_SPACE} from '../../app/shared/constants.js';
+import {BaseCe, IInitializedCe} from '../../app/js/components/base.ce.js';
+import {WIN, ZERO_WIDTH_SPACE} from '../../app/js/shared/constants.js';
 
 
 export interface IMockPropertyHelpers<T, P extends keyof T> {

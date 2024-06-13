@@ -1,4 +1,4 @@
-import {EMOJI, ENV, WIN, ZERO_WIDTH_SPACE} from '../../../app/shared/constants.js';
+import {EMOJI, ENV, WIN, ZERO_WIDTH_SPACE} from '../../../app/js/shared/constants.js';
 
 
 describe('shared/constants', () => {
