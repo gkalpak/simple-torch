@@ -8,7 +8,7 @@
     "import"
   ],
   "env": {
-		"es2022": true,
+    "es2022": true,
     "node": true
   },
   "parserOptions": {
