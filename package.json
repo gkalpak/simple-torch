@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "@gkalpak/simple-torch",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "A simple torch PWA using the `MediaDevices` API.",
   "keywords": [
     "MediaCapabilities",
