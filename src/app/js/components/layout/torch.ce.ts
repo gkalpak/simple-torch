@@ -4,10 +4,15 @@ import {ISound, Sounds} from '../../shared/sounds.service.js';
 import {BaseCe, IInitializedCe} from '../base.ce.js';
 
 
-interface ITrackInfo {
+interface ITorchInfo {
   hasCamera: boolean;
   hasTorch: boolean;
+  screenWakeLock: WakeLockSentinel | undefined;
   track: MediaStreamTrack | undefined;
+}
+
+interface ITorchInfoWithTrack extends ITorchInfo {
+  track: NonNullable<ITorchInfo['track']>;
 }
 
 export const enum State {
@@ -18,7 +23,12 @@ export const enum State {
   On,
 }
 
-export const EMPTY_TRACK_INFO: ITrackInfo = {hasCamera: false, hasTorch: false, track: undefined};
+export const EMPTY_TORCH_INFO: ITorchInfo = {
+  hasCamera: false,
+  hasTorch: false,
+  screenWakeLock: undefined,
+  track: undefined,
+};
 
 export class TorchCe extends BaseCe {
   private static readonly statusMessages = {
@@ -95,7 +105,7 @@ export class TorchCe extends BaseCe {
   `;
 
   protected state: State = State.Uninitialized;
-  protected trackInfoPromise: Promise<ITrackInfo> = Promise.resolve(EMPTY_TRACK_INFO);
+  protected torchInfoPromise: Promise<ITorchInfo> = Promise.resolve(EMPTY_TORCH_INFO);
 
   private readonly settings: ISettings = Settings.getInstance();
   private readonly sounds: Sounds = Sounds.getInstance();
@@ -128,13 +138,15 @@ export class TorchCe extends BaseCe {
     }
   }
 
-  protected async getTrackInfo(renewIfNecessary = false): Promise<ITrackInfo> {
-    let trackInfo = await this.trackInfoPromise;
-    const noActiveTrack = !trackInfo.track || (trackInfo.track.readyState === 'ended');
+  protected async getTorchInfo(renewIfNecessary = false): Promise<ITorchInfo> {
+    let torchInfo = await this.torchInfoPromise;
+    const noActiveTrack = !torchInfo.track || (torchInfo.track.readyState === 'ended');
 
     if (noActiveTrack) {
+      await this.releaseScreenWakeLock(torchInfo);
+
       if (renewIfNecessary) {
-        this.trackInfoPromise = (async () => {
+        this.torchInfoPromise = (async () => {
           await this.acquireCameraPermission();
 
           let hasCamera = false;
@@ -150,25 +162,25 @@ export class TorchCe extends BaseCe {
 
             if (track?.getCapabilities?.().torch === true) {
               this.settings.torchDeviceId = deviceId;
-              return {hasCamera: true, hasTorch: true, track};
+              return {hasCamera: true, hasTorch: true, screenWakeLock: undefined, track};
             } else {
               track?.stop();
             }
           }
 
           return {
-            ...EMPTY_TRACK_INFO,
+            ...EMPTY_TORCH_INFO,
             hasCamera,
           };
         })();
 
-        trackInfo = await this.trackInfoPromise;
+        torchInfo = await this.torchInfoPromise;
       } else {
-        trackInfo = EMPTY_TRACK_INFO;
+        torchInfo = EMPTY_TORCH_INFO;
       }
     }
 
-    return trackInfo;
+    return torchInfo;
   }
 
   protected override async initialize(): Promise<IInitializedCe<this>> {
@@ -197,8 +209,8 @@ export class TorchCe extends BaseCe {
 
       this.state = newState;
 
-      const {track} = await this.getTrackInfo();
-      if (track) track.applyConstraints({advanced: [{torch: on}]});
+      const torchInfo = await this.getTorchInfo();
+      if (this.torchInfoHasTrack(torchInfo)) await this.toggleTorch(torchInfo, on);
     };
 
     try {
@@ -208,7 +220,7 @@ export class TorchCe extends BaseCe {
       // The `updateState()` call should complete fairly quickly, though, so serial execution should
       // not have a noticeable impact here.
       await updateState(State.Initializing);
-      const {hasCamera, hasTorch} = await this.getTrackInfo(true);
+      const {hasCamera, hasTorch} = await this.getTorchInfo(true);
 
       if (!hasTorch) {
         throw new Error(`Unable to detect ${hasCamera ? 'torch' : 'camera'} on your device.`);
@@ -244,23 +256,48 @@ export class TorchCe extends BaseCe {
   }
 
   protected async onVisibilityChange(): Promise<void> {
-    const {track} = await this.getTrackInfo(!WIN.document.hidden);
-    if (!track) return;
+    const torchInfo = await this.getTorchInfo(!WIN.document.hidden);
+    if (!this.torchInfoHasTrack(torchInfo)) return;
 
     if (WIN.document.hidden) {
-      track.stop();
+      await this.stopTrack(torchInfo);
     } else if (this.state === State.On) {
-      track.applyConstraints({advanced: [{torch: true}]});
+      await this.toggleTorch(torchInfo, true);
     }
+  }
+
+  protected async releaseScreenWakeLock(torchInfo: ITorchInfo): Promise<void> {
+    if (torchInfo.screenWakeLock?.released === false) {
+      await torchInfo.screenWakeLock?.release();
+    }
+
+    torchInfo.screenWakeLock = undefined;
   }
 
   protected async updateState(_newState: State, _extraMsg?: string): Promise<void> {
     return undefined;
   }
 
-  private async stopTrack(): Promise<void> {
-    const {track} = await this.getTrackInfo();
-    if (track) track.stop();
+  private torchInfoHasTrack(torchInfo: ITorchInfo): torchInfo is ITorchInfoWithTrack {
+    return torchInfo.track !== undefined;
+  }
+
+  private async stopTrack(torchInfo?: ITorchInfo): Promise<void> {
+    torchInfo = torchInfo ?? await this.getTorchInfo();
+
+    torchInfo.track?.stop();
+    await this.releaseScreenWakeLock(torchInfo);
+  }
+
+  private async toggleTorch(torchInfo: ITorchInfoWithTrack, on: boolean): Promise<void> {
+    await Promise.all([
+      torchInfo.track.applyConstraints({advanced: [{torch: on}]}),
+      this.releaseScreenWakeLock(torchInfo),
+    ]);
+
+    if (on) {
+      torchInfo.screenWakeLock = await navigator.wakeLock.request('screen');
+    }
   }
 
   private async *getCameraDeviceIds(): AsyncGenerator<string> {

@@ -1,7 +1,7 @@
 /* eslint-disable max-classes-per-file */
 
 import {BaseCe, IInitializedCe} from '../../../../app/js/components/base.ce.js';
-import {EMPTY_TRACK_INFO, State, TorchCe} from '../../../../app/js/components/layout/torch.ce.js';
+import {EMPTY_TORCH_INFO, State, TorchCe} from '../../../../app/js/components/layout/torch.ce.js';
 import {LoaderCe} from '../../../../app/js/components/shared/loader.ce.js';
 import {EMOJI, WIN} from '../../../../app/js/shared/constants.js';
 import {ISettings, Settings} from '../../../../app/js/shared/settings.service.js';
@@ -19,7 +19,7 @@ import {
 describe('TorchCe', () => {
   const initCe = setupCeContainer();
   let mockSettings: ISettings;
-  let getTrackInfoSpy: jasmine.Spy;
+  let getTorchInfoSpy: jasmine.Spy;
   let onErrorSpy: jasmine.Spy;
 
   beforeAll(() => TestTorchCe.register());
@@ -27,7 +27,7 @@ describe('TorchCe', () => {
   beforeEach(() => {
     mockSettings = {muted: false, torchDeviceId: ''};
     spyOn(Settings, 'getInstance').and.returnValue(mockSettings);
-    getTrackInfoSpy = spyOn(TestTorchCe.prototype, 'getTrackInfo').and.resolveTo(EMPTY_TRACK_INFO);
+    getTorchInfoSpy = spyOn(TestTorchCe.prototype, 'getTorchInfo').and.resolveTo(EMPTY_TORCH_INFO);
     onErrorSpy = spyOn(TestTorchCe.prototype, 'onError');
   });
 
@@ -129,7 +129,7 @@ describe('TorchCe', () => {
     });
   });
 
-  describe('#getTrackInfo()', () => {
+  describe('#getTorchInfo()', () => {
     let mockMediaDevices: MockMediaDevices;
     let getUserMediaSpy: jasmine.Spy;
     let acquireCameraPermissionSpy: jasmine.Spy;
@@ -141,83 +141,154 @@ describe('TorchCe', () => {
       spyOnProperty(WIN.navigator, 'mediaDevices').and.returnValue(mockMediaDevices as unknown as MediaDevices);
       getUserMediaSpy = spyOn(mockMediaDevices, 'getUserMedia').and.callThrough();
       acquireCameraPermissionSpy = spyOn(TestTorchCe.prototype, 'acquireCameraPermission').and.resolveTo();
-      getTrackInfoSpy.and.callThrough();
+      getTorchInfoSpy.and.callThrough();
 
       elem = new TestTorchCe();
     });
 
     describe('(with `renewIfNecessary: false`)', () => {
-      it('should retrieve and return the existing track info', async () => {
+      it('should retrieve and return the existing torch info', async () => {
         await initCe(elem);
         getUserMediaSpy.calls.reset();
         acquireCameraPermissionSpy.calls.reset();
 
-        const trackInfo = await elem.getTrackInfo();
+        const torchInfo = await elem.getTorchInfo();
 
-        expect(trackInfo).toEqual({hasCamera: true, hasTorch: true, track: jasmine.any(MockMediaStreamTrack)});
+        expect(torchInfo).toEqual({
+          hasCamera: true,
+          hasTorch: true,
+          screenWakeLock: undefined,
+          track: jasmine.any(MockMediaStreamTrack),
+        });
         expect(getUserMediaSpy).not.toHaveBeenCalled();
         expect(acquireCameraPermissionSpy).not.toHaveBeenCalled();
       });
 
-      it('should return empty track info, if there is no track info', async () => {
-        const trackInfo = await elem.getTrackInfo();
+      describe('if there is no track info', () => {
+        it('should return empty torch info', async () => {
+          const torchInfo = await elem.getTorchInfo();
 
-        expect(trackInfo).toEqual(EMPTY_TRACK_INFO);
-        expect(getUserMediaSpy).not.toHaveBeenCalled();
-        expect(acquireCameraPermissionSpy).not.toHaveBeenCalled();
+          expect(torchInfo).toEqual(EMPTY_TORCH_INFO);
+          expect(getUserMediaSpy).not.toHaveBeenCalled();
+          expect(acquireCameraPermissionSpy).not.toHaveBeenCalled();
+        });
+
+        it('should release the screen wake lock', async () => {
+          const releaseScreenWakeLockSpy = spyOn(TestTorchCe.prototype, 'releaseScreenWakeLock');
+
+          const torchInfo = await elem.getTorchInfo();
+
+          expect(torchInfo).toEqual(EMPTY_TORCH_INFO);
+          expect(releaseScreenWakeLockSpy).toHaveBeenCalledWith(torchInfo);
+        });
       });
 
-      it('should return empty track info, if the previous track has been stopped', async () => {
-        await initCe(elem);
-        const trackInfo1 = await elem.getTrackInfo();
+      describe('if the previous track has been stopped', () => {
+        it('should return empty torch info', async () => {
+          await initCe(elem);
+          const torchInfo1 = await elem.getTorchInfo();
 
-        trackInfo1.track?.stop();
-        getUserMediaSpy.calls.reset();
-        acquireCameraPermissionSpy.calls.reset();
+          torchInfo1.track?.stop();
+          getUserMediaSpy.calls.reset();
+          acquireCameraPermissionSpy.calls.reset();
 
-        const trackInfo2 = await elem.getTrackInfo();
+          const torchInfo2 = await elem.getTorchInfo();
 
-        expect(trackInfo1).not.toEqual(EMPTY_TRACK_INFO);
-        expect(trackInfo2).toEqual(EMPTY_TRACK_INFO);
-        expect(getUserMediaSpy).not.toHaveBeenCalled();
-        expect(acquireCameraPermissionSpy).not.toHaveBeenCalled();
+          expect(torchInfo1).not.toEqual(EMPTY_TORCH_INFO);
+          expect(torchInfo2).toEqual(EMPTY_TORCH_INFO);
+          expect(getUserMediaSpy).not.toHaveBeenCalled();
+          expect(acquireCameraPermissionSpy).not.toHaveBeenCalled();
+        });
+
+        it('should release the screen wake lock', async () => {
+          const releaseScreenWakeLockSpy = spyOn(TestTorchCe.prototype, 'releaseScreenWakeLock');
+
+          await initCe(elem);
+          const torchInfo1 = await elem.getTorchInfo();
+
+          torchInfo1.track?.stop();
+          getUserMediaSpy.calls.reset();
+          acquireCameraPermissionSpy.calls.reset();
+          releaseScreenWakeLockSpy.calls.reset();
+
+          const torchInfo2 = await elem.getTorchInfo();
+
+          expect(torchInfo1).not.toEqual(EMPTY_TORCH_INFO);
+          expect(torchInfo2).toEqual(EMPTY_TORCH_INFO);
+          expect(releaseScreenWakeLockSpy).toHaveBeenCalledOnceWith(torchInfo1);
+        });
       });
     });
 
     describe('(with `renewIfNecessary: true`)', () => {
       it('should get a new track, if there is currently no track', async () => {
-        const trackInfo = await elem.getTrackInfo(true);
+        const torchInfo = await elem.getTorchInfo(true);
 
-        expect(trackInfo).toEqual({hasCamera: true, hasTorch: true, track: jasmine.any(MockMediaStreamTrack)});
+        expect(torchInfo).toEqual({
+          hasCamera: true,
+          hasTorch: true,
+          screenWakeLock: undefined,
+          track: jasmine.any(MockMediaStreamTrack),
+        });
         expect(acquireCameraPermissionSpy).toHaveBeenCalledOnceWith();
         expect(getUserMediaSpy).toHaveBeenCalledWith({video: {deviceId: {exact: jasmine.any(String)}}});
       });
 
-      it('should return the same track info, if no renewal is required', async () => {
-        const trackInfo1 = await elem.getTrackInfo(true);
+      it('should release the screen wake lock, if there is no active track', async () => {
+        const releaseScreenWakeLockSpy = spyOn(TestTorchCe.prototype, 'releaseScreenWakeLock');
+
+        const torchInfo1 = await elem.getTorchInfo(true);
+        torchInfo1.track?.stop();
+
+        releaseScreenWakeLockSpy.calls.reset();
+        const torchInfo2 = await elem.getTorchInfo(true);
+
+        expect(torchInfo2).not.toBe(torchInfo1);
+        expect(releaseScreenWakeLockSpy).toHaveBeenCalledOnceWith(torchInfo1);
+
+        releaseScreenWakeLockSpy.calls.reset();
+        torchInfo2.track = undefined;
+        const torchInfo3 = await elem.getTorchInfo(true);
+
+        expect(torchInfo3).not.toBe(torchInfo2);
+        expect(releaseScreenWakeLockSpy).toHaveBeenCalledOnceWith(torchInfo2);
+      });
+
+      it('should return the same torch info, if no renewal is required', async () => {
+        const torchInfo1 = await elem.getTorchInfo(true);
 
         acquireCameraPermissionSpy.calls.reset();
         getUserMediaSpy.calls.reset();
 
-        const trackInfo2 = await elem.getTrackInfo(true);
+        const torchInfo2 = await elem.getTorchInfo(true);
 
-        expect(trackInfo2).toBe(trackInfo1);
-        expect(trackInfo2).toEqual({hasCamera: true, hasTorch: true, track: jasmine.any(MockMediaStreamTrack)});
+        expect(torchInfo2).toBe(torchInfo1);
+        expect(torchInfo2).toEqual({
+          hasCamera: true,
+          hasTorch: true,
+          screenWakeLock: undefined,
+          track: jasmine.any(MockMediaStreamTrack),
+        });
         expect(acquireCameraPermissionSpy).not.toHaveBeenCalled();
         expect(getUserMediaSpy).not.toHaveBeenCalled();
       });
 
       it('should renew the track, if the previous track has been stopped', async () => {
-        const trackInfo1 = await elem.getTrackInfo(true);
+        const torchInfo1 = await elem.getTorchInfo(true);
 
-        trackInfo1.track?.stop();
+        torchInfo1.track?.stop();
         acquireCameraPermissionSpy.calls.reset();
         getUserMediaSpy.calls.reset();
 
-        const trackInfo2 = await elem.getTrackInfo(true);
+        const torchInfo2 = await elem.getTorchInfo(true);
 
-        expect(trackInfo2).not.toBe(trackInfo1);
-        expect(trackInfo2).toEqual({hasCamera: true, hasTorch: true, track: jasmine.any(MockMediaStreamTrack)});
+        expect(torchInfo2).not.toBe(torchInfo1);
+        expect(torchInfo2).toEqual({
+          hasCamera: true,
+          hasTorch: true,
+          screenWakeLock: undefined,
+          track: jasmine.any(MockMediaStreamTrack),
+        });
         expect(acquireCameraPermissionSpy).toHaveBeenCalledOnceWith();
         expect(getUserMediaSpy).toHaveBeenCalledWith({video: {deviceId: {exact: jasmine.any(String)}}});
       });
@@ -225,10 +296,10 @@ describe('TorchCe', () => {
       it('should reject if permission to camera is denied', async () => {
         acquireCameraPermissionSpy.and.rejectWith('Permission denied.');
 
-        await expectAsync(elem.getTrackInfo(true)).toBeRejectedWith('Permission denied.');
+        await expectAsync(elem.getTorchInfo(true)).toBeRejectedWith('Permission denied.');
       });
 
-      it('should return empty track info, if there is no camera', async () => {
+      it('should return empty torch info, if there is no camera', async () => {
         mockMediaDevices.$devicesWithSpecs = new Map([
           [new TestDeviceInfo('audiooutput', 'spkr-001'), {}],
           [new TestDeviceInfo('audiooutput', 'spkr-002'), {}],
@@ -236,16 +307,26 @@ describe('TorchCe', () => {
           [new TestDeviceInfo('audioinput', 'mic-002'), {}],
         ]);
 
-        expect(await elem.getTrackInfo(true)).toEqual({hasCamera: false, hasTorch: false, track: undefined});
+        expect(await elem.getTorchInfo(true)).toEqual({
+          hasCamera: false,
+          hasTorch: false,
+          screenWakeLock: undefined,
+          track: undefined,
+        });
       });
 
-      it('should return empty track info, if there is no camera with torch', async () => {
+      it('should return empty torch info, if there is no camera with torch', async () => {
         mockMediaDevices.$devicesWithSpecs = new Map([
           [new TestDeviceInfo('videoinput', 'cam-001'), {}],
           [new TestDeviceInfo('videoinput', 'cam-002'), {}],
         ]);
 
-        expect(await elem.getTrackInfo(true)).toEqual({hasCamera: true, hasTorch: false, track: undefined});
+        expect(await elem.getTorchInfo(true)).toEqual({
+          hasCamera: true,
+          hasTorch: false,
+          screenWakeLock: undefined,
+          track: undefined,
+        });
       });
 
       it('should try all video input devices to find one that supports torch', async () => {
@@ -261,7 +342,7 @@ describe('TorchCe', () => {
           [new TestDeviceInfo('videoinput', 'cam-003'), {}],
         ]);
 
-        await elem.getTrackInfo(true);
+        await elem.getTorchInfo(true);
 
         expect(getUserMediaSpy).toHaveBeenCalledTimes(3);
         expect(getUserMediaSpy).toHaveBeenCalledWith({video: {deviceId: {exact: 'cam-001'}}});
@@ -276,7 +357,7 @@ describe('TorchCe', () => {
           [new TestDeviceInfo('videoinput', 'cam-003'), {}],
         ]);
 
-        await elem.getTrackInfo(true);
+        await elem.getTorchInfo(true);
 
         expect(getUserMediaSpy.calls.allArgs()).toEqual([
           [{video: {deviceId: {exact: 'cam-003'}}}],
@@ -292,7 +373,7 @@ describe('TorchCe', () => {
           [new TestDeviceInfo('videoinput', 'cam-003'), {}],
         ]);
 
-        await elem.getTrackInfo(true);
+        await elem.getTorchInfo(true);
 
         expect(getUserMediaSpy.calls.allArgs()).toEqual([
           [{video: {deviceId: {exact: 'cam-003'}}}],
@@ -307,7 +388,7 @@ describe('TorchCe', () => {
           [new TestDeviceInfo('videoinput', 'cam-003'), {}],
         ]);
 
-        await elem.getTrackInfo(true);
+        await elem.getTorchInfo(true);
         const tracks = await Promise.
           all(getUserMediaSpy.calls.all().map(x => x.returnValue as Promise<MockMediaStream>)).
           then(mockStreams => mockStreams.map(x => x.$track));
@@ -323,7 +404,7 @@ describe('TorchCe', () => {
           [new TestDeviceInfo('videoinput', 'cam-003'), {}],
         ]);
 
-        await elem.getTrackInfo(true);
+        await elem.getTorchInfo(true);
         const tracks = await Promise.
           all(getUserMediaSpy.calls.all().map(x => x.returnValue as Promise<MockMediaStream>)).
           then(mockStreams => mockStreams.map(x => x.$track));
@@ -339,7 +420,7 @@ describe('TorchCe', () => {
           [new TestDeviceInfo('videoinput', 'cam-003'), {}],
         ]);
 
-        await elem.getTrackInfo(true);
+        await elem.getTorchInfo(true);
 
         expect(mockSettings.torchDeviceId).toBe('cam-002');
       });
@@ -352,7 +433,7 @@ describe('TorchCe', () => {
           [new TestDeviceInfo('videoinput', 'cam-003'), {}],
         ]);
 
-        await elem.getTrackInfo(true);
+        await elem.getTorchInfo(true);
 
         expect(mockSettings.torchDeviceId).toBe('cam-002');
         expect(getUserMediaSpy).toHaveBeenCalledOnceWith({video: {deviceId: {exact: 'cam-002'}}});
@@ -367,7 +448,7 @@ describe('TorchCe', () => {
           [new TestDeviceInfo('videoinput', 'cam-004'), {}],
         ]);
 
-        await elem.getTrackInfo(true);
+        await elem.getTorchInfo(true);
 
         expect(getUserMediaSpy).toHaveBeenCalledTimes(4);
         expect(getUserMediaSpy).toHaveBeenCalledWith({video: {deviceId: {exact: 'cam-003'}}});
@@ -390,26 +471,26 @@ describe('TorchCe', () => {
       await initCe(elem);
 
       expect(setStateSpy).toHaveBeenCalledWith(State.Initializing);
-      expect(setStateSpy).toHaveBeenCalledBefore(getTrackInfoSpy);
+      expect(setStateSpy).toHaveBeenCalledBefore(getTorchInfoSpy);
     });
 
-    it('should retrieve the track info', async () => {
+    it('should retrieve the torch info', async () => {
       await initCe(elem);
-      expect(getTrackInfoSpy).toHaveBeenCalledWith(true);
+      expect(getTorchInfoSpy).toHaveBeenCalledWith(true);
     });
 
-    it('should report an error, if retrieving the track info fails', async () => {
-      getTrackInfoSpy.and.throwError('`getTrackInfo()` failed');
+    it('should report an error, if retrieving the torch info fails', async () => {
+      getTorchInfoSpy.and.throwError('`getTorchInfo()` failed');
       await initCe(elem);
 
-      expect(onErrorSpy).toHaveBeenCalledWith(new Error('`getTrackInfo()` failed'));
+      expect(onErrorSpy).toHaveBeenCalledWith(new Error('`getTorchInfo()` failed'));
     });
 
     it('should report an error, if switching the torch on fails', async () => {
       const mockTrack = new MockMediaStreamTrack(true);
 
       spyOn(mockTrack, 'applyConstraints').and.throwError('`applyConstraints()` failed');
-      getTrackInfoSpy.and.resolveTo({hasTorch: true, track: mockTrack});
+      getTorchInfoSpy.and.resolveTo({hasTorch: true, track: mockTrack});
 
       await initCe(elem);
 
@@ -424,7 +505,7 @@ describe('TorchCe', () => {
         mockTrack = new MockMediaStreamTrack(true);
 
         onVisibilityChangeSpy = spyOn(elem, 'onVisibilityChange');
-        getTrackInfoSpy.and.resolveTo({hasCamera: true, hasTorch: true, track: mockTrack});
+        getTorchInfoSpy.and.resolveTo({hasCamera: true, hasTorch: true, screenWakeLock: undefined, track: mockTrack});
       });
 
       it('should set the state to `On`', async () => {
@@ -475,6 +556,24 @@ describe('TorchCe', () => {
         await microtick();
         expect(mockTrack.readyState).toBe('ended');
       });
+
+      it('should register a clean-up function to release the screen wake lock (if active)', async () => {
+        await initCe(elem);
+
+        const mockWakeLock = new MockWakeLockSentinel('screen');
+        getTorchInfoSpy.and.resolveTo({
+          hasCamera: true,
+          hasTorch: true,
+          screenWakeLock: mockWakeLock,
+          track: undefined,
+        });
+
+        expect(mockWakeLock.released).toBe(false);
+
+        elem.disconnectedCallback();
+        await microtick();
+        expect(mockWakeLock.released).toBe(true);
+      });
     });
 
     describe('(without camera/torch/permission)', () => {
@@ -483,7 +582,12 @@ describe('TorchCe', () => {
       beforeEach(() => onVisibilityChangeSpy = spyOn(elem, 'onVisibilityChange'));
 
       it('should abort and report an error, when no torch detected', async () => {
-        getTrackInfoSpy.and.resolveTo({hasCamera: true, hasTorch: false, track: new MockMediaStreamTrack()});
+        getTorchInfoSpy.and.resolveTo({
+          hasCamera: true,
+          hasTorch: false,
+          screenWakeLock: undefined,
+          track: new MockMediaStreamTrack(),
+        });
 
         await initCe(elem);
         WIN.document.dispatchEvent(new Event('visibilitychange'));
@@ -494,7 +598,7 @@ describe('TorchCe', () => {
       });
 
       it('should abort and report an error, when no camera detected', async () => {
-        getTrackInfoSpy.and.resolveTo(EMPTY_TRACK_INFO);
+        getTorchInfoSpy.and.resolveTo(EMPTY_TORCH_INFO);
 
         await initCe(elem);
         WIN.document.dispatchEvent(new Event('visibilitychange'));
@@ -506,7 +610,7 @@ describe('TorchCe', () => {
 
       it('should abort and report an error, when permission not granted', async () => {
         const mockError = new Error('Permission not granted.');
-        getTrackInfoSpy.and.throwError(mockError);
+        getTorchInfoSpy.and.throwError(mockError);
 
         await initCe(elem);
         WIN.document.dispatchEvent(new Event('visibilitychange'));
@@ -594,12 +698,22 @@ describe('TorchCe', () => {
 
     it('should stop the track (if any)', async () => {
       const mockTrack = new MockMediaStreamTrack();
-      getTrackInfoSpy.and.resolveTo({track: mockTrack});
+      getTorchInfoSpy.and.resolveTo({track: mockTrack});
 
       expect(mockTrack.readyState).toBe('live');
 
       await elem.onError(new Error('test'));
       expect(mockTrack.readyState).toBe('ended');
+    });
+
+    it('should release the screen wake lock (if any)', async () => {
+      const mockWakeLock = new MockWakeLockSentinel('screen');
+      getTorchInfoSpy.and.resolveTo({screenWakeLock: mockWakeLock});
+
+      expect(mockWakeLock.released).toBe(false);
+
+      await elem.onError(new Error('test'));
+      expect(mockWakeLock.released).toBe(true);
     });
 
     it('should set the state to `Disabled`', async () => {
@@ -611,137 +725,228 @@ describe('TorchCe', () => {
   });
 
   describe('#onVisibilityChange()', () => {
+    interface IMockPartialTorchInfo {
+      screenWakeLock: MockWakeLockSentinel | undefined;
+      track: MockMediaStreamTrack | undefined;
+    }
+
     interface IOnVisibilityChangeTestCase {
       description: string;
       initialState: State;
-      getInitialTrack: () => MockMediaStreamTrack | undefined;
-      verifyOutcome: (initialTrack?: MockMediaStreamTrack, lastTrack?: MockMediaStreamTrack) => Promise<void>;
+      getInitialPartialInfo: () => IMockPartialTorchInfo;
+      verifyOutcome: (initialInfo: IMockPartialTorchInfo, finalInfo: IMockPartialTorchInfo) => Promise<void>;
     }
 
     const {setMockValue: setMockHidden} = mockProperty(WIN.document, 'hidden');
     const createMockTrack = (stopped = false) =>
       Object.assign(new MockMediaStreamTrack(true), stopped && {readyState: 'ended'});
+    const createMockWakeLock = (released = false) =>
+      Object.assign(new MockWakeLockSentinel('screen'), {released});
     const testCases: IOnVisibilityChangeTestCase[] = [
       {
         description: '(state: Off, track: none)',
         initialState: State.Off,
 
-        getInitialTrack: () => undefined,
-        verifyOutcome: async (_initialTrack, lastTrack) => {
-          expect(lastTrack).toBeDefined();
-          expect(lastTrack!.isTorchOn()).toBe(false);
+        getInitialPartialInfo: () => ({screenWakeLock: createMockWakeLock(), track: undefined}),
+        verifyOutcome: async (initialInfo, finalInfo) => {
+          expect(finalInfo.screenWakeLock).not.toBe(initialInfo.screenWakeLock);
+
+          expect(initialInfo.screenWakeLock).toBeDefined();
+          expect(initialInfo.screenWakeLock!.released).toBe(true);
+
+          expect(finalInfo.screenWakeLock).toBeUndefined();
+          expect(finalInfo.track).toBeDefined();
+          expect(finalInfo.track!.isTorchOn()).toBe(false);
         },
       },
       {
         description: '(state: On, track: none)',
         initialState: State.On,
 
-        getInitialTrack: () => undefined,
-        verifyOutcome: async (_initialTrack, lastTrack) => {
-          expect(lastTrack).toBeDefined();
-          expect(lastTrack!.isTorchOn()).toBe(true);
+        getInitialPartialInfo: () => ({screenWakeLock: createMockWakeLock(), track: undefined}),
+        verifyOutcome: async (initialInfo, finalInfo) => {
+          expect(finalInfo.screenWakeLock).not.toBe(initialInfo.screenWakeLock);
+
+          expect(initialInfo.screenWakeLock).toBeDefined();
+          expect(initialInfo.screenWakeLock!.released).toBe(true);
+
+          expect(finalInfo.screenWakeLock).toBeDefined();
+          expect(finalInfo.screenWakeLock!.released).toBe(false);
+          expect(finalInfo.track).toBeDefined();
+          expect(finalInfo.track!.isTorchOn()).toBe(true);
         },
       },
       {
         description: '(state: Off, track: stopped)',
         initialState: State.Off,
 
-        getInitialTrack: () => createMockTrack(true),
-        verifyOutcome: async (initialTrack, lastTrack) => {
-          expect(lastTrack).not.toBe(initialTrack);
+        getInitialPartialInfo: () => ({screenWakeLock: createMockWakeLock(), track: createMockTrack(true)}),
+        verifyOutcome: async (initialInfo, finalInfo) => {
+          expect(finalInfo.screenWakeLock).not.toBe(initialInfo.screenWakeLock);
+          expect(finalInfo.track).not.toBe(initialInfo.track);
 
-          expect(initialTrack).toBeDefined();
-          expect(initialTrack!.readyState).toBe('ended');
+          expect(initialInfo.screenWakeLock).toBeDefined();
+          expect(initialInfo.screenWakeLock!.released).toBe(true);
+          expect(initialInfo.track).toBeDefined();
+          expect(initialInfo.track!.readyState).toBe('ended');
 
-          expect(lastTrack).toBeDefined();
-          expect(lastTrack!.readyState).toBe('live');
-          expect(lastTrack!.isTorchOn()).toBe(false);
+          expect(finalInfo.screenWakeLock).toBeUndefined();
+          expect(finalInfo.track).toBeDefined();
+          expect(finalInfo.track!.readyState).toBe('live');
+          expect(finalInfo.track!.isTorchOn()).toBe(false);
         },
       },
       {
         description: '(state: On, track: stopped)',
         initialState: State.On,
 
-        getInitialTrack: () => createMockTrack(true),
-        verifyOutcome: async (initialTrack, lastTrack) => {
-          expect(lastTrack).not.toBe(initialTrack);
+        getInitialPartialInfo: () => ({screenWakeLock: createMockWakeLock(), track: createMockTrack(true)}),
+        verifyOutcome: async (initialInfo, finalInfo) => {
+          expect(finalInfo.screenWakeLock).not.toBe(initialInfo.screenWakeLock);
+          expect(finalInfo.track).not.toBe(initialInfo.track);
 
-          expect(initialTrack).toBeDefined();
-          expect(initialTrack!.readyState).toBe('ended');
+          expect(initialInfo.screenWakeLock).toBeDefined();
+          expect(initialInfo.screenWakeLock!.released).toBe(true);
+          expect(initialInfo.track).toBeDefined();
+          expect(initialInfo.track!.readyState).toBe('ended');
 
-          expect(lastTrack).toBeDefined();
-          expect(lastTrack!.readyState).toBe('live');
-          expect(lastTrack!.isTorchOn()).toBe(true);
+          expect(finalInfo.screenWakeLock).toBeDefined();
+          expect(finalInfo.screenWakeLock!.released).toBe(false);
+          expect(finalInfo.track).toBeDefined();
+          expect(finalInfo.track!.readyState).toBe('live');
+          expect(finalInfo.track!.isTorchOn()).toBe(true);
         },
       },
       {
         description: '(state: Off, track: active)',
         initialState: State.Off,
 
-        getInitialTrack: () => createMockTrack(),
-        verifyOutcome: async (initialTrack, lastTrack) => {
-          expect(lastTrack).not.toBe(initialTrack);
+        getInitialPartialInfo: () => ({screenWakeLock: createMockWakeLock(), track: createMockTrack()}),
+        verifyOutcome: async (initialInfo, finalInfo) => {
+          expect(finalInfo.screenWakeLock).not.toBe(initialInfo.screenWakeLock);
+          expect(finalInfo.track).not.toBe(initialInfo.track);
 
-          expect(initialTrack).toBeDefined();
-          expect(initialTrack!.readyState).toBe('ended');
+          expect(initialInfo.screenWakeLock).toBeDefined();
+          expect(initialInfo.screenWakeLock!.released).toBe(true);
+          expect(initialInfo.track).toBeDefined();
+          expect(initialInfo.track!.readyState).toBe('ended');
 
-          expect(lastTrack).toBeDefined();
-          expect(lastTrack!.readyState).toBe('live');
-          expect(lastTrack!.isTorchOn()).toBe(false);
+          expect(finalInfo.screenWakeLock).toBeUndefined();
+          expect(finalInfo.track).toBeDefined();
+          expect(finalInfo.track!.readyState).toBe('live');
+          expect(finalInfo.track!.isTorchOn()).toBe(false);
         },
       },
       {
         description: '(state: On, track: active)',
         initialState: State.On,
 
-        getInitialTrack: () => createMockTrack(),
-        verifyOutcome: async (initialTrack, lastTrack) => {
-          expect(lastTrack).not.toBe(initialTrack);
+        getInitialPartialInfo: () => ({screenWakeLock: createMockWakeLock(), track: createMockTrack()}),
+        verifyOutcome: async (initialInfo, finalInfo) => {
+          expect(finalInfo.screenWakeLock).not.toBe(initialInfo.screenWakeLock);
+          expect(finalInfo.track).not.toBe(initialInfo.track);
 
-          expect(initialTrack).toBeDefined();
-          expect(initialTrack!.readyState).toBe('ended');
+          expect(initialInfo.screenWakeLock).toBeDefined();
+          expect(initialInfo.screenWakeLock!.released).toBe(true);
+          expect(initialInfo.track).toBeDefined();
+          expect(initialInfo.track!.readyState).toBe('ended');
 
-          expect(lastTrack).toBeDefined();
-          expect(lastTrack!.readyState).toBe('live');
-          expect(lastTrack!.isTorchOn()).toBe(true);
+          expect(finalInfo.screenWakeLock).toBeDefined();
+          expect(finalInfo.screenWakeLock!.released).toBe(false);
+          expect(finalInfo.track).toBeDefined();
+          expect(finalInfo.track!.readyState).toBe('live');
+          expect(finalInfo.track!.isTorchOn()).toBe(true);
         },
       },
     ];
 
-    testCases.forEach(({description, initialState, getInitialTrack, verifyOutcome}) => describe(description, () => {
-      let elem: TestTorchCe;
-      let initialTrack: MockMediaStreamTrack | undefined;
+    testCases.forEach(
+        ({description, initialState, getInitialPartialInfo, verifyOutcome}) => describe(description, () => {
+          let elem: TestTorchCe;
+          let initialInfo: IMockPartialTorchInfo;
 
-      beforeEach(async () => {
-        initialTrack = getInitialTrack();
-        elem = await initCe(TestTorchCe);
-        elem.state = initialState;
-        elem.trackInfoPromise = Promise.resolve({
-          hasCamera: true,
-          hasTorch: !!(initialTrack && initialTrack.$capabilities.torch),
-          track: initialTrack as unknown as MediaStreamTrack,
-        });
+          beforeEach(async () => {
+            initialInfo = getInitialPartialInfo();
+            elem = await initCe(TestTorchCe);
+            elem.state = initialState;
+            elem.torchInfoPromise = Promise.resolve({
+              hasCamera: true,
+              hasTorch: !!(initialInfo.track && initialInfo.track.$capabilities.torch),
+              screenWakeLock: initialInfo.screenWakeLock as unknown as WakeLockSentinel | undefined,
+              track: initialInfo.track as unknown as MediaStreamTrack | undefined,
+            });
 
-        spyOn(TestTorchCe.prototype, 'acquireCameraPermission').and.resolveTo();
-        spyOnProperty(WIN.navigator, 'mediaDevices').and.returnValue(new MockMediaDevices(new Map([
-          [new TestDeviceInfo('videoinput', 'cam-001'), {torch: true}],
-        ])) as unknown as MediaDevices);
+            spyOn(TestTorchCe.prototype, 'acquireCameraPermission').and.resolveTo();
+            spyOnProperty(WIN.navigator, 'mediaDevices').and.returnValue(new MockMediaDevices(new Map([
+              [new TestDeviceInfo('videoinput', 'cam-001'), {torch: true}],
+            ])) as unknown as MediaDevices);
+            spyOnProperty(WIN.navigator, 'wakeLock').and.returnValue(new MockWakeLock());
 
-        getTrackInfoSpy.and.callThrough();
-        setMockHidden(false);
-      });
+            getTorchInfoSpy.and.callThrough();
+            setMockHidden(false);
+          });
 
-      it('should do the right thing (TM)', async () => {
-        setMockHidden(true);
-        await elem.onVisibilityChange();
+          it('should do the right thing (TM)', async () => {
+            setMockHidden(true);
+            await elem.onVisibilityChange();
 
-        setMockHidden(false);
-        await elem.onVisibilityChange();
+            setMockHidden(false);
+            await elem.onVisibilityChange();
 
-        const lastTrack = (await elem.trackInfoPromise).track as unknown as MockMediaStreamTrack;
-        await verifyOutcome(initialTrack, lastTrack);
-      });
-    }));
+            const finalInfo = (await elem.torchInfoPromise) as unknown as IMockPartialTorchInfo;
+            await verifyOutcome(initialInfo, finalInfo);
+          });
+        }));
+  });
+
+  describe('#releaseScreenWakeLock()', () => {
+    let elem: TestTorchCe;
+    let testTorchInfo: Parameters<TestTorchCe['releaseScreenWakeLock']>[0];
+
+    beforeEach(() => {
+      elem = new TestTorchCe();
+      testTorchInfo = {
+        hasCamera: false,
+        hasTorch: false,
+        screenWakeLock: new MockWakeLockSentinel('screen') as unknown as WakeLockSentinel,
+        track: undefined,
+      };
+    });
+
+    it('should release the screen wake lock', async () => {
+      const wakeLock = testTorchInfo.screenWakeLock;
+      const releaseSpy = spyOn(wakeLock!, 'release').and.callThrough();
+
+      expect(wakeLock!.released).toBe(false);
+
+      await elem.releaseScreenWakeLock(testTorchInfo);
+
+      expect(releaseSpy).toHaveBeenCalledOnceWith();
+      expect(wakeLock!.released).toBe(true);
+      expect(testTorchInfo.screenWakeLock).toBeUndefined();
+    });
+
+    it('should not call `release()`, if screen wake lock is already released', async () => {
+      const wakeLock = testTorchInfo.screenWakeLock;
+      await wakeLock!.release();
+      const releaseSpy = spyOn(wakeLock!, 'release').and.callThrough();
+
+      expect(wakeLock!.released).toBe(true);
+
+      await elem.releaseScreenWakeLock(testTorchInfo);
+
+      expect(releaseSpy).not.toHaveBeenCalled();
+      expect(wakeLock!.released).toBe(true);
+      expect(testTorchInfo.screenWakeLock).toBeUndefined();
+    });
+
+    it('should not break, if there is no screen wake lock', async () => {
+      testTorchInfo.screenWakeLock = undefined;
+
+      await elem.releaseScreenWakeLock(testTorchInfo);
+
+      expect(testTorchInfo.screenWakeLock).toBeUndefined();
+    });
   });
 
   describe('#updateState()', () => {
@@ -768,7 +973,7 @@ describe('TorchCe', () => {
 
     it('should switch the torch on/off, if a track is active', async () => {
       const mockTrack = new MockMediaStreamTrack(true);
-      getTrackInfoSpy.and.resolveTo({hasTorch: true, track: mockTrack});
+      getTorchInfoSpy.and.resolveTo({hasTorch: true, track: mockTrack});
 
       await elem.updateState(State.Uninitialized);
       expect(mockTrack.isTorchOn()).toBe(false);
@@ -792,13 +997,52 @@ describe('TorchCe', () => {
       expect(mockTrack.isTorchOn()).toBe(false);
     });
 
-    it('should not renew the track', async () => {
+    it('should release the screen wake lock, if a track is active', async () => {
+      const releaseScreenWakeLockSpy = spyOn(TestTorchCe.prototype, 'releaseScreenWakeLock');
+      const mockTorchInfo = {
+        hasCamera: false,
+        hasTorch: false,
+        screenWakeLock: undefined,
+        track: new MockMediaStreamTrack() as unknown as MediaStreamTrack,
+      };
+      getTorchInfoSpy.and.resolveTo(mockTorchInfo);
+
+      releaseScreenWakeLockSpy.calls.reset();
+      await elem.updateState(State.Uninitialized);
+      expect(releaseScreenWakeLockSpy).toHaveBeenCalledOnceWith(mockTorchInfo);
+
+      releaseScreenWakeLockSpy.calls.reset();
       await elem.updateState(State.On);
-      expect(getTrackInfoSpy).toHaveBeenCalledWith();
+      expect(releaseScreenWakeLockSpy).toHaveBeenCalledOnceWith(mockTorchInfo);
+
+      releaseScreenWakeLockSpy.calls.reset();
+      await elem.updateState(State.Initializing);
+      expect(releaseScreenWakeLockSpy).toHaveBeenCalledOnceWith(mockTorchInfo);
+
+      releaseScreenWakeLockSpy.calls.reset();
+      await elem.updateState(State.On);
+      expect(releaseScreenWakeLockSpy).toHaveBeenCalledOnceWith(mockTorchInfo);
+
+      releaseScreenWakeLockSpy.calls.reset();
+      await elem.updateState(State.Disabled);
+      expect(releaseScreenWakeLockSpy).toHaveBeenCalledOnceWith(mockTorchInfo);
+
+      releaseScreenWakeLockSpy.calls.reset();
+      await elem.updateState(State.On);
+      expect(releaseScreenWakeLockSpy).toHaveBeenCalledOnceWith(mockTorchInfo);
+
+      releaseScreenWakeLockSpy.calls.reset();
+      await elem.updateState(State.Off);
+      expect(releaseScreenWakeLockSpy).toHaveBeenCalledOnceWith(mockTorchInfo);
     });
 
-    it('should reject, if retrieving track info fails', async () => {
-      getTrackInfoSpy.and.rejectWith('test');
+    it('should not renew the track', async () => {
+      await elem.updateState(State.On);
+      expect(getTorchInfoSpy).toHaveBeenCalledWith();
+    });
+
+    it('should reject, if retrieving torch info fails', async () => {
+      getTorchInfoSpy.and.rejectWith('test');
       const rejection = await reversePromise(elem.updateState(State.On));
 
       expect(rejection).toBe('test');
@@ -972,8 +1216,8 @@ describe('TorchCe', () => {
     ])) {
     }
 
-    public enumerateDevices(): Promise<MediaDeviceInfo[]> {
-      return Promise.resolve([...this.$devicesWithSpecs.keys()]);
+    public async enumerateDevices(): Promise<MediaDeviceInfo[]> {
+      return [...this.$devicesWithSpecs.keys()];
     }
 
     public async getUserMedia(constraints?: MediaStreamConstraints | undefined): Promise<MediaStream> {
@@ -1032,9 +1276,8 @@ describe('TorchCe', () => {
       this.$capabilities.torch = this.hasTorch;
     }
 
-    public applyConstraints(constraints: MediaTrackConstraints): Promise<void> {
+    public async applyConstraints(constraints: MediaTrackConstraints): Promise<void> {
       this.$constraints = constraints;
-      return Promise.resolve();
     }
 
     public getCapabilities(): MediaTrackCapabilities {
@@ -1059,6 +1302,23 @@ describe('TorchCe', () => {
     }
   }
 
+  class MockWakeLock implements WakeLock {
+    public async request(type: WakeLockType = 'screen'): Promise<WakeLockSentinel> {
+      return new MockWakeLockSentinel(type) as unknown as WakeLockSentinel;
+    }
+  }
+
+  class MockWakeLockSentinel implements Pick<WakeLockSentinel, 'release' | 'released' | 'type'> {
+    public released = false;
+
+    constructor(public readonly type: WakeLockType) {
+    }
+
+    public async release(): Promise<void> {
+      this.released = true;
+    }
+  }
+
   class TestDeviceInfo implements MediaDeviceInfo {
     public readonly label: string;
 
@@ -1076,14 +1336,14 @@ describe('TorchCe', () => {
 
   class TestTorchCe extends TorchCe {
     declare public state: TorchCe['state'];
-    declare public trackInfoPromise: TorchCe['trackInfoPromise'];
+    declare public torchInfoPromise: TorchCe['torchInfoPromise'];
 
     public override acquireCameraPermission(): Promise<void> {
       return super.acquireCameraPermission();
     }
 
-    public override getTrackInfo(...args: Parameters<TorchCe['getTrackInfo']>) {
-      return super.getTrackInfo(...args);
+    public override getTorchInfo(...args: Parameters<TorchCe['getTorchInfo']>) {
+      return super.getTorchInfo(...args);
     }
 
     public override onClick(...args: Parameters<TorchCe['onClick']>) {
@@ -1096,6 +1356,10 @@ describe('TorchCe', () => {
 
     public override onVisibilityChange(...args: Parameters<TorchCe['onVisibilityChange']>) {
       return super.onVisibilityChange(...args);
+    }
+
+    public override releaseScreenWakeLock(...args: Parameters<TorchCe['releaseScreenWakeLock']>) {
+      return super.releaseScreenWakeLock(...args);
     }
 
     public override updateState(...args: Parameters<TorchCe['updateState']>) {

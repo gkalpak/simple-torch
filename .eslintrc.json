@@ -149,6 +149,7 @@
       ],
       "rules": {
         "jasmine/new-line-before-expect": "off",
+        "jasmine/no-disabled-tests": "error",
         "jasmine/no-spec-dupes": ["warn", "branch"],
         "jasmine/no-suite-dupes": ["warn", "branch"],
         "max-classes-per-file": ["error", 4]
