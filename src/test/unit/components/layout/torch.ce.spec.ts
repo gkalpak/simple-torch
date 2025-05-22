@@ -436,7 +436,10 @@ describe('TorchCe', () => {
         await elem.getTorchInfo(true);
 
         expect(mockSettings.torchDeviceId).toBe('cam-002');
-        expect(getUserMediaSpy).toHaveBeenCalledOnceWith({video: {deviceId: {exact: 'cam-002'}}});
+        expect(mockSettings.unset).not.toHaveBeenCalled();
+        expect(getUserMediaSpy.calls.allArgs()).toEqual(jasmine.arrayWithExactContents([
+          [{video: {deviceId: {exact: 'cam-002'}}}],
+        ]));
       });
 
       it('should try other devices if a stored matched video input device from settings does not work', async () => {
@@ -450,11 +453,48 @@ describe('TorchCe', () => {
 
         await elem.getTorchInfo(true);
 
-        expect(getUserMediaSpy).toHaveBeenCalledTimes(4);
-        expect(getUserMediaSpy).toHaveBeenCalledWith({video: {deviceId: {exact: 'cam-003'}}});
-        expect(getUserMediaSpy).toHaveBeenCalledWith({video: {deviceId: {exact: 'cam-004'}}});
-        expect(getUserMediaSpy).toHaveBeenCalledWith({video: {deviceId: {exact: 'cam-003'}}});
-        expect(getUserMediaSpy).toHaveBeenCalledWith({video: {deviceId: {exact: 'cam-002'}}});
+        expect(mockSettings.torchDeviceId).toBe('cam-002');
+        expect(mockSettings.unset).not.toHaveBeenCalled();
+        expect(getUserMediaSpy.calls.allArgs()).toEqual(jasmine.arrayWithExactContents([
+          [{video: {deviceId: {exact: 'cam-003'}}}],
+          [{video: {deviceId: {exact: 'cam-004'}}}],
+          [{video: {deviceId: {exact: 'cam-003'}}}],
+          [{video: {deviceId: {exact: 'cam-002'}}}],
+        ]));
+      });
+
+      it('should not try a stored matched video input device from settings that no longer exists', async () => {
+        mockSettings.torchDeviceId = 'cam-002';
+        mockMediaDevices.$devicesWithSpecs = new Map([
+          [new TestDeviceInfo('videoinput', 'cam-001'), {}],
+          [new TestDeviceInfo('videoinput', 'cam-003'), {}],
+        ]);
+
+        await elem.getTorchInfo(true);
+
+        expect(mockSettings.unset).toHaveBeenCalledWith('torchDeviceId');
+        expect(getUserMediaSpy.calls.allArgs()).toEqual(jasmine.arrayWithExactContents([
+          [{video: {deviceId: {exact: 'cam-003'}}}],
+          [{video: {deviceId: {exact: 'cam-001'}}}],
+        ]));
+      });
+
+
+      it('should not try a stored matched video input device from settings that is not a camera', async () => {
+        mockSettings.torchDeviceId = 'cam-002';
+        mockMediaDevices.$devicesWithSpecs = new Map([
+          [new TestDeviceInfo('videoinput', 'cam-001'), {}],
+          [new TestDeviceInfo('audioinput', 'cam-002'), {}],
+          [new TestDeviceInfo('videoinput', 'cam-003'), {}],
+        ]);
+
+        await elem.getTorchInfo(true);
+
+        expect(mockSettings.unset).toHaveBeenCalledWith('torchDeviceId');
+        expect(getUserMediaSpy.calls.allArgs()).toEqual(jasmine.arrayWithExactContents([
+          [{video: {deviceId: {exact: 'cam-003'}}}],
+          [{video: {deviceId: {exact: 'cam-001'}}}],
+        ]));
       });
     });
   });

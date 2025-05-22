@@ -301,16 +301,22 @@ export class TorchCe extends BaseCe {
   }
 
   private async *getCameraDeviceIds(): AsyncGenerator<string> {
-    if (this.settings.torchDeviceId !== '') {
-      yield this.settings.torchDeviceId;
+    const storedTorchDeviceId = this.settings.torchDeviceId;
+    const cameras = (await WIN.navigator.mediaDevices.enumerateDevices()).
+      filter((x): x is MediaDeviceInfo & {kind: 'videoinput'} => x.kind === 'videoinput');
+
+    if (storedTorchDeviceId !== '') {
+      // Device IDs can sometimes change, so only return the stored one if it is still among the current device IDs.
+      if (cameras.some(x => x.deviceId === storedTorchDeviceId)) {
+        yield storedTorchDeviceId;
+      } else {
+        // The device ID does no longer match an camera, so remove from settings.
+        this.settings.unset('torchDeviceId');
+      }
     }
 
-    const devices = await WIN.navigator.mediaDevices.enumerateDevices();
-    const cameras = devices.
-      filter((x): x is MediaDeviceInfo & {kind: 'videoinput'} => x.kind === 'videoinput').
-      reverse();  // Often, it is the last camera that has the torch.
-
-    for (const cam of cameras) {
+    // Often, it is the last camera that has the torch, so iterated over them from the end.
+    for (const cam of cameras.reverse()) {
       yield cam.deviceId;
     }
   }
