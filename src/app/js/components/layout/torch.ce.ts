@@ -317,7 +317,9 @@ export class TorchCe extends BaseCe {
 
     // Often, it is the last camera that has the torch, so iterated over them from the end.
     for (const cam of cameras.reverse()) {
-      yield cam.deviceId;
+      if (cam.deviceId !== storedTorchDeviceId) {
+        yield cam.deviceId;
+      }
     }
   }
 }

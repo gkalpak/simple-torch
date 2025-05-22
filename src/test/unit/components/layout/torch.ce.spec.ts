@@ -458,7 +458,6 @@ describe('TorchCe', () => {
         expect(getUserMediaSpy.calls.allArgs()).toEqual(jasmine.arrayWithExactContents([
           [{video: {deviceId: {exact: 'cam-003'}}}],
           [{video: {deviceId: {exact: 'cam-004'}}}],
-          [{video: {deviceId: {exact: 'cam-003'}}}],
           [{video: {deviceId: {exact: 'cam-002'}}}],
         ]));
       });
