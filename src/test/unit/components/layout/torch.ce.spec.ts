@@ -25,7 +25,7 @@ describe('TorchCe', () => {
   beforeAll(() => TestTorchCe.register());
 
   beforeEach(() => {
-    mockSettings = {muted: false, torchDeviceId: ''};
+    mockSettings = {muted: false, torchDeviceId: '', unset: jasmine.createSpy('unset')};
     spyOn(Settings, 'getInstance').and.returnValue(mockSettings);
     getTorchInfoSpy = spyOn(TestTorchCe.prototype, 'getTorchInfo').and.resolveTo(EMPTY_TORCH_INFO);
     onErrorSpy = spyOn(TestTorchCe.prototype, 'onError');

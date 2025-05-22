@@ -32,7 +32,7 @@ describe('Settings', () => {
     });
 
     it('should correctly return falsy values', () => {
-      // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       TestSettings.storeValues({muted: null as any});
       const settings = new TestSettings();
 
@@ -73,13 +73,13 @@ describe('Settings', () => {
     });
 
     it('should correctly return falsy values', () => {
-      // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       TestSettings.storeValues({torchDeviceId: null as any});
       const settings = new TestSettings();
 
       expect(settings.torchDeviceId).toBeNull();
 
-      // eslint-disable-next-line  @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       settings.torchDeviceId = undefined as any;
       expect(settings.torchDeviceId).toBeUndefined();
     });
@@ -95,6 +95,30 @@ describe('Settings', () => {
       settings.torchDeviceId = 'bar';
       expect(settings.torchDeviceId).toBe('bar');
       expect(TestSettings.retrieveValues()).toEqual({torchDeviceId: 'bar'});
+    });
+  });
+
+  describe('#unset()', () => {
+    beforeEach(() => spyOnProperty(WIN, 'localStorage').and.returnValue(new MockStorage()));
+
+    it('should return unset a value', () => {
+      TestSettings.storeValues({muted: true, torchDeviceId: 'foo'});
+      const settings = new TestSettings();
+
+      expect(settings.muted).toBe(true);
+      expect(settings.torchDeviceId).toBe('foo');
+
+      settings.unset('muted');
+
+      expect(settings.muted).toBe(false);
+      expect(settings.torchDeviceId).toBe('foo');
+      expect(TestSettings.retrieveValues()).toEqual({torchDeviceId: 'foo'});
+
+      settings.unset('torchDeviceId');
+
+      expect(settings.muted).toBe(false);
+      expect(settings.torchDeviceId).toBe('');
+      expect(TestSettings.retrieveValues()).toEqual({});
     });
   });
 

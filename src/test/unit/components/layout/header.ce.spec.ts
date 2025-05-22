@@ -58,7 +58,7 @@ describe('HeaderCe', () => {
       then(elem => elem.shadowRoot.querySelector('external-svg-ce.speaker') as HTMLElement);
 
     beforeEach(() => {
-      mockSettings = {muted: false, torchDeviceId: ''};
+      mockSettings = {muted: false, torchDeviceId: '', unset: jasmine.createSpy('unset')};
       spyOn(Settings, 'getInstance').and.returnValue(mockSettings);
     });
 

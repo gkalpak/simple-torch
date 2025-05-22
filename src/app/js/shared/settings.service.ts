@@ -4,6 +4,8 @@ import {WIN} from './constants.js';
 export interface ISettings {
   muted: boolean;
   torchDeviceId: string;
+
+  unset(key: Exclude<keyof ISettings, 'unset'>): void;
 }
 
 export class Settings implements ISettings {
@@ -23,6 +25,11 @@ export class Settings implements ISettings {
 
   public static getInstance(): ISettings {
     return this.instance || (this.instance = new Settings());
+  }
+
+  public unset<T extends keyof ISettings>(key: T): void {
+    delete this.values[key];
+    Settings.storeValues(this.values);
   }
 
   protected static retrieveValues(): Partial<ISettings> {
