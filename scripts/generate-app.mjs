@@ -10,7 +10,8 @@ import {hash, hashFile} from './utils/hash-utils.mjs';
 sh.set('-e');
 
 // Constants
-const ROOT_DIR = resolve(`${import.meta.dirname}/..`);
+// ShellJS' `ls('-R')` does not work unless the slashes are forward ones ¯\_(ツ)_/¯
+const ROOT_DIR = resolve(`${import.meta.dirname}/..`).replace(/\\/g, '/');
 const PKG_PATH = `${ROOT_DIR}/package.json`;
 const OUT_DIR = `${ROOT_DIR}/out`;
 const OUT_APP_DIR = `${OUT_DIR}/app`;
