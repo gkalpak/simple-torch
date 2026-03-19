@@ -24,7 +24,7 @@
     "generate-icons": "node scripts/generate-icons.mjs",
     "postinstall": "patch-package",
     "lint": "run-p ~~lint-code ~~typecheck-scripts",
-    "release": "gkcu-run \"npm version \\${*:patch}\"",
+    "release": "gkcu-run \"npm version \\${*:patch}\" --gkcu-sapVersion=2",
     "postrelease": "npm run deploy",
     "preserve-prod": "npm run build-prod",
     "serve-prod": "npm run ~~serve-prod",
