@@ -1,0 +1,29 @@
+diff --git a/node_modules/chrome-launcher/dist/chrome-launcher.js b/node_modules/chrome-launcher/dist/chrome-launcher.js
+index d7fb4cf..4a8fd4d 100644
+--- a/node_modules/chrome-launcher/dist/chrome-launcher.js
++++ b/node_modules/chrome-launcher/dist/chrome-launcher.js
+@@ -364,7 +364,23 @@ class Launcher {
+         // backwards support for node v12 + v14.14+
+         // https://nodejs.org/api/deprecations.html#DEP0147
+         const rmSync = this.fs.rmSync || this.fs.rmdirSync;
+-        rmSync(this.userDataDir, { recursive: true, force: true, maxRetries: 10 });
++        /*
++         * [LOCAL-PATCH]
++         * Wrap `rmSync()` call in `try/catch`, because it fails on Windows, due to permission issues:
++         * ```
++         * Error: EPERM, Permission denied: \\?\C:\Users\gkalpak\AppData\Local\Temp\lighthouse.60312775 [...] {
++         *   errno: 1,
++         *   code: 'EPERM',
++         *   path: '\\\\?\\C:\\Users\\gkalpak\\AppData\\Local\\Temp\\lighthouse.60312775',
++         *   syscall: 'rm'
++         * }
++         * ```
++         */
++        try {
++            rmSync(this.userDataDir, { recursive: true, force: true, maxRetries: 10 });
++        } catch (err) {
++            console.log(`[WARN] Failed to delete user data directory: ${this.userDataDir}`);
++        }
+     }
+ }
+ ;

@@ -15,7 +15,9 @@ describe('Simple Torch app', () => {
   let pageErrors: string[];
 
   beforeEach(async () => {
-    browser = await launch();
+    // Disable headless mode, since it started randomly hanging (esp. for `evaluate()` calls), at least on Windows.
+    // TODO(gkalpak): Re-enable, if it is fixed in a future version.
+    browser = await launch({headless: false});
     page = await browser.newPage();
 
     pageLogs = [];
@@ -23,7 +25,7 @@ describe('Simple Torch app', () => {
 
     page.
       on('console', msg => pageLogs.push(`[${msg.type().toUpperCase()}] ${msg.text()}`)).
-      on('pageerror', err => pageErrors.push(err.message)).
+      on('pageerror', err => pageErrors.push((err instanceof Error) ? err.message : `${err}`)).
       on('requestfailed', req => pageErrors.push(`${req.failure()?.errorText ?? 'UNKNOWN FAILURE'} - ${req.url()}`));
 
     await page.goto(`${appOrigin}/`, {waitUntil: 'networkidle0'});

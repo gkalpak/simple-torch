@@ -30,16 +30,20 @@ import {launch as launchChrome} from 'chrome-launcher';
 import lighthouse from 'lighthouse';
 import {OutputMode as LhReportOutputMode, write as writeLhReport} from 'lighthouse/cli/printer.js';
 import logger from 'lighthouse-logger';
-import puppeteer from 'puppeteer';
+import {executablePath as chromePath} from 'puppeteer';
 
+
+// Types
+/** @import * as chromeLauncher from 'chrome-launcher' */
+/** @import * as lh from 'lighthouse' */
 
 // Constants
-/** @type {import('chrome-launcher').Options} */
+/** @type {chromeLauncher.Options} */
 const CHROME_LAUNCH_OPTS = {
   chromeFlags: ['--headless', '--use-fake-ui-for-media-stream'],
-  chromePath: puppeteer.executablePath(),
+  chromePath: chromePath(),
 };
-/** @type {import('lighthouse').Flags} */
+/** @type {lh.Flags} */
 const LIGHTHOUSE_FLAGS = {logLevel: env['CI'] ? 'error' : 'info'};
 const VIEWER_URL = 'https://googlechrome.github.io/lighthouse/viewer';
 const AUDIT_CATEGORIES = [
@@ -58,9 +62,9 @@ _main(argv.slice(2));
 // Helpers
 async function _main(args) {
   const {url, minScores, logFile} = parseInput(args);
-  /** @type {import('lighthouse').Flags} */
+  /** @type {lh.Flags} */
   const lhFlags = {...LIGHTHOUSE_FLAGS};
-  /** @type {import('lighthouse').Config} */
+  /** @type {lh.Config} */
   const lhConfig = {
     extends: 'lighthouse:default',
     settings: {

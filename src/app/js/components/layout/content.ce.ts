@@ -2,7 +2,11 @@ import {BaseCe} from '../base.ce.js';
 
 
 export class ContentCe extends BaseCe {
-  protected static override readonly template = '<torch-ce></torch-ce>';
+  protected static override readonly template = `
+    <main>
+      <torch-ce></torch-ce>
+    </main>
+  `;
   protected static override readonly style = `
     :host {
       color: darkgray;
