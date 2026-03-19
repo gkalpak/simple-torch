@@ -2,13 +2,6 @@
   <defs>
     <!-- Circle. -->
     <circle id="circle" fill="currentColor" stroke="none" cx="50" cy="50" r="10" />
-
-    <!-- Loader. -->
-    <g id="loader">
-      <use href="#circle" transform="translate(-30)" />
-      <use href="#circle" />
-      <use href="#circle" transform="translate(30)" />
-    </g>
   </defs>
 
   <style>
@@ -22,8 +15,12 @@
     #loader [href="#circle"]:nth-of-type(1) { animation-delay: 0.1s; }
     #loader [href="#circle"]:nth-of-type(2) { animation-delay: 0.2s; }
     #loader [href="#circle"]:nth-of-type(3) { animation-delay: 0.3s; }
-
   </style>
 
-  <use href="#loader" />
+  <!-- Loader. -->
+  <g id="loader">
+    <use href="#circle" transform="translate(-30)" />
+    <use href="#circle" />
+    <use href="#circle" transform="translate(30)" />
+  </g>
 </svg>

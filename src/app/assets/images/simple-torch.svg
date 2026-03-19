@@ -15,68 +15,43 @@
   <defs>
     <!-- Effect: Light glow. -->
     <filter id="light-glow" filterUnits="userSpaceOnUse">
-      <feDropShadow dx="-4" dy="-2" flood-color="var(--st-light-color)" flood-opacity="0.4" stdDeviation="4" />
-      <feDropShadow dx="+4" dy="-2" flood-color="var(--st-light-color)" flood-opacity="0.4" stdDeviation="4" />
+      <feDropShadow dx="-4" dy="0" flood-color="var(--__st-light-color)" flood-opacity="0.3" stdDeviation="5" />
+      <feDropShadow dx="+4" dy="0" flood-color="var(--__st-light-color)" flood-opacity="0.3" stdDeviation="5" />
     </filter>
     <!-- Effect: Shadow. -->
     <filter id="shadow">
       <feDropShadow dx="0" dy="0" stdDeviation="3" flood-opacity="0.33" />
     </filter>
-
-    <!-- Light. -->
-    <g id="light" stroke="var(--st-stroke-color)" stroke-linejoin="round" stroke-width="2">
-      <path fill="var(--st-light-color)" d="M25 20 a100 125 0 0 1 70 0 z" />
-    </g>
-    <!-- Torch body. -->
-    <g id="torch-body" stroke="var(--st-stroke-color)" stroke-linejoin="round" stroke-width="2">
-      <path fill="var(--st-body-color-1)" d="M25 20 h70 v10 h-70 z" />
-      <path fill="var(--st-body-color-2)" d="M25 30 h70 a50 50 0 0 1 -15 25 h-40 a50 50 0 0 1 -15 -25 z" />
-      <path fill="var(--st-body-color-1)" d="M40 55 h40 v55 a100 125 0 0 1 -40 0 z" />
-    </g>
-    <!-- Torch switch. -->
-    <g id="torch-switch" stroke="var(--st-stroke-color)" stroke-linejoin="round" stroke-width="2">
-      <path fill="var(--st-switch-color-1)" d="M55 70 a5 5 0 1 1 10 0 v15 a5 5 0 1 1 -10 0 z" />
-      <circle id="torch-switch-thingy" fill="var(--st-switch-color-2)" cx="60" cy="70" r="7.5" />
-    </g>
-
-    <!-- Foreground. -->
-    <g id="foreground">
-      <use href="#light" />
-      <use href="#light2" />
-      <use href="#torch-body" />
-      <use href="#torch-switch" />
-    </g>
-    <!-- Background. -->
-    <g id="background" fill="var(--st-bg-color)" stroke="var(--st-outline-color)">
-      <circle cx="60" cy="60" r="59" />
-    </g>
   </defs>
 
   <style>
     svg {
-      --st-bg-color: var(--simple-torch-bg-color, rgb(33, 33, 33));
-      --st-body-color-1: darkorange;
-      --st-body-color-2: orange;
-      --st-light-color: yellow;
-      --st-outline-color: var(--simple-torch-outline-color, dimgray);
-      --st-rotation: var(--simple-torch-rotation, 45deg);
-      --st-stroke-color: var(--simple-torch-stroke-color, var(--st-bg-color));
-      --st-switch-color-1: darkorchid;
-      --st-switch-color-2: orchid;
+      --__st-background-display: initial;
+      --__st-bg-color: var(--simple-torch-bg-color, rgb(33, 33, 33));
+      --__st-body-color-1: darkorange;
+      --__st-body-color-2: orange;
+      --__st-light-color: yellow;
+      --__st-outline-color: var(--simple-torch-outline-color, dimgray);
+      --__st-rotation: var(--simple-torch-rotation, 45deg);
+      --__st-stroke-color: var(--simple-torch-stroke-color, var(--__st-bg-color));
+      --__st-switch-color-1: darkorchid;
+      --__st-switch-color-2: orchid;
     }
 
     svg.dark {
-      --st-body-color-1: dimgray;
-      --st-body-color-2: gray;
-      --st-light-color: goldenrod;
-      --st-switch-color-1: darkslategray;
-      --st-switch-color-2: slategray;
+      --__st-body-color-1: dimgray;
+      --__st-body-color-2: gray;
+      --__st-light-color: goldenrod;
+      --__st-switch-color-1: darkslategray;
+      --__st-switch-color-2: slategray;
     }
 
-    svg.no-bg #background { display: none; }
+    svg.no-bg {
+      --__st-background-display: none;
+    }
 
     #foreground {
-      transform: rotateZ(var(--st-rotation));
+      transform: rotateZ(var(--__st-rotation));
       transform-origin: center;
     }
 
@@ -93,6 +68,29 @@
     svg.off #torch-switch-thingy { transform: translate(0, 15px); }
   </style>
 
-  <use href="#background" />
-  <use href="#foreground" />
+  <!-- Background. -->
+  <g id="background" fill="var(--__st-bg-color)" stroke="var(--__st-outline-color)">
+    <circle cx="60" cy="60" r="59" />
+  </g>
+
+  <!-- Foreground. -->
+  <g id="foreground">
+    <!-- Light. -->
+    <g id="light" stroke="var(--__st-stroke-color)" stroke-linejoin="round" stroke-width="2">
+      <path fill="var(--__st-light-color)" d="M25 20 a100 125 0 0 1 70 0 z" />
+    </g>
+
+    <!-- Torch body. -->
+    <g id="torch-body" stroke="var(--__st-stroke-color)" stroke-linejoin="round" stroke-width="2">
+      <path fill="var(--__st-body-color-1)" d="M25 20 h70 v10 h-70 z" />
+      <path fill="var(--__st-body-color-2)" d="M25 30 h70 a50 50 0 0 1 -15 25 h-40 a50 50 0 0 1 -15 -25 z" />
+      <path fill="var(--__st-body-color-1)" d="M40 55 h40 v55 a100 125 0 0 1 -40 0 z" />
+    </g>
+
+    <!-- Torch switch. -->
+    <g id="torch-switch" stroke="var(--__st-stroke-color)" stroke-linejoin="round" stroke-width="2">
+      <path fill="var(--__st-switch-color-1)" d="M55 70 a5 5 0 1 1 10 0 v15 a5 5 0 1 1 -10 0 z" />
+      <circle id="torch-switch-thingy" fill="var(--__st-switch-color-2)" cx="60" cy="70" r="7.5" />
+    </g>
+  </g>
 </svg>

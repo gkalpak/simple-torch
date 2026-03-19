@@ -14,6 +14,7 @@ export class ContentCe extends BaseCe {
       padding: 10px;
     }
 
+    main,
     torch-ce {
       height: 100%;
       width: 100%;
