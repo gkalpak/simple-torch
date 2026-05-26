@@ -10,7 +10,7 @@ export {
 
 // Helpers
 async function convertToSizes(inputFilePath, sizes) {
-  const converter = await createConverter({launch: {executablePath}});
+  const converter = await createConverter({launch: {executablePath: await executablePath()}});
   const convertedFilePaths = [];
 
   try {

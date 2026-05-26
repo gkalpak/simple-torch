@@ -87,5 +87,5 @@ Things I want to (but won't necessarily) do:
 [mdn-pwa]: https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps
 [mdn-sw]: https://developer.mozilla.org/en-US/docs/Web/API/Service_Worker_API
 [lighthouse]: https://developers.google.com/web/tools/lighthouse
-[run-lighthouse]: scripts/run-lighthouse.mjs
+[run-lighthouse]: scripts/run-lighthouse.js
 [webhint]: https://webhint.io/

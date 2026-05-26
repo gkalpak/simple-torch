@@ -12,7 +12,7 @@ export const registerSw = (scriptUrl: string, updateCheckInterval: number): Prom
     const utils = Utils.getInstance();
     utils.onLoad(async () => {
       try {
-        await swContainer.register(scriptUrl);
+        await swContainer.register(scriptUrl, {type: 'module'});
         console.info('[ServiceWorker] Registered successfully.');
 
         setInterval(() => {

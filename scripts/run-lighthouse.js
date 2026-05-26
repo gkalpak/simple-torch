@@ -1,7 +1,7 @@
 /**
  * Usage:
  * ```sh
- * node scripts/run-lighthouse.mjs <url> <min-scores> [<log-file>]
+ * node scripts/run-lighthouse <url> <min-scores> [<log-file>]
  * ```
  *
  * Runs audits against the specified URL on specific categories (accessibility, best practices, performance, SEO). It
@@ -41,7 +41,7 @@ import {executablePath as chromePath} from 'puppeteer';
 /** @type {chromeLauncher.Options} */
 const CHROME_LAUNCH_OPTS = {
   chromeFlags: ['--headless', '--use-fake-ui-for-media-stream'],
-  chromePath: chromePath(),
+  chromePath: await chromePath(),
 };
 /** @type {lh.Flags} */
 const LIGHTHOUSE_FLAGS = {logLevel: env['CI'] ? 'error' : 'info'};

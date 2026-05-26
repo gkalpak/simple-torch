@@ -3,7 +3,7 @@ import {afterEach, beforeEach, describe, it} from 'node:test';
 
 import {Browser, HTTPResponse, launch, Page} from 'puppeteer';
 
-import {default as pkg} from '../../../package.json' with {type: 'json'};
+import pkg from '../../../package.json' with {type: 'json'};
 import {IEnv} from '../../app/js/shared/constants.js';
 
 
@@ -15,9 +15,11 @@ describe('Simple Torch app', () => {
   let pageErrors: string[];
 
   beforeEach(async () => {
-    // Disable headless mode, since it started randomly hanging (esp. for `evaluate()` calls), at least on Windows.
-    // TODO(gkalpak): Re-enable, if it is fixed in a future version.
-    browser = await launch({headless: false});
+    browser = await launch({
+      args: [
+        '--use-fake-ui-for-media-stream', // Bypass the camera/mic permission prompt.
+      ],
+    });
     page = await browser.newPage();
 
     pageLogs = [];

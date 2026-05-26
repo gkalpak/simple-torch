@@ -86,7 +86,7 @@ describe('registerSw()', () => {
         expect(mockSwContainer.register).not.toHaveBeenCalled();
 
         callback();
-        expect(mockSwContainer.register).toHaveBeenCalledWith('foo.js');
+        expect(mockSwContainer.register).toHaveBeenCalledWith('foo.js', {type: 'module'});
       });
 
       it('should resolve once the ServiceWorker has been registered', async () => {

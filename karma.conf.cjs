@@ -7,49 +7,54 @@ const {env} = require('node:process');
 const {executablePath} = require('puppeteer');
 
 
-env['CHROME_BIN'] = executablePath();
+// Types
+/** @import {ClientOptions, Config} from 'karma' */
 
 /**
- * @param {import('karma').Config} config
- * @return void;
+ * @param {Config} config
+ * @return void
  */
-module.exports = config => config.set({
-  browsers: ['ChromeHeadless'],
-  client: {
-    jasmine: {
-      random: true,
-      seed: '',
-    },
-  },
-  files: [
-    /* eslint-disable sort-keys */
-    {pattern: 'out/app/**/*.js.map', included: false, watched: false},
-    {pattern: 'out/app/assets/**', included: false},
-    {pattern: 'out/app/js/**/*.js', included: false},
-    {pattern: 'out/test/unit/test-utils.js', included: false},
-    {pattern: 'out/test/unit/patch-env.js', type: 'module'},
-    {pattern: 'out/test/unit/**/*.js', type: 'module'},
-    /* eslint-enable sort-keys */
-  ],
-  frameworks: ['jasmine'],
-  middleware: [
-    'dummy-request',
-    'exit-on-404',
-  ],
-  plugins: [
-    'karma-*',
-    {'middleware:dummy-request': ['factory', dummyRequestMiddlewareFactory]},
-    {'middleware:exit-on-404': ['factory', exitOn404MiddlewareFactory]},
-    {'reporter:jasmine-seed': ['type', JasmineSeedReporter]},
-  ],
-  preprocessors: {'out/**/*.js': ['sourcemap']},
-  proxies: {'/assets/': '/base/out/app/assets/'},
-  reporters: [
-    'progress',
-    'jasmine-seed',
-  ],
-  restartOnFileChange: true,
-});
+module.exports = async config => {
+  env['CHROME_BIN'] = await executablePath();
+
+  return config.set({
+    browsers: ['ChromeHeadless'],
+    client: /** @type {ClientOptions & Record<string, object>} */({
+      jasmine: {
+        random: true,
+        seed: '',
+      },
+    }),
+    files: [
+      /* eslint-disable sort-keys */
+      {pattern: 'out/app/**/*.js.map', included: false, watched: false},
+      {pattern: 'out/app/assets/**', included: false},
+      {pattern: 'out/app/js/**/*.js', included: false},
+      {pattern: 'out/test/unit/test-utils.js', included: false},
+      {pattern: 'out/test/unit/patch-env.js', type: 'module'},
+      {pattern: 'out/test/unit/**/*.js', type: 'module'},
+      /* eslint-enable sort-keys */
+    ],
+    frameworks: ['jasmine'],
+    middleware: [
+      'dummy-request',
+      'exit-on-404',
+    ],
+    plugins: [
+      'karma-*',
+      {'middleware:dummy-request': ['factory', dummyRequestMiddlewareFactory]},
+      {'middleware:exit-on-404': ['factory', exitOn404MiddlewareFactory]},
+      {'reporter:jasmine-seed': ['type', JasmineSeedReporter]},
+    ],
+    preprocessors: {'out/**/*.js': ['sourcemap']},
+    proxies: {'/assets/': '/base/out/app/assets/'},
+    reporters: [
+      'progress',
+      'jasmine-seed',
+    ],
+    restartOnFileChange: true,
+  });
+};
 
 // Helpers
 function dummyRequestMiddlewareFactory() {

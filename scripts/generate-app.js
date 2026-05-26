@@ -4,7 +4,7 @@ import {argv, exit} from 'node:process';
 
 import sh from 'shelljs';
 
-import {hash, hashFile} from './utils/hash-utils.mjs';
+import {hash, hashFile} from './utils/hash-utils.js';
 
 
 sh.set('-e');

@@ -2,7 +2,7 @@
 import {resolve} from 'node:path';
 import {exit} from 'node:process';
 
-import {convertToSizes} from './utils/svg-to-pngs.mjs';
+import {convertToSizes} from './utils/svg-to-pngs.js';
 
 
 // Constants
